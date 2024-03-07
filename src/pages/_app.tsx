@@ -47,7 +47,7 @@ type GuardProps = {
   children: ReactNode
 }
 
-// ** Pace Loader
+// ** Pace Loader (tạo thanh ngang màu xanh khi ấn chuyển trang (load))
 if (themeConfig.routingLoader) {
   Router.events.on('routeChangeStart', () => {
     NProgress.start()
