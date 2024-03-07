@@ -1,7 +1,13 @@
 'use client'
+import { useTheme } from '@emotion/react'
 import Head from 'next/head'
+import { useSettings } from 'src/hooks/useSettings'
 
 export default function Home() {
+  const theme =useTheme()
+  const {settings} = useSettings()
+  console.log('theme', {theme, settings})
+  
   return (
     <>
       <Head>
