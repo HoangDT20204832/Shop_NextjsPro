@@ -21,3 +21,4 @@ export default Login
 //  xem ở file next.d.ts:  getLayout?: (page: ReactElement) => ReactNode
 //trang Login có truyền getLayout là dùng layout của BlackLayout
 Login.getLayout = (page: ReactNode) => <BlackLayout>{page}</BlackLayout>
+Login.guestGuard = true  //trang Login là trang ko bắt bc đăng nhập => truyền guestGuard = true để đá sang <GuestGuard/> để hiện thị giao diện

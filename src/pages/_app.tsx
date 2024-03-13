@@ -61,6 +61,10 @@ if (themeConfig.routingLoader) {
   })
 }
 
+//Tạo component Guard với biến authGuard mặc định =true; và guestGuard mặc định =false
+// => các page nếu ko truyền gì thì sẽ mặc định nhân {authGuard=true, guestGuard=false} => chạy vào <AuthGuard/> (những trang chỉ cho user vào)
+// => những trang ko bắt bc đăng nhập và ko cho vào khi đã đăng nhập(chỉ cho khách vào nhưu login,...)  => phải truyền thêm guestGuard=true => chạy vào <GuestGiard/>
+// => những trang ko bắt bc đăng nhập và có thể vào kể cả khi đã đăng nhập(cho cả khách và user vào) => truyênf thêm authGuard=true, guestGuard=true 
 const Guard = ({ children, authGuard, guestGuard }: GuardProps) => {
   if (guestGuard) {
     return <GuestGuard fallback={<FallbackSpinner />}>{children}</GuestGuard>
