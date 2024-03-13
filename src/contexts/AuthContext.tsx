@@ -12,6 +12,7 @@ import authConfig from 'src/configs/auth'
 
 // ** Types
 import { AuthValuesType, LoginParams, ErrCallbackType, UserDataType } from './types'
+import { loginAuth } from 'src/services/auth'
 
 // ** Defaults
 const defaultProvider: AuthValuesType = {
@@ -72,16 +73,16 @@ const AuthProvider = ({ children }: Props) => {
   }, [])
 
   const handleLogin = (params: LoginParams, errorCallback?: ErrCallbackType) => {
-    axios
-      .post(authConfig.loginEndpoint, params)
+      loginAuth({email: params.email, password:params.password })  // gọi hàm loginAuth từ folder services/auth
       .then(async response => {
         params.rememberMe
-          ? window.localStorage.setItem(authConfig.storageTokenKeyName, response.data.accessToken)
+          ? window.localStorage.setItem(authConfig.storageTokenKeyName, response.data.access_token)//nếu tích vào Rememberme thì sẽ lưu accesstoken vào localstorgate
           : null
         const returnUrl = router.query.returnUrl
+        console.log('res', response)
 
-        setUser({ ...response.data.userData })
-        params.rememberMe ? window.localStorage.setItem('userData', JSON.stringify(response.data.userData)) : null
+        setUser({ ...response.data.user })
+        params.rememberMe ? window.localStorage.setItem('userData', JSON.stringify(response.data.user)) : null //nếu tích vào Rememberme thì sẽ lưu luôn thông tin người dùng vào localStrorgate
 
         const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
 

@@ -36,6 +36,7 @@ import AclGuard from 'src/components/auth/AclGuard'
 import ReactHotToast from 'src/components/react-hot-toast'
 import { useSettings } from 'src/hooks/useSettings'
 import ThemeComponent from 'src/theme/ThemeComponent'
+import UserLayout from 'src/views/layouts/UserLayout'
 
 type ExtendedAppProps = AppProps & {
   Component: NextPage
@@ -73,10 +74,15 @@ const Guard = ({ children, authGuard, guestGuard }: GuardProps) => {
 export default function App(props: ExtendedAppProps) {
   const { Component, pageProps } = props
 
+  console.log("Component", {Component})
+
   const { settings } = useSettings()
 
   // Variables
-  const getLayout = Component.getLayout ?? (page => <>{page}</>)
+  const getLayout = Component.getLayout ?? (page => <UserLayout>{page}</UserLayout>) 
+     
+   //Những page có truyền getLayout thì sẽ sử dụng Layout của chính nó truyền
+   //còn những page ko có truyền getLayout thì sẽ sử dụng layput mặc định là <UserLayout/>
 
   const setConfig = Component.setConfig ?? undefined
 
