@@ -5,16 +5,23 @@ import { createContext, useEffect, useState, ReactNode } from 'react'
 import { useRouter } from 'next/router'
 
 // ** Axios
-import axios from 'axios'
+// import axios from 'axios'
 
 // ** Config
 import authConfig from 'src/configs/auth'
 
 // ** Types
 import { AuthValuesType, LoginParams, ErrCallbackType, UserDataType } from './types'
+
+// ** Services 
 import { loginAuth, logoutAuth } from 'src/services/auth'
+
+// ** Configs 
 import { CONFIG_API } from 'src/configs/api'
+
+// ** helpers
 import { clearLocalUserData, setLocalUserData } from 'src/helpers/storage'
+import instanceAxios from 'src/helpers/axios'
 
 // ** Defaults
 const defaultProvider: AuthValuesType = {
@@ -47,13 +54,17 @@ const AuthProvider = ({ children }: Props) => {
       const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)!
       if (storedToken) {
         setLoading(true)
-        await axios
-          .get(CONFIG_API.AUTH.AUTH_ME, {
-            headers: {
-              Authorization: `Bearer ${storedToken}`
-            }
-          })
+        await instanceAxios
+          .get(CONFIG_API.AUTH.AUTH_ME
+
+          //   , {
+          //   headers: {
+          //     Authorization: `Bearer ${storedToken}`
+          //   }
+          // }
+          )
           .then(async response => {
+            console.log("response: ",response)
             setLoading(false)
             setUser({ ...response.data.data })
           })
