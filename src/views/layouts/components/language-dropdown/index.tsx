@@ -19,7 +19,6 @@ import { LANGUAGE_OPTIONS } from 'src/configs/i18n'
 
 type TProps = {}
 
-
 const LanguageDropdown = (props: TProps) => {
   // ** State
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)

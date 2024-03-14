@@ -17,6 +17,8 @@ import Image from 'next/image'
 import { useAuth } from 'src/hooks/useAuth'
 import IconifyIcon from '../../../../components/Icon'
 import { useTranslation } from 'react-i18next'
+import { useRouter } from 'next/router'
+import { ROUTE_CONFIG } from 'src/configs/route'
 
 // import PersonAdd from '@mui/icons-material/PersonAdd';
 // import Settings from '@mui/icons-material/Settings';
@@ -27,19 +29,26 @@ const UserDropdown = (props: TProps) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
 
   //lây {t} để chuyển đổi ngôn ngư
-  const {t} = useTranslation()
+  const { t } = useTranslation()
 
-  //lấy thoogn tin user khi đăng nhập và chức năng logout 
+  //lấy thoogn tin user khi đăng nhập và chức năng logout
   const { user, logout } = useAuth()
 
   const open = Boolean(anchorEl)
-
+  const router = useRouter()
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
   }
 
   const handleClose = () => {
     setAnchorEl(null)
+  }
+
+  const handleNavigateMyProfile = () => {
+    // dùng với push để điều hướng trang vẫn giống như replace => nhưng khác ở chỗ push dùng khi  muốn cho phép họ quay lại trang trước đó bằng cách sử dụng nút "Back" trong trình duyệt => có thể back về trang home
+    // còn replace thì sử dụng khi bạn không muốn người dùng quay lại trang trước đó bằng cách sử dụng nút "Back" trong trình duyệt // vd trang login thì ko muốn họ back về trang home
+    router.push(`/${ROUTE_CONFIG.MY_PROFILE}`) 
+    handleClose()
   }
 
   return (
@@ -107,24 +116,13 @@ const UserDropdown = (props: TProps) => {
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
         <MenuItem onClick={handleClose}>
-            {user?.email}
-            {/* {user?.firstName}{user?.middleName}{user?.lastName} */}
+          {user?.email}
+          {/* {user?.firstName}{user?.middleName}{user?.lastName} */}
         </MenuItem>
-        <MenuItem onClick={handleClose}>
-          <Avatar /> Profile
+        <MenuItem onClick={handleNavigateMyProfile}>
+          <Avatar /> {t('my_profile')}
         </MenuItem>
-        <MenuItem onClick={handleClose}>
-          <Avatar /> My account
-        </MenuItem>
-        <Divider />
-        <MenuItem onClick={handleClose}>
-          <ListItemIcon>{/* <PersonAdd fontSize="small" /> */}</ListItemIcon>
-          Add another account
-        </MenuItem>
-        <MenuItem onClick={handleClose}>
-          <ListItemIcon>{/* <Settings fontSize="small" /> */}</ListItemIcon>
-          Settings
-        </MenuItem>
+
         <MenuItem onClick={logout}>
           <ListItemIcon>{/* <Logout fontSize="small" /> */}</ListItemIcon>
           Logout

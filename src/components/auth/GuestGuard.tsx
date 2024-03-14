@@ -30,7 +30,7 @@ const GuestGuard = (props: GuestGuardProps) => {
   }, [router.route])
 
   //để hiển thị quay khi cố vào trang login/register khi đã đăng nhập; tránh hiển thị trang login 1 lúc rồi mới đá sang home
-  if(authContext.loading || !(authContext.user === null)){ //nếu user đã có(đã đăng nhập) => cố vào login sẽ gọi fallback(quay)
+  if(authContext.loading || (!authContext.loading && authContext.user !== null)){ //nếu user đã có(đã đăng nhập) => cố vào login sẽ gọi fallback(quay)
     return fallback
   }
 

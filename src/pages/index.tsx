@@ -28,3 +28,6 @@ export default function Home() {
 
 Home.getLayout = (page: ReactNode) => <LayoutNotApp>{page}</LayoutNotApp>
 
+//trang Home cả khách và user đều vào được => truyên 2 biến là false hết để trang return về {children} luôn
+Home.guestGuard = false
+Home.authGuard = false
