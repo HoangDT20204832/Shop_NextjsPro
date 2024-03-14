@@ -16,6 +16,7 @@ import Image from 'next/image'
 // ** Hooks
 import { useAuth } from 'src/hooks/useAuth'
 import IconifyIcon from '../../../../components/Icon'
+import { useTranslation } from 'react-i18next'
 
 // import PersonAdd from '@mui/icons-material/PersonAdd';
 // import Settings from '@mui/icons-material/Settings';
@@ -24,6 +25,9 @@ import IconifyIcon from '../../../../components/Icon'
 type TProps = {}
 const UserDropdown = (props: TProps) => {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
+
+  //lây {t} để chuyển đổi ngôn ngư
+  const {t} = useTranslation()
 
   //lấy thoogn tin user khi đăng nhập và chức năng logout 
   const { user, logout } = useAuth()
@@ -41,7 +45,7 @@ const UserDropdown = (props: TProps) => {
   return (
     <React.Fragment>
       <Box sx={{ display: 'flex', alignItems: 'center', textAlign: 'center' }}>
-        <Tooltip title='Account settings'>
+        <Tooltip title={t('Account')}>
           <IconButton
             onClick={handleClick}
             size='small'

@@ -3,6 +3,7 @@ import { Palette } from '@mui/material'
 import { Skin } from 'src/types/layouts'
 
 const DefaultPalette = (mode: Palette['mode'], skin: Skin): Palette => {
+  
   // ** Vars
   const whiteColor = '#FFF'
   const lightColor = '47, 43, 61'
