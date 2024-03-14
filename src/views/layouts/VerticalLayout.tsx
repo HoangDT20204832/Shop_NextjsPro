@@ -7,12 +7,10 @@ import { NextPage } from 'next'
 import { styled } from '@mui/material/styles'
 import MuiDrawer from '@mui/material/Drawer'
 import Toolbar from '@mui/material/Toolbar'
-import List from '@mui/material/List'
 import Divider from '@mui/material/Divider'
 import IconButton from '@mui/material/IconButton'
 
 // ** Layout
-import { mainListItems, secondaryListItems } from 'src/views/layouts/listItem'
 import { Collapse, ListItemButton, ListItemIcon, ListItemText, ListSubheader } from '@mui/material'
 import IconifyIcon from 'src/components/Icon'
 import ListVerticalLayout from './ListVerticalLayout'
