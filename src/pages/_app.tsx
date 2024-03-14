@@ -27,15 +27,28 @@ import { AuthProvider } from 'src/contexts/AuthContext'
 // ** Global css styles
 import 'src/styles/globals.scss'
 
+// ** Redux
 import { store } from 'src/stores'
+
+// ** Components
 import GuestGuard from 'src/components/auth/GuestGuard'
 import AuthGuard from 'src/components/auth/AuthGuard'
 import FallbackSpinner from 'src/components/fall-back'
 import { SettingsConsumer, SettingsProvider } from 'src/contexts/SettingsContext'
 import AclGuard from 'src/components/auth/AclGuard'
 import ReactHotToast from 'src/components/react-hot-toast'
+
+// ** Hooks
 import { useSettings } from 'src/hooks/useSettings'
+
+// ** Theme
 import ThemeComponent from 'src/theme/ThemeComponent'
+
+// ** Views
+import UserLayout from 'src/views/layouts/UserLayout'
+
+// ** Helpers
+import { AxiosInterceptor } from 'src/helpers/axios'
 
 type ExtendedAppProps = AppProps & {
   Component: NextPage
@@ -60,6 +73,10 @@ if (themeConfig.routingLoader) {
   })
 }
 
+//Tạo component Guard với biến authGuard mặc định =true; và guestGuard mặc định =false
+// => các page nếu ko truyền gì thì sẽ mặc định nhân {authGuard=true, guestGuard=false} => chạy vào <AuthGuard/> (những trang chỉ cho user vào)
+// => những trang ko bắt bc đăng nhập và ko cho vào khi đã đăng nhập(chỉ cho khách vào nhưu login,...)  => phải truyền thêm guestGuard=true => chạy vào <GuestGiard/>
+// => những trang ko bắt bc đăng nhập và có thể vào kể cả khi đã đăng nhập(cho cả khách và user vào) => truyênf thêm authGuard=true, guestGuard=true 
 const Guard = ({ children, authGuard, guestGuard }: GuardProps) => {
   if (guestGuard) {
     return <GuestGuard fallback={<FallbackSpinner />}>{children}</GuestGuard>
@@ -73,10 +90,15 @@ const Guard = ({ children, authGuard, guestGuard }: GuardProps) => {
 export default function App(props: ExtendedAppProps) {
   const { Component, pageProps } = props
 
+  console.log("Component", {Component})
+
   const { settings } = useSettings()
 
   // Variables
-  const getLayout = Component.getLayout ?? (page => <>{page}</>)
+  const getLayout = Component.getLayout ?? (page => <UserLayout>{page}</UserLayout>) 
+     
+   //Những page có truyền getLayout thì sẽ sử dụng Layout của chính nó truyền
+   //còn những page ko có truyền getLayout thì sẽ sử dụng layput mặc định là <UserLayout/>
 
   const setConfig = Component.setConfig ?? undefined
 
@@ -114,6 +136,7 @@ export default function App(props: ExtendedAppProps) {
       </Head>
 
       <AuthProvider>
+        <AxiosInterceptor>
         <SettingsProvider {...(setConfig ? { pageSettings: setConfig() } : {})}>
           <SettingsConsumer>
             {({ settings }) => {
@@ -132,6 +155,7 @@ export default function App(props: ExtendedAppProps) {
             }}
           </SettingsConsumer>
         </SettingsProvider>
+        </AxiosInterceptor>
       </AuthProvider>
     </Provider>
   )

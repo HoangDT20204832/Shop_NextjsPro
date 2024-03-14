@@ -2,13 +2,16 @@
 // import { useTheme } from '@emotion/react'
 import { Box,useTheme } from '@mui/material'
 import Head from 'next/head'
+import { ReactNode } from 'react'
 import CustomTextField from 'src/components/text-field'
 import { useSettings } from 'src/hooks/useSettings'
+import LayoutNotApp from 'src/views/layouts/LayoutNotApp'
 
 export default function Home() {
   const theme =useTheme()
   const {settings} = useSettings()
-  console.log('theme', {theme, settings})
+  
+  // console.log('theme', {theme, settings})
 
   return (
     <>
@@ -22,3 +25,6 @@ export default function Home() {
     </>
   )
 }
+
+Home.getLayout = (page: ReactNode) => <LayoutNotApp>{page}</LayoutNotApp>
+

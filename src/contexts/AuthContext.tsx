@@ -5,13 +5,23 @@ import { createContext, useEffect, useState, ReactNode } from 'react'
 import { useRouter } from 'next/router'
 
 // ** Axios
-import axios from 'axios'
+// import axios from 'axios'
 
 // ** Config
 import authConfig from 'src/configs/auth'
 
 // ** Types
 import { AuthValuesType, LoginParams, ErrCallbackType, UserDataType } from './types'
+
+// ** Services 
+import { loginAuth, logoutAuth } from 'src/services/auth'
+
+// ** Configs 
+import { CONFIG_API } from 'src/configs/api'
+
+// ** helpers
+import { clearLocalUserData, setLocalUserData } from 'src/helpers/storage'
+import instanceAxios from 'src/helpers/axios'
 
 // ** Defaults
 const defaultProvider: AuthValuesType = {
@@ -38,27 +48,31 @@ const AuthProvider = ({ children }: Props) => {
   const router = useRouter()
 
   useEffect(() => {
+    //chaỵ vào initAuth() khi đã đăng nhập, rồi refresh lại trang 
+    
     const initAuth = async (): Promise<void> => {
       const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)!
       if (storedToken) {
         setLoading(true)
-        await axios
-          .get(authConfig.meEndpoint, {
-            headers: {
-              Authorization: storedToken
-            }
-          })
+        await instanceAxios
+          .get(CONFIG_API.AUTH.AUTH_ME
+
+          //   , {
+          //   headers: {
+          //     Authorization: `Bearer ${storedToken}`
+          //   }
+          // }
+          )
           .then(async response => {
+            console.log("response: ",response)
             setLoading(false)
-            setUser({ ...response.data.userData })
+            setUser({ ...response.data.data })
           })
           .catch(() => {
-            localStorage.removeItem('userData')
-            localStorage.removeItem('refreshToken')
-            localStorage.removeItem('accessToken')
+            clearLocalUserData()
             setUser(null)
             setLoading(false)
-            if (authConfig.onTokenExpiration === 'logout' && !router.pathname.includes('login')) {
+            if (!router.pathname.includes('login')) {
               router.replace('/login')
             }
           })
@@ -72,16 +86,21 @@ const AuthProvider = ({ children }: Props) => {
   }, [])
 
   const handleLogin = (params: LoginParams, errorCallback?: ErrCallbackType) => {
-    axios
-      .post(authConfig.loginEndpoint, params)
+      loginAuth({email: params.email, password:params.password })  // gọi hàm loginAuth từ folder services/auth
       .then(async response => {
         params.rememberMe
-          ? window.localStorage.setItem(authConfig.storageTokenKeyName, response.data.accessToken)
+          ? setLocalUserData(
+            JSON.stringify(response.data.user),
+            response.data.access_token,
+            response.data.refresh_token
+          )//nếu tích vào Rememberme thì sẽ lưu userData,accesstoken,refresh_token vào localstorgate
           : null
         const returnUrl = router.query.returnUrl
+        console.log('res', response)
 
-        setUser({ ...response.data.userData })
-        params.rememberMe ? window.localStorage.setItem('userData', JSON.stringify(response.data.userData)) : null
+        setUser({ ...response.data.user })
+
+        // params.rememberMe ? window.localStorage.setItem('userData', JSON.stringify(response.data.user)) : null //nếu tích vào Rememberme thì sẽ lưu luôn thông tin người dùng vào localStrorgate
 
         const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
 
@@ -94,10 +113,11 @@ const AuthProvider = ({ children }: Props) => {
   }
 
   const handleLogout = () => {
-    setUser(null)
-    window.localStorage.removeItem('userData')
-    window.localStorage.removeItem(authConfig.storageTokenKeyName)
-    router.push('/login')
+    logoutAuth().then((res)=>{
+      setUser(null)
+      clearLocalUserData()
+      router.push('/login')
+    })
   }
 
   const values = {

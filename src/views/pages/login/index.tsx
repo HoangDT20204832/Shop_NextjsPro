@@ -32,6 +32,9 @@ import Image from 'next/image'
 import LoginDark from '/public/images/login-dark.png'
 import LoginLight from '/public/images/login-light.png'
 
+//** Hooks */
+import { useAuth } from 'src/hooks/useAuth'
+
 
 // import { useTheme } from '@emotion/react'
 
@@ -46,7 +49,11 @@ const LoginPage: NextPage<TProps> = () => {
 
   //Theme
   const theme = useTheme()
-  console.log('thembfskje', theme)
+  
+  // console.log('thembfskje', theme)
+
+  const {login} = useAuth()  //lấy login: handleLogin từ AuthContext thoogn qua hàm useAuth ở folder hooks
+
 
   const schema = yup
     .object()
@@ -68,9 +75,12 @@ const LoginPage: NextPage<TProps> = () => {
     resolver: yupResolver(schema)
   })
   console.log('error', { errors })
+
   const onSubmit = (data: { email: string; password: string }) => {
+    login({...data, rememberMe: isRemember})
     console.log('data', { data })
   }
+
 
   return (
     <Box
@@ -200,7 +210,10 @@ const LoginPage: NextPage<TProps> = () => {
                 {"Don't have an account?"}
               </Grid>
               <Grid item>
-                <Link href='/register'>
+                <Link href='/register'
+                style={{
+                  color: theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.common.white
+                }}>
                   {'Register'}
                 </Link>
               </Grid>
@@ -211,7 +224,7 @@ const LoginPage: NextPage<TProps> = () => {
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
                   role='img'
-                  font-size='1.375rem'
+                  fontSize='1.375rem'
                   className='iconify iconify--mdi'
                   width='1em'
                   height='1em'
