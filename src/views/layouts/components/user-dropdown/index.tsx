@@ -15,7 +15,7 @@ import Image from 'next/image'
 
 // ** Hooks
 import { useAuth } from 'src/hooks/useAuth'
-import IconifyIcon from '../Icon'
+import IconifyIcon from '../../../../components/Icon'
 
 // import PersonAdd from '@mui/icons-material/PersonAdd';
 // import Settings from '@mui/icons-material/Settings';
