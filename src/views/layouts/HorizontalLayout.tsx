@@ -16,6 +16,10 @@ import IconifyIcon from 'src/components/Icon'
 import UserDropdown from 'src/views/layouts/components/user-dropdown'
 import ModeToggle from './components/mode-toggle'
 import LanguageDropdown from './components/language-dropdown'
+import { useAuth } from 'src/hooks/useAuth'
+import { Button } from '@mui/material'
+import { useRouter } from 'next/router'
+import { ROUTE_CONFIG } from 'src/configs/route'
 
 const drawerWidth: number = 240
 
@@ -50,7 +54,10 @@ const AppBar = styled(MuiAppBar, {
   })
 }))
 
-const HorizontalLayout: NextPage<TProps> = ({ open, toggleDrawer,isHideMenu }) => {
+const HorizontalLayout: NextPage<TProps> = ({ open, toggleDrawer, isHideMenu }) => {
+  const { user } = useAuth()
+  const router = useRouter()
+
   return (
     <AppBar position='absolute' open={open}>
       <Toolbar
@@ -59,7 +66,7 @@ const HorizontalLayout: NextPage<TProps> = ({ open, toggleDrawer,isHideMenu }) =
           margin: '0 20px'
         }}
       >
-            {!isHideMenu && (
+        {!isHideMenu && (
           <IconButton
             edge='start'
             color='inherit'
@@ -78,8 +85,15 @@ const HorizontalLayout: NextPage<TProps> = ({ open, toggleDrawer,isHideMenu }) =
           Dashboard
         </Typography>
         <LanguageDropdown />
-        <ModeToggle/>
-        <UserDropdown />
+        <ModeToggle />
+        {user ? (
+          <UserDropdown />
+        ) : (
+          <Button sx={{ width: 'auto', ml: 2 }} variant='contained' onClick={() => router.push(ROUTE_CONFIG.LOGIN)}>
+            Sign in
+          </Button>
+        )}
+
         {/* <IconButton color='inherit'>
           <Badge badgeContent={4} color='primary'>
             <IconifyIcon icon='iconamoon:notification-light' />

@@ -1,5 +1,3 @@
-
-
 // ** React
 import * as React from 'react'
 
@@ -15,24 +13,26 @@ import Container from '@mui/material/Container'
 // ** views
 import HorizontalLayout from 'src/views/layouts/HorizontalLayout'
 import VerticalLayout from 'src/views/layouts/VerticalLayout'
+import { useTheme } from '@mui/material'
 
 type TProps = {
-  children: React.ReactNode    //children ở đây chính là các component thể hiện các trang giao diện 
-                                //=> set type để là: React.ReactNode
+  children: React.ReactNode //children ở đây chính là các component thể hiện các trang giao diện
+  //=> set type để là: React.ReactNode
 }
 
 const LayoutNotApp: NextPage<TProps> = ({ children }) => {
   const [open, setOpen] = React.useState(true)
 
-//   const toggleDrawer = () => {
-//     setOpen(!open)
-//   }
+  //   const toggleDrawer = () => {
+  //     setOpen(!open)
+  //   }
+  const theme = useTheme()
 
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
       {/* <VerticalLayout toggleDrawer={toggleDrawer} open={open} /> */}
-      <HorizontalLayout toggleDrawer={()=>{}} open={false} isHideMenu />
+      <HorizontalLayout toggleDrawer={() => {}} open={false} isHideMenu />
       <Box
         component='main'
         sx={{
@@ -40,11 +40,22 @@ const LayoutNotApp: NextPage<TProps> = ({ children }) => {
             theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
           flexGrow: 1,
           height: '100vh',
-          overflow: 'auto'
+          overflow: 'auto',
         }}
       >
         <Toolbar />
-        <Container maxWidth='lg' sx={{ mt: 4, mb: 4 }}>
+        <Container
+          sx={{
+            m: 4,
+            padding:" 0 !important",
+            
+            // backgroundColor: theme.palette.background.paper,
+            width: 'calc(100vw - 32px)',
+            maxWidth: 'unset !important',
+            overflow: 'auto',
+            maxHeight: `calc(100vh - ${theme.mixins.toolbar.minHeight} - 32px)`,
+          }}
+        >
           {children}
         </Container>
       </Box>
