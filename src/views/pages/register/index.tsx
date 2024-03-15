@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 // ** React
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 // ** Mui
 import {
@@ -34,6 +34,14 @@ import { EMAIL_REG, PASSWORD_REG } from 'src/configs/regex'
 // ** Images
 import RegisterDark from '/public/images/register-dark.png'
 import RegisterLight from '/public/images/register-light.png'
+import { useDispatch, useSelector } from 'react-redux'
+import { registerAuthAsync } from 'src/stores/apps/auth/actions'
+import { AppDispatch, RootState } from 'src/stores'
+import toast from 'react-hot-toast'
+import FallbackSpinner from 'src/components/fall-back'
+import { resetInitialState } from 'src/stores/apps/auth'
+import { useRouter } from 'next/router'
+import { ROUTE_CONFIG } from 'src/configs/route'
 
 type TProps = {}
 
@@ -47,6 +55,13 @@ const RegisterPage: NextPage<TProps> = () => {
   // State
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+
+  // ** Router
+  const router = useRouter()
+
+  // ** Redux
+  const dispatch:AppDispatch = useDispatch()    //dùng để đưa actions vào reducer xử lý
+  const {isSuccess, isLoading, isError, message} = useSelector((state:RootState)=> state.auth) // dùng useSelector để lấy ra các state trong store
 
   // ** theme
   const theme = useTheme()
@@ -80,11 +95,30 @@ const RegisterPage: NextPage<TProps> = () => {
     resolver: yupResolver(schema)
   })
   console.log('errors', { errors })
+
   const onSubmit = (data: { email: string; password: string }) => {
-    console.log('data', { data, errors })
+    // console.log('data', { data, errors })
+    dispatch(registerAuthAsync({email: data.email, password: data.password}))
   }
 
+  useEffect(()=>{
+    if(message){  // tất cả thằng dưới pahri có message thì mưới hiện thông báo toast(tranh việc mưới vào trang reggister đã hiện toast)
+      if(isError){
+        toast.error(message)
+      }else if(isSuccess){
+        toast.success(message)
+        router.push(ROUTE_CONFIG.LOGIN)
+      }
+
+      //khi ấn đky xong thì phải reset lại state để nếu ấn liên tục đky mà ko thành công sẽ hiện toast thông báo lỗi liên tục cho họ thấy
+      dispatch(resetInitialState())
+    }
+  
+  },[isError,isSuccess, message])
+
   return (
+    <>
+    {isLoading && <FallbackSpinner/>}
     <Box
       sx={{
         height: '100vh',
@@ -285,6 +319,7 @@ const RegisterPage: NextPage<TProps> = () => {
         </Box>
       </Box>
     </Box>
+    </>
   )
 }
 

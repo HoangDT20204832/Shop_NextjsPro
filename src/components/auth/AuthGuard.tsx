@@ -30,7 +30,7 @@ const AuthGuard = (props: AuthGuardProps) => {
       !window.localStorage.getItem(ACCESS_TOKEN) &&
       !window.localStorage.getItem(USER_DATA)
     ) {
-      if(router.asPath !== '/'){       //nếu trang muốn vào ko phải trang Home => khi bị bắt đăng nhập thì sẽ kèm theo returnUrl để khi đăng nhập sẽ đá sang chính trang đó
+      if(router.asPath !== '/' && router.asPath !== '/login'){       //nếu trang muốn vào ko phải trang Home => khi bị bắt đăng nhập thì sẽ kèm theo returnUrl để khi đăng nhập sẽ đá sang chính trang đó
       router.replace({        
         pathname: '/login',
         query: {returnUrl : router.asPath}
