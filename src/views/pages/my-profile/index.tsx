@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 // ** React
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 
 // ** Mui
 import {
@@ -41,41 +41,64 @@ import IconifyIcon from 'src/components/Icon'
 import { useTranslation } from 'react-i18next'
 import WrapperFileUpload from 'src/components/wrapper-file-upload'
 import { useAuth } from 'src/hooks/useAuth'
+import { getAuthMe } from 'src/services/auth'
+import { UserDataType } from 'src/contexts/types'
+import { convertBase64, separationFullName, toFullName } from 'src/utils'
+import { useDispatch, useSelector } from 'react-redux'
+import { AppDispatch, RootState } from 'src/stores'
+import toast from 'react-hot-toast'
+import { resetInitialState } from 'src/stores/apps/auth'
+import { ROUTE_CONFIG } from 'src/configs/route'
+import { updateAuthMeAsync } from 'src/stores/apps/auth/actions'
+import FallbackSpinner from 'src/components/fall-back'
+import Spinner from 'src/components/spinner'
 
 type TProps = {}
 
 type TDefaultValue = {
-  email: string,
-  address: string,
-  fullName: string,
-  city: string,
-  phoneNumber: string,
+  email: string
+  address: string
+  fullName: string
+  city: string
+  phoneNumber: string
   role: string
 }
 
 const MyProfilePage: NextPage<TProps> = () => {
   // State
-  const {user} = useAuth()
+  const [loading, setLoading] = useState(false)
+  const [avatar, setAvatar] = useState('')
+  const [roleId, setRoleId] = useState('')
+
+  // const [user, setUser] = useState<UserDataType | null>(null);
+
+  // ** translate
+  const { i18n } = useTranslation()
+  const { t } = useTranslation()
 
   // ** theme
   const theme = useTheme()
 
+  // ** redux
+  const dispatch: AppDispatch = useDispatch()
+  const {isErrorUpdateMe, isLoading, isSuccessUpdateMe, messageUpdateMe} = useSelector((state:RootState) => state.auth)
+
   const schema = yup.object().shape({
     email: yup.string().required('The field is required').matches(EMAIL_REG, 'The field is must email type'),
-    fullName: yup.string().required('The field is required'),
-    city: yup.string().required('The field is required'),
-    phoneNumber: yup.string().required('The field is required'),
-    address: yup.string().required('The field is required'),
-    role: yup.string().required('The field is required'),
+    fullName: yup.string().notRequired(),
+    city: yup.string().notRequired(),
+    phoneNumber: yup.string().required('The field is required').min(8, 'The phone number is min 8 number'),
+    address: yup.string().notRequired(),
+    role: yup.string().required('The field is required')
   })
 
   const defaultValues: TDefaultValue = {
-    email: "",
-  address: "",
-  fullName: "",
-  city: "",
-  phoneNumber: "",
-  role: ""
+    email: '',
+    address: '',
+    fullName: '',
+    city: '',
+    phoneNumber: '',
+    role: ''
   }
 
   const {
@@ -89,30 +112,79 @@ const MyProfilePage: NextPage<TProps> = () => {
     resolver: yupResolver(schema)
   })
 
-  useEffect( () => {
-    if(user){
-      reset({
-        email: "",
-        address: "",
-        fullName:"" ,
-        city: "",
-        phoneNumber: "",
-        role: user?.role?.name
+  const fetchGetAuthMe = async () => {
+    setLoading(true)
+    await getAuthMe()
+      .then(async response => {
+        console.log('response: ', response)
+        setLoading(false)
+        const data = response?.data
+        if (data) {
+          setRoleId(data?.roleId?._id)
+          setAvatar(data?.avatar)
+          reset({
+            email: data?.email,
+            address: data?.address,
+            city: data?.city,
+            phoneNumber: data?.phoneNumber,
+            role: data?.role?.name,
+            fullName: toFullName(data?.lastName, data?.middleName, data?.firstName, i18n?.language)
+          })
+        }
       })
+      .catch(() => {
+        setLoading(false)
+      })
+  }
+
+  useEffect(() => {
+    fetchGetAuthMe()
+  }, [i18n?.language])
+
+  useEffect(()=>{
+    if(messageUpdateMe){  // tất cả thằng dưới pahri có message thì mưới hiện thông báo toast(tranh việc mưới vào trang reggister đã hiện toast)
+      if(isErrorUpdateMe){
+        toast.error(messageUpdateMe)
+      }else if(isSuccessUpdateMe){
+        toast.success(messageUpdateMe)
+        fetchGetAuthMe()
+      }
+
+      //khi ấn đky xong thì phải reset lại state để nếu ấn liên tục đky mà ko thành công sẽ hiện toast thông báo lỗi liên tục cho họ thấy
+      dispatch(resetInitialState())
     }
-  },[user])
+  
+  },[isErrorUpdateMe,isSuccessUpdateMe, messageUpdateMe])
+
 
   // console.log('errors', { errors })
   const onSubmit = (data: any) => {
     console.log('data', { data, errors })
+    const {firstName, middleName, lastName} = separationFullName(data?.fullName,i18n.language )
+    dispatch(updateAuthMeAsync({
+      email: data.email,
+      role: roleId,
+      phoneNumber: data.phoneNumber,
+      firstName:firstName,
+      middleName:middleName,
+      lastName:lastName,
+      address: data.address,
+      avatar: avatar,
+
+      // city: data.city,
+    }))
   }
 
-  const {t} = useTranslation()
-  const handleUploadAvatar = (file: File)=>{
-
+  const handleUploadAvatar = async (file: File) => {
+    const base64 = await convertBase64(file)
+    console.log('base64', base64)
+    setAvatar(base64 as string)
   }
+
 
   return (
+    <>
+    {loading || isLoading && <Spinner/>}
     <form onSubmit={handleSubmit(onSubmit)} autoComplete='off' noValidate>
       <Grid container>
         <Grid
@@ -127,97 +199,124 @@ const MyProfilePage: NextPage<TProps> = () => {
             px: 4
           }}
         >
-         <Box sx={{height:"100%", width:"100%"}}>
-          <Grid container spacing={4}>
-          <Grid item md={12} xs={12}>
-            <Box
-              sx={{
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 2,
-                justifyContent: 'center',
-                alignItems: 'center'
-              }}
-            >
-              <Avatar sx={{ width: 100, height: 100 }}>
-                {/* {user?.avatar ? (
-                <Image
-                  src={user?.avatar || ''}
-                  alt='avatar'
-                  style={{
-                    height: 'auto',
-                    width: 'auto'
+          <Box sx={{ height: '100%', width: '100%' }}>
+            <Grid container spacing={4}>
+              <Grid item md={12} xs={12}>
+                <Box
+                  sx={{
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 2,
+                    justifyContent: 'center',
+                    alignItems: 'center'
+
+                    // position: 'relative'
                   }}
+                >
+                  <Box
+                    sx={{
+                      position: 'relative'
+                    }}
+                  >
+                    {avatar ? (
+                      <IconButton
+                        edge='start'
+                        sx={{
+                          position: 'absolute',
+                          bottom: -6,
+                          right: -6,
+                          zIndex: 2,
+                          color: theme.palette.primary.main
+                        }}
+                        onClick={() => setAvatar('')}
+                      >
+                        <IconifyIcon icon='material-symbols-light:delete-outline'></IconifyIcon>
+                      </IconButton>
+                    ) : (
+                      <></>
+                    )}
+
+                    {avatar ? (
+                      <Avatar src={avatar} sx={{ width: 100, height: 100 }}></Avatar>
+                    ) : (
+                      <Avatar sx={{ width: 100, height: 100 }}>
+                        <IconifyIcon icon='ph:user-thin' fontSize={50} />
+                      </Avatar>
+                    )}
+                  </Box>
+
+                  <WrapperFileUpload
+                    uploadFunc={handleUploadAvatar}
+                    objectAcceptFile={{
+                      'image/jpeg': ['.jpg', 'jpeg'],
+                      'image/png': ['.png']
+                    }}
+                  >
+                    <Button
+                      variant='outlined'
+                      sx={{ width: 'auto', display: 'flex', justifyContent: 'center', gap: 2 }}
+                    >
+                      <IconifyIcon icon='ph:camera-thin' />
+                      {avatar ? t('change_avatar') : t('upload_avatar')}
+                    </Button>
+                  </WrapperFileUpload>
+                </Box>
+              </Grid>
+              <Grid item md={6} xs={12}>
+                <Controller
+                  control={control}
+                  rules={{
+                    required: true
+                  }}
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <CustomTextField
+                      required
+                      disabled
+                      autoFocus
+                      fullWidth
+                      label={t('Email')}
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      value={value}
+                      placeholder={t('enter_your_email')}
+                      error={Boolean(errors?.email)}
+                      helperText={errors?.email?.message}
+                    />
+                  )}
+                  name='email'
                 />
-              ) : ( */}
-                <IconifyIcon icon='ph:user-thin' fontSize={50} />
-                {/* )} */}
-              </Avatar>
-              <WrapperFileUpload uploadFunc={handleUploadAvatar} objectAcceptFile={{
-                "image/jpeg": [".jpg", "jpeg"],
-                "image/png": [".png"]
-              }}>
-              <Button variant='outlined' sx={{ width: 'auto', display:"flex", justifyContent:"center",gap:2 }}>
-                <IconifyIcon icon="ph:camera-thin" />
-                {t("upload_avatar")}
-              </Button>
-              </WrapperFileUpload>
-            </Box>
-          </Grid>
-          <Grid item md={6} xs={12}>
-            <Controller
-              control={control}
-              rules={{
-                required: true
-              }}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <CustomTextField
-                  required
-                  autoFocus
-                  fullWidth
-                  label={t('Email')}
-                  onChange={onChange}
-                  onBlur={onBlur}
-                  value={value}
-                  placeholder={t("enter_your_email")}
-                  error={Boolean(errors?.email)}
-                  helperText={errors?.email?.message}
+              </Grid>
+              <Grid item md={6} xs={12}>
+                <Controller
+                  control={control}
+                  rules={{
+                    required: true
+                  }}
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <CustomTextField
+                      required
+                      autoFocus
+                      fullWidth
+                      disabled
+                      label={t('Role')}
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      value={value}
+                      placeholder={t('enter_your_role')}
+                      error={Boolean(errors?.role)}
+                      helperText={errors?.role?.message}
+                    />
+                  )}
+                  name='role'
                 />
-              )}
-              name='email'
-            />
-          </Grid>
-          <Grid item md={6} xs={12}>
-            <Controller
-              control={control}
-              rules={{
-                required: true
-              }}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <CustomTextField
-                  required
-                  autoFocus
-                  fullWidth
-                  disabled
-                  label={t("Role")}
-                  onChange={onChange}
-                  onBlur={onBlur}
-                  value={value}
-                  placeholder= {t("enter_your_role")}
-                  error={Boolean(errors?.role)}
-                  helperText={errors?.role?.message}
-                />
-              )}
-              name='role'
-            />
-          </Grid>
-          </Grid>
-         </Box>
+              </Grid>
+            </Grid>
+          </Box>
         </Grid>
 
-        <Grid container item md={6} xs={12} mt={{md:0, xs:5}}>
+        <Grid container item md={6} xs={12} mt={{ md: 0, xs: 5 }}>
           <Box
             sx={{
               height: '100%',
@@ -230,22 +329,18 @@ const MyProfilePage: NextPage<TProps> = () => {
             marginLeft={{ md: 5, xs: 0 }}
           >
             <Grid container spacing={4}>
-            <Grid item md={6} xs={12}>
+              <Grid item md={6} xs={12}>
                 <Controller
                   control={control}
-                  rules={{
-                    required: true
-                  }}
                   render={({ field: { onChange, onBlur, value } }) => (
                     <CustomTextField
-                      required
                       autoFocus
                       fullWidth
-                      label={t("Full_name")}
+                      label={t('Full_name')}
                       onChange={onChange}
                       onBlur={onBlur}
                       value={value}
-                      placeholder={t("enter_your_full_name")}
+                      placeholder={t('enter_your_full_name')}
                       error={Boolean(errors?.fullName)}
                       helperText={errors?.fullName?.message}
                     />
@@ -256,17 +351,15 @@ const MyProfilePage: NextPage<TProps> = () => {
               <Grid item md={6} xs={12}>
                 <Controller
                   control={control}
-                
                   render={({ field: { onChange, onBlur, value } }) => (
                     <CustomTextField
-                      required
                       autoFocus
                       fullWidth
-                      label={t("Address")}
+                      label={t('Address')}
                       onChange={onChange}
                       onBlur={onBlur}
                       value={value}
-                      placeholder={t("enter_your_address")}
+                      placeholder={t('enter_your_address')}
                       error={Boolean(errors?.address)}
                       helperText={errors?.address?.message}
                     />
@@ -277,17 +370,15 @@ const MyProfilePage: NextPage<TProps> = () => {
               <Grid item md={6} xs={12}>
                 <Controller
                   control={control}
-               
                   render={({ field: { onChange, onBlur, value } }) => (
                     <CustomTextField
-                      required
                       autoFocus
                       fullWidth
-                      label={t("City")}
+                      label={t('City')}
                       onChange={onChange}
                       onBlur={onBlur}
                       value={value}
-                      placeholder={t("enter_your_city")}
+                      placeholder={t('enter_your_city')}
                       error={Boolean(errors?.city)}
                       helperText={errors?.city?.message}
                     />
@@ -298,17 +389,24 @@ const MyProfilePage: NextPage<TProps> = () => {
               <Grid item md={6} xs={12}>
                 <Controller
                   control={control}
-             
                   render={({ field: { onChange, onBlur, value } }) => (
                     <CustomTextField
                       required
                       autoFocus
                       fullWidth
-                      label={t("Phone_number")}
-                      onChange={onChange}
+                      label={t('Phone_number')}
+                      onChange={e => {
+                        const numValue = e.target.value.replace(/\D/g, '')
+                        onChange(numValue)
+                      }}
+                      inputProps={{
+                        inputMode: 'numeric',
+                        pattern: '[0-9]*',
+                        minLength: 8
+                      }}
                       onBlur={onBlur}
                       value={value}
-                      placeholder={t("enter_your_phone")}
+                      placeholder={t('enter_your_phone')}
                       error={Boolean(errors?.phoneNumber)}
                       helperText={errors?.phoneNumber?.message}
                     />
@@ -316,7 +414,6 @@ const MyProfilePage: NextPage<TProps> = () => {
                   name='phoneNumber'
                 />
               </Grid>
-              
             </Grid>
           </Box>
         </Grid>
@@ -324,10 +421,10 @@ const MyProfilePage: NextPage<TProps> = () => {
 
       <Box sx={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'flex-end' }}>
         <Button type='submit' variant='contained' sx={{ mt: 3, mb: 2 }}>
-          {t("Update")}
+          {t('Update')}
         </Button>
       </Box>
-    </form>
+    </form></>
   )
 }
 

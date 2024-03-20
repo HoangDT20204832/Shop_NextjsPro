@@ -4,7 +4,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
 // ** Axios Imports
 import axios from 'axios'
-import { registerAuthAsync } from './actions'
+import { registerAuthAsync, updateAuthMeAsync } from './actions'
 
 interface DataParams {
   q: string
@@ -25,7 +25,10 @@ export const authSlice = createSlice({
     isSuccess: true,
     isError: false,
     message: "",
-    typeError: ""
+    typeError: "",
+    isSuccessUpdateMe :true,
+    isErrorUpdateMe : false  ,
+    messageUpdateMe : "" 
   },
   reducers: {
     resetInitialState: (state) =>{
@@ -34,9 +37,15 @@ export const authSlice = createSlice({
       state.isError = true  
       state.message = "" 
       state.typeError = ""  
+      state.isSuccessUpdateMe = false
+      state.isErrorUpdateMe = true  
+      state.messageUpdateMe = ""
     }
   },
+
   extraReducers: builder => {
+
+    // ** Register
     builder.addCase(registerAuthAsync.pending, (state, action) => {  //khi đang call
       state.isLoading = true
 
@@ -54,6 +63,27 @@ export const authSlice = createSlice({
       state.isSuccess = false
       state.isError = true  
       state.message = "" 
+      state.typeError = ""  
+    })
+
+     // ** Update-me
+     builder.addCase(updateAuthMeAsync.pending, (state, action) => {  //khi đang call
+      state.isLoading = true
+
+    }),
+    builder.addCase(updateAuthMeAsync.fulfilled, (state, action) => {  //khi call thành công
+      console.log("action", action)
+      state.isLoading = false
+      state.isSuccessUpdateMe =  !!action.payload?.data?.email  //true khi có email
+      state.isErrorUpdateMe = !action.payload?.data?.email  // true khi ko có email
+      state.messageUpdateMe = action.payload?.message  
+      state.typeError = action.payload?.typeError  
+    }),
+    builder.addCase(updateAuthMeAsync.rejected, (state, action) => {   // khi call thất bại
+      state.isLoading = false
+      state.isSuccessUpdateMe = false
+      state.isErrorUpdateMe = true  
+      state.messageUpdateMe = "" 
       state.typeError = ""  
     })
   }
