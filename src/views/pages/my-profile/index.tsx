@@ -15,9 +15,11 @@ import {
   Checkbox,
   CssBaseline,
   FormControlLabel,
+  FormHelperText,
   Grid,
   IconButton,
   InputAdornment,
+  InputLabel,
   Typography,
   useTheme
 } from '@mui/material'
@@ -52,6 +54,7 @@ import { ROUTE_CONFIG } from 'src/configs/route'
 import { updateAuthMeAsync } from 'src/stores/apps/auth/actions'
 import FallbackSpinner from 'src/components/fall-back'
 import Spinner from 'src/components/spinner'
+import CustomSelect from 'src/components/custom-select'
 
 type TProps = {}
 
@@ -295,19 +298,40 @@ const MyProfilePage: NextPage<TProps> = () => {
                     required: true
                   }}
                   render={({ field: { onChange, onBlur, value } }) => (
-                    <CustomTextField
-                      required
-                      autoFocus
+                    <div>
+                    <label
+                      style={{
+                        fontSize: '13px',
+                        marginBottom: "4px",
+                        display: "block",
+                        color: errors?.role
+                          ? theme.palette.error.main
+                          : `rgba(${theme.palette.customColors.main}, 0.42)`
+                      }}
+                    >
+                      {t('Role')}
+                    </label>
+                    <CustomSelect
                       fullWidth
-                      disabled
-                      label={t('Role')}
                       onChange={onChange}
+                      options={[]}
+                      error={Boolean(errors?.role)}
                       onBlur={onBlur}
                       value={value}
                       placeholder={t('enter_your_role')}
-                      error={Boolean(errors?.role)}
-                      helperText={errors?.role?.message}
                     />
+                    {!errors?.email?.message && (
+                      <FormHelperText
+                        sx={{
+                          color: !errors?.role
+                            ? theme.palette.error.main
+                            : `rgba(${theme.palette.customColors.main}, 0.42)`,
+                        }}
+                      >
+                        {errors?.role?.message}
+                      </FormHelperText>
+                    )}
+                  </div>
                   )}
                   name='role'
                 />
@@ -371,17 +395,40 @@ const MyProfilePage: NextPage<TProps> = () => {
                 <Controller
                   control={control}
                   render={({ field: { onChange, onBlur, value } }) => (
-                    <CustomTextField
-                      autoFocus
+                    <Box>
+                    <InputLabel
+                      sx={{
+                        fontSize: '13px',
+                        marginBottom: "4px",
+                        display: "block",
+                        color: errors?.role
+                          ? theme.palette.error.main
+                          : `rgba(${theme.palette.customColors.main}, 0.42)`
+                      }}
+                    >
+                      {t('City')}
+                    </InputLabel>
+                    <CustomSelect
                       fullWidth
-                      label={t('City')}
                       onChange={onChange}
+                      options={[]}
+                      error={Boolean(errors?.role)}
                       onBlur={onBlur}
                       value={value}
                       placeholder={t('enter_your_city')}
-                      error={Boolean(errors?.city)}
-                      helperText={errors?.city?.message}
                     />
+                    {!errors?.email?.message && (
+                      <FormHelperText
+                        sx={{
+                          color: !errors?.role
+                            ? theme.palette.error.main
+                            : `rgba(${theme.palette.customColors.main}, 0.42)`,
+                        }}
+                      >
+                        {errors?.email?.message}
+                      </FormHelperText>
+                    )}
+                  </Box>
                   )}
                   name='city'
                 />
