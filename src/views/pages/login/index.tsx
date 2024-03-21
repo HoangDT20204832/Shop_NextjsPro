@@ -34,6 +34,8 @@ import LoginLight from '/public/images/login-light.png'
 
 //** Hooks */
 import { useAuth } from 'src/hooks/useAuth'
+import toast from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
 
 
 // import { useTheme } from '@emotion/react'
@@ -46,6 +48,9 @@ const LoginPage: NextPage<TProps> = () => {
   //State
   const [showPassword, setShowPassword] = useState<boolean>(false)
   const [isRemember, setIsRemember] = useState<boolean>(true)
+
+  // ** Language
+  const {t} = useTranslation()
 
   //Theme
   const theme = useTheme()
@@ -77,8 +82,15 @@ const LoginPage: NextPage<TProps> = () => {
   console.log('error', { errors })
 
   const onSubmit = (data: { email: string; password: string }) => {
-    login({...data, rememberMe: isRemember})
-    console.log('data', { data })
+    if(!Object.keys(errors).length){  // nếu ko có lỗi thì mưới thực hiện login
+      login({...data, rememberMe: isRemember}, (err)=>{
+        console.log("errpr", err)
+        if(err?.response?.data?.typeError==="INVALID"){
+          toast.error(t("the_email_or_password_is_wrong"))
+        }
+      })
+    }
+
   }
 
 

@@ -4,7 +4,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
 // ** Axios Imports
 import axios from 'axios'
-import { registerAuthAsync, updateAuthMeAsync } from './actions'
+import { changePasswordMeAsync, registerAuthAsync, updateAuthMeAsync } from './actions'
 
 interface DataParams {
   q: string
@@ -28,7 +28,10 @@ export const authSlice = createSlice({
     typeError: "",
     isSuccessUpdateMe :true,
     isErrorUpdateMe : false  ,
-    messageUpdateMe : "" 
+    messageUpdateMe : "" ,
+    isSuccessChangePassword :true,
+    isErrorChangePassword : false  ,
+    messageChangePassword : "" 
   },
   reducers: {
     resetInitialState: (state) =>{
@@ -40,6 +43,9 @@ export const authSlice = createSlice({
       state.isSuccessUpdateMe = false
       state.isErrorUpdateMe = true  
       state.messageUpdateMe = ""
+      state.isSuccessChangePassword = false
+      state.isErrorChangePassword = true  
+      state.messageChangePassword = ""
     }
   },
 
@@ -51,7 +57,6 @@ export const authSlice = createSlice({
 
     }),
     builder.addCase(registerAuthAsync.fulfilled, (state, action) => {  //khi call thành công
-      console.log("action", action)
       state.isLoading = false
       state.isSuccess =  !!action.payload?.data?.email  //true khi có email
       state.isError = !action.payload?.data?.email  // true khi ko có email
@@ -72,7 +77,6 @@ export const authSlice = createSlice({
 
     }),
     builder.addCase(updateAuthMeAsync.fulfilled, (state, action) => {  //khi call thành công
-      console.log("action", action)
       state.isLoading = false
       state.isSuccessUpdateMe =  !!action.payload?.data?.email  //true khi có email
       state.isErrorUpdateMe = !action.payload?.data?.email  // true khi ko có email
@@ -84,6 +88,27 @@ export const authSlice = createSlice({
       state.isSuccessUpdateMe = false
       state.isErrorUpdateMe = true  
       state.messageUpdateMe = "" 
+      state.typeError = ""  
+    })
+
+     // ** Change-password-me
+     builder.addCase(changePasswordMeAsync.pending, (state, action) => {  //khi đang call
+      state.isLoading = true
+
+    }),
+    builder.addCase(changePasswordMeAsync.fulfilled, (state, action) => {  //khi call thành công
+      console.log("action", action)
+      state.isLoading = false
+      state.isSuccessChangePassword =  !!action.payload?.data //true khi có email
+      state.isErrorChangePassword = !action.payload?.data  // true khi ko có email
+      state.messageChangePassword = action.payload?.message  
+      state.typeError = action.payload?.typeError  
+    }),
+    builder.addCase(changePasswordMeAsync.rejected, (state, action) => {   // khi call thất bại
+      state.isLoading = false
+      state.isSuccessChangePassword = false
+      state.isErrorChangePassword = true  
+      state.messageChangePassword = "" 
       state.typeError = ""  
     })
   }

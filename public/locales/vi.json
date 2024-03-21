@@ -14,5 +14,9 @@
     "enter_your_address": "Nhập địa chỉ",
     "upload_avatar": "Tải ảnh đại diện",
     "change_avatar": "Thay đổi ảnh đại diện",
-    "Update": "Cập nhật"
+    "Update": "Cập nhật",
+    "Change_password": "Đổi mật khẩu",
+    "Logout": "Đăng xuất",
+    "the_email_or_password_is_wrong": "Email hoặc mật khẩu không đúng",
+    "login_success": "Đăng nhập thành công"
 }

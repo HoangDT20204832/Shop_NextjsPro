@@ -19,7 +19,7 @@ export type ACLObj = {
 const defineRulesFor = (permission: string[], subject: string) => {
   const { can, rules } = new AbilityBuilder(AppAbility)
 
-  if (permission.includes("ADMIN.GRANTED")) {
+  if (permission.includes("ADMIN.GRANTED" ) || !permission.length) { //tạm thời xử lý để khi nào cấp role xử lý sau
     can('manage', 'all')
   } 
 

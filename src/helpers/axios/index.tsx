@@ -45,12 +45,12 @@ const handleRedirectLogin = (router: NextRouter, setUser: (data: UserDataType | 
 
 const AxiosInterceptor: FC<TAxiosInterceptor> = ({ children }) => {
     const router = useRouter()
-  const { accessToken, refreshToken } = getLocalUserData()
   const { setUser } = useAuth()
 
   //các hàm useRouter, useAuth,... ko thể khai báo  trong interceptors => phải đưa nó vào trong 1 component rồi move useRouter,... lên trên 
 instanceAxios.interceptors.request.use( async config => {  
     console.log("config",config)
+  const { accessToken, refreshToken } = getLocalUserData()
 
     if(accessToken){
         const decodeAccessToken:any = jwtDecode(accessToken)   //nếu có acccesstoken thì sẽ mã hóa nó

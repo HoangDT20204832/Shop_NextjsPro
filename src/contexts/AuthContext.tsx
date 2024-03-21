@@ -22,6 +22,8 @@ import { CONFIG_API } from 'src/configs/api'
 // ** helpers
 import { clearLocalUserData, setLocalUserData } from 'src/helpers/storage'
 import instanceAxios from 'src/helpers/axios'
+import toast from 'react-hot-toast'
+import { useTranslation } from 'react-i18next'
 
 // ** Defaults
 const defaultProvider: AuthValuesType = {
@@ -46,6 +48,9 @@ const AuthProvider = ({ children }: Props) => {
 
   // ** Hooks
   const router = useRouter()
+
+  // ** Language
+  const {t} = useTranslation()
 
   useEffect(() => {
     //chaỵ vào initAuth() khi đã đăng nhập, rồi refresh lại trang 
@@ -86,10 +91,8 @@ const AuthProvider = ({ children }: Props) => {
   }, [])
 
   const handleLogin = (params: LoginParams, errorCallback?: ErrCallbackType) => {
-    setLoading(true)
       loginAuth({email: params.email, password:params.password })  // gọi hàm loginAuth từ folder services/auth
-      .then(async response => {
-    setLoading(false)
+      .then(async response => { // đăng nhập thành công sẽ chyaj vào nhánh này
         params.rememberMe
           ? setLocalUserData(
             JSON.stringify(response.data.user),
@@ -97,6 +100,8 @@ const AuthProvider = ({ children }: Props) => {
             response.data.refresh_token
           )//nếu tích vào Rememberme thì sẽ lưu userData,accesstoken,refresh_token vào localstorgate
           : null
+
+        toast.success(t("login_success"));
         const returnUrl = router.query.returnUrl
         console.log('res', response)
 
@@ -109,8 +114,8 @@ const AuthProvider = ({ children }: Props) => {
         router.replace(redirectURL as string)
       })
 
-      .catch(err => {
-    setLoading(false)
+      .catch((err : any) => {  // đăng nhập thất bại sẽ chạy vào nhánh này
+        console.log("err", {err})
         if (errorCallback) errorCallback(err)
       })
   }
