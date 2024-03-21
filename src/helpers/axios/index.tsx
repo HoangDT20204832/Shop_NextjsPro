@@ -6,7 +6,7 @@ import { BASE_URL, CONFIG_API } from "src/configs/api";
 import {jwtDecode} from "jwt-decode"  //  dungf để mã hóa accesstoken phía fe để bieestt thời gian bắt đầu vfa hết hạn của nó
 
 // ** Helpers
-import { clearLocalUserData, getLocalUserData } from "../storage";
+import { clearLocalUserData, clearTemporaryToken, getLocalUserData, getTemporaryToken, setLocalUserData, setTemporaryToken } from "../storage";
 
 // ** Contexts
 import { UserDataType } from "src/contexts/types";
@@ -38,6 +38,7 @@ const handleRedirectLogin = (router: NextRouter, setUser: (data: UserDataType | 
     }
     setUser(null)
     clearLocalUserData()
+    clearTemporaryToken()
   }
 
 //dùng interceptors để custom lại axios để đưa accesstoken vào headers luôn; chứ ko cần phải viết headers ra ở code => chỉ cần dùng instanceAxios 
@@ -45,18 +46,24 @@ const handleRedirectLogin = (router: NextRouter, setUser: (data: UserDataType | 
 
 const AxiosInterceptor: FC<TAxiosInterceptor> = ({ children }) => {
     const router = useRouter()
-  const { setUser } = useAuth()
+  const { setUser, user } = useAuth()
 
   //các hàm useRouter, useAuth,... ko thể khai báo  trong interceptors => phải đưa nó vào trong 1 component rồi move useRouter,... lên trên 
 instanceAxios.interceptors.request.use( async config => {  
     console.log("config",config)
-  const { accessToken, refreshToken } = getLocalUserData()
+  const { accessToken, refreshToken } = getLocalUserData() // chuyển xuống đây để mỗi khi thay mật khẩu,... sẽ lấy acctoken mới nhất
 
-    if(accessToken){
-        const decodeAccessToken:any = jwtDecode(accessToken)   //nếu có acccesstoken thì sẽ mã hóa nó
+  const {temporaryToken} = getTemporaryToken()
+    if(accessToken || temporaryToken){
+      let decodeAccessToken:any = {}
+      if(accessToken){
+         decodeAccessToken = jwtDecode(accessToken)   //nếu có acccesstoken thì sẽ mã hóa nó
+      }else if(temporaryToken){
+        decodeAccessToken = jwtDecode(temporaryToken)   //nếu có temporaryToken thì sẽ mã hóa nó
+      }
 
-        if(decodeAccessToken?.exp > Date.now() / 1000){
-            config.headers['Authorization'] = `Bearer ${accessToken}`   // neeus accesstoken còn hạn thì sẽ đưa accesstoken vào "headers" của connffig
+        if(decodeAccessToken?.exp > Date.now() / 1000){ //// neeus accesstoken hoặc temporaryToken  còn hạn thì sẽ đưa accesstoken vào "headers" của connffig
+            config.headers['Authorization'] = `Bearer ${accessToken ? accessToken : temporaryToken}`   
         }else { //nếu accesstoken hết hạn
             if (refreshToken) {
               const decodedRefreshToken: any = jwtDecode(refreshToken) //mã hóa refreshtoken
@@ -76,6 +83,9 @@ instanceAxios.interceptors.request.use( async config => {
                     const newAccessToken = res?.data?.data?.access_token //lấy access_token mưới ra rồi gán nó vào trong headers của config 
                     if (newAccessToken) {
                       config.headers['Authorization'] = `Bearer ${newAccessToken}`
+                      if(accessToken){ // lấy acctoken mưới gán vào trong acctokene lưu ở phái storgate
+                        setLocalUserData(JSON.stringify(user), newAccessToken, refreshToken )
+                      }
                     } else {
                       handleRedirectLogin(router, setUser)
                     }

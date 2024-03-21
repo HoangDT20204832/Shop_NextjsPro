@@ -20,7 +20,7 @@ import { loginAuth, logoutAuth } from 'src/services/auth'
 import { CONFIG_API } from 'src/configs/api'
 
 // ** helpers
-import { clearLocalUserData, setLocalUserData } from 'src/helpers/storage'
+import { clearLocalUserData, setLocalUserData, setTemporaryToken } from 'src/helpers/storage'
 import instanceAxios from 'src/helpers/axios'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
@@ -93,14 +93,15 @@ const AuthProvider = ({ children }: Props) => {
   const handleLogin = (params: LoginParams, errorCallback?: ErrCallbackType) => {
       loginAuth({email: params.email, password:params.password })  // gọi hàm loginAuth từ folder services/auth
       .then(async response => { // đăng nhập thành công sẽ chyaj vào nhánh này
-        params.rememberMe
-          ? setLocalUserData(
+        if(params.rememberMe){  ////nếu tích vào Rememberme thì sẽ lưu userData,accesstoken,refresh_token vào localstorgate
+          setLocalUserData(
             JSON.stringify(response.data.user),
             response.data.access_token,
             response.data.refresh_token
-          )//nếu tích vào Rememberme thì sẽ lưu userData,accesstoken,refresh_token vào localstorgate
-          : null
-
+          )
+        }else{ // nếu ko thì chỉ cấp cho nó 1 TemporaryToken có thời hạn => khi refresh lại trang thì sẽ xóa thoogn tin user và đá sang trang login để đăng nhập lại
+          setTemporaryToken(response.data.access_token)
+        }
         toast.success(t("login_success"));
         const returnUrl = router.query.returnUrl
         console.log('res', response)

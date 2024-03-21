@@ -2,7 +2,7 @@
 import { useRouter } from 'next/router'
 import { ReactNode, ReactElement, useEffect } from 'react'
 import { ACCESS_TOKEN, USER_DATA } from 'src/configs/auth'
-import { clearLocalUserData } from 'src/helpers/storage'
+import { clearLocalUserData, clearTemporaryToken, getTemporaryToken } from 'src/helpers/storage'
 import { useAuth } from 'src/hooks/useAuth'
 
 interface AuthGuardProps {
@@ -21,6 +21,7 @@ const AuthGuard = (props: AuthGuardProps) => {
   const router = useRouter()
 
   useEffect(() => {
+    const {temporaryToken} = getTemporaryToken()
     if(!router.isReady){   //nếu Page chauw first=render xong thì sẽ chạy return => ko chạy hàm if() phái dưới
       return
     }
@@ -28,7 +29,8 @@ const AuthGuard = (props: AuthGuardProps) => {
     if (     //nếu vào những trang bắt buộc đăng nhập mà chưa đăng nhập thì sẽ đá sang trnag login
       authContext.user === null &&
       !window.localStorage.getItem(ACCESS_TOKEN) &&
-      !window.localStorage.getItem(USER_DATA)
+      !window.localStorage.getItem(USER_DATA) && 
+      !temporaryToken
     ) {
       if(router.asPath !== '/' && router.asPath !== '/login'){       //nếu trang muốn vào ko phải trang Home => khi bị bắt đăng nhập thì sẽ kèm theo returnUrl để khi đăng nhập sẽ đá sang chính trang đó
       router.replace({        
@@ -42,6 +44,18 @@ const AuthGuard = (props: AuthGuardProps) => {
       clearLocalUserData()
     }
   }, [router.route])
+
+  useEffect(()=>{
+    const handleUnload = () =>{
+      clearTemporaryToken()
+    }
+    window.addEventListener("beforeunload", handleUnload) // xử lý sự kiện khi thoát khỏi trang hawocj reload lại trang => sẽ xóa bỏ temporaryToken
+
+    return ()=>{
+    window.addEventListener("beforeunload", handleUnload)
+
+    }
+  }, [])
 
   //để hiển thị quay khi cố vào trang bắt bc mà chưa đăng nhập; tránh hiển thị trang đó 1 lúc rồi mới đá sang login
   if(authContext.loading || authContext.user === null){
