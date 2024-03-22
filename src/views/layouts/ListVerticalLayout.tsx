@@ -5,43 +5,94 @@ import { NextPage } from 'next'
 import React, { useEffect, useState } from 'react'
 
 // ** Mui
-import { Collapse, List, ListItemButton, ListItemIcon, ListItemText, ListSubheader } from '@mui/material'
+import {
+  Box,
+  Collapse,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  ListItemTextProps,
+  ListSubheader,
+  styled,
+  Tooltip,
+  useTheme,
+  useThemeProps
+} from '@mui/material'
 
 // ** Components
 import IconifyIcon from 'src/components/Icon'
 
-// ** Configs 
+// ** Configs
 import { VerticalItems } from 'src/configs/layout'
+import { useRouter } from 'next/router'
+import { hexToRGBA } from 'src/utils/hex-to-rgba'
 
 type TProps = {
   open: boolean
 }
 
 type TListItems = {
-  level: number,
-  openItems:{
+  level: number
+  openItems: {
     [key: string]: boolean
-  },
-  items: any,
+  }
+  items: any
   setOpenItems: React.Dispatch<
-  React.SetStateAction<{
-    [key: string]: boolean
-  }>
-  >,
+    React.SetStateAction<{
+      [key: string]: boolean
+    }>
+  >
   disabled: boolean
+  activePath: string | null
+  setActivePath: React.Dispatch<React.SetStateAction<string | null>>
 }
 
-const RecursiveListItems:NextPage<TListItems> = ({ items, level,openItems, setOpenItems, disabled }) => {
+interface TListItemText extends ListItemTextProps {
+  active: boolean
+}
+const StyleListItemText = styled(ListItemText)<TListItemText>(({ theme, active }) => ({
+  '.MuiTypography-root.MuiTypography-body1.MuiListItemText-primary': {
+    textOverflow: 'ellipsis',
+    overflow: 'hidden',
+    display: 'block',
+    width: '100%',
+    color: active ? `${theme.palette.primary.main} !important` : `rgba(${theme.palette.customColors.main}, 0.78)`,
+    fontWeight: active ? 600 : 400
+  }
+}))
+
+const RecursiveListItems: NextPage<TListItems> = ({
+  items,
+  level,
+  openItems,
+  setOpenItems,
+  disabled,
+  activePath,
+  setActivePath
+}) => {
   // const [openItems, setOpenItems] = useState<{ [key: string]: boolean }>({})
 
   const handleClick = (title: string) => {
-    if(!disabled){
-      setOpenItems((pre) => ({
-        ...pre,
+    if (!disabled) {
+      setOpenItems(pre => ({
         [title]: !pre[title]
       }))
     }
+  }
+
+  // ** theme
+  const theme = useTheme()
+
+  // ** router
+  const router = useRouter()
+  const handleSelectItem = (path: string) => {
+    setActivePath(path)
+    if (path) {
+      router.push(path)
     }
+  }
+  console.log('activePath', { activePath })
 
   return (
     <>
@@ -50,24 +101,65 @@ const RecursiveListItems:NextPage<TListItems> = ({ items, level,openItems, setOp
           <React.Fragment key={item.title}>
             <ListItemButton
               sx={{
-                padding: `8px 10px 8px ${level * (level ===1 ?28: 20)}px`
+                padding: `8px 10px 8px ${level * (level === 1 ? 28 : 20)}px`,
+                backgroundColor:
+                  (activePath && item.path === activePath) || openItems[item.title]
+                    ? `${hexToRGBA(theme.palette.primary.main, 0.08)} !important`
+                    : theme.palette.background.paper
               }}
-              onClick={()=>{
-                if(item.childrens){
+              onClick={() => {
+                if (item.childrens) {
                   handleClick(item.title)
                 }
               }}
             >
               <ListItemIcon>
-                <IconifyIcon icon={item.icon} />
+                <Box
+                  sx={{
+                    borderRadius: '8px',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    display: 'flex',
+                    height: '30px',
+                    width: '30px',
+                    backgroundColor:
+                      (activePath && item.path === activePath) || !!openItems[item.title]
+                        ? `${theme.palette.primary.main} !important`
+                        : theme.palette.background.paper
+                  }}
+                >
+                  <IconifyIcon
+                    style={{
+                      color:
+                        (activePath && item.path === activePath) || !!openItems[item.title]
+                          ? `${theme.palette.customColors.lightPaperBg}`
+                          : `rgba(${theme.palette.customColors.main}, 0.78)`
+                    }}
+                    icon={item.icon}
+                  />
+                </Box>
               </ListItemIcon>
-              {!disabled && <ListItemText primary={item.title} />}
+              {!disabled && (
+                <Tooltip title={item.title}>
+                  <StyleListItemText
+                    primary={item.title}
+                    onClick={() => handleSelectItem(item.path)}
+                    active={(activePath && item.path === activePath) || openItems[item.title]}
+                  />
+                </Tooltip>
+              )}
               {item?.childrens && item?.childrens.length > 0 && (
                 <>
                   {openItems[item.title] ? (
-                    <IconifyIcon icon='material-symbols-light:expand-less-rounded' style={{
-                      transform:"rotate(180deg)"
-                    }} />
+                    <IconifyIcon
+                      icon='material-symbols-light:expand-less-rounded'
+                      style={{
+                        transform: 'rotate(180deg)',
+                        color: !!openItems[item.title]
+                          ? `${theme.palette.primary.main}`
+                          : `rgba(${theme.palette.customColors.main}, 0.78)`
+                      }}
+                    />
                   ) : (
                     <IconifyIcon icon='material-symbols-light:expand-less-rounded' />
                   )}
@@ -77,11 +169,15 @@ const RecursiveListItems:NextPage<TListItems> = ({ items, level,openItems, setOp
             {item.childrens && item.childrens.length > 0 && (
               <>
                 <Collapse in={openItems[item.title]} timeout='auto' unmountOnExit>
-                  <RecursiveListItems 
-                  items={item.childrens} level={level + 1}
-                  openItems={openItems}
-                  setOpenItems={setOpenItems}
-                  disabled={disabled} />
+                  <RecursiveListItems
+                    items={item.childrens}
+                    level={level + 1}
+                    openItems={openItems}
+                    setOpenItems={setOpenItems}
+                    disabled={disabled}
+                    activePath={activePath}
+                    setActivePath={setActivePath}
+                  />
                 </Collapse>
               </>
             )}
@@ -92,19 +188,16 @@ const RecursiveListItems:NextPage<TListItems> = ({ items, level,openItems, setOp
   )
 }
 
-const ListVerticalLayout: NextPage<TProps> = ({open}) => {
+const ListVerticalLayout: NextPage<TProps> = ({ open }) => {
   // const [open, setOpen] = React.useState(true)
   const [openItems, setOpenItems] = useState<{ [key: string]: boolean }>({})
+  const [activePath, setActivePath] = useState<null | string>('')
 
-  useEffect(()=>{
-    if(!open){
+  useEffect(() => {
+    if (!open) {
       setOpenItems({})
     }
-  },[open])
-
-  // const handleClick = () => {
-  //   setOpenItems(!open)
-  // }
+  }, [open])
 
   return (
     <List
@@ -112,10 +205,15 @@ const ListVerticalLayout: NextPage<TProps> = ({open}) => {
       component='nav'
       aria-labelledby='nested-list-subheader'
     >
-      <RecursiveListItems items={VerticalItems} level={1}
-       openItems={openItems}
-       setOpenItems={setOpenItems}
-       disabled={!open} />
+      <RecursiveListItems
+        items={VerticalItems}
+        level={1}
+        openItems={openItems}
+        setOpenItems={setOpenItems}
+        disabled={!open}
+        activePath={activePath}
+        setActivePath={setActivePath}
+      />
 
       {/* <ListItemButton onClick={handleClick}>
           <ListItemIcon>

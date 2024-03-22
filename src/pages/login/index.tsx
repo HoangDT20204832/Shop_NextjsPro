@@ -9,6 +9,7 @@ import { ReactNode } from 'react'
 import BlackLayout from 'src/views/layouts/BlackLayout'
 import LoginPage from 'src/views/pages/login'
 
+
 type TProps = {}
 
  const Login:NextPage<TProps>=()=> {
