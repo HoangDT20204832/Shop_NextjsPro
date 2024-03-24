@@ -14,7 +14,7 @@ type TProps = {}
  const User:NextPage<TProps>=()=> {
 
   return (
-    <> Day la trang User</>
+    <> Day la trang Userrrr</>
   )
 }
 
