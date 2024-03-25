@@ -1,6 +1,5 @@
-
 // Next
-import {NextPage} from 'next'
+import { NextPage } from 'next'
 
 // ** React
 import { ReactNode } from 'react'
@@ -11,13 +10,8 @@ import RegisterPage from 'src/views/pages/register'
 
 type TProps = {}
 
- const User:NextPage<TProps>=()=> {
-
-  return (
-    <> Day la trang Userrrr</>
-  )
+const User: NextPage<TProps> = () => {
+  return <> Day la trang Userrrr</>
 }
 
 export default User
-
-

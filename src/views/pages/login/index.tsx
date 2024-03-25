@@ -1,6 +1,6 @@
 // ** Next
-import { NextPage} from 'next'
-import Link from "next/link"
+import { NextPage } from 'next'
+import Link from 'next/link'
 
 //** Mui
 import {
@@ -37,7 +37,6 @@ import { useAuth } from 'src/hooks/useAuth'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 
-
 // import { useTheme } from '@emotion/react'
 
 type TProps = {}
@@ -50,22 +49,19 @@ const LoginPage: NextPage<TProps> = () => {
   const [isRemember, setIsRemember] = useState<boolean>(true)
 
   // ** Language
-  const {t} = useTranslation()
+  const { t } = useTranslation()
 
   //Theme
   const theme = useTheme()
-  
+
   // console.log('thembfskje', theme)
 
-  const {login} = useAuth()  //lấy login: handleLogin từ AuthContext thoogn qua hàm useAuth ở folder hooks
+  const { login } = useAuth() //lấy login: handleLogin từ AuthContext thoogn qua hàm useAuth ở folder hooks
 
-
-  const schema = yup
-    .object()
-    .shape({
-      email: yup.string().required('Email là bắt buộc').matches(EMAIL_REG, 'Kiểu Email không đúng'),
-      password: yup.string().required('Password là bắt buộc').matches(PASSWORD_REG, 'Kiểu mật khẩu không đúng')
-    })
+  const schema = yup.object().shape({
+    email: yup.string().required('Email là bắt buộc').matches(EMAIL_REG, 'Kiểu Email không đúng'),
+    password: yup.string().required('Password là bắt buộc').matches(PASSWORD_REG, 'Kiểu mật khẩu không đúng')
+  })
 
   const {
     handleSubmit,
@@ -82,17 +78,16 @@ const LoginPage: NextPage<TProps> = () => {
   console.log('error', { errors })
 
   const onSubmit = (data: { email: string; password: string }) => {
-    if(!Object.keys(errors).length){  // nếu ko có lỗi thì mưới thực hiện login
-      login({...data, rememberMe: isRemember}, (err)=>{
-        console.log("errpr", err)
-        if(err?.response?.data?.typeError==="INVALID"){
-          toast.error(t("the_email_or_password_is_wrong"))
+    if (!Object.keys(errors).length) {
+      // nếu ko có lỗi thì mưới thực hiện login
+      login({ ...data, rememberMe: isRemember }, err => {
+        console.log('errpr', err)
+        if (err?.response?.data?.typeError === 'INVALID') {
+          toast.error(t('the_email_or_password_is_wrong'))
         }
       })
     }
-
   }
-
 
   return (
     <Box
@@ -119,7 +114,11 @@ const LoginPage: NextPage<TProps> = () => {
           minWidth: '50%'
         }}
       >
-        <Image src={theme.palette.mode==="light" ? LoginLight : LoginDark} alt='login image' style={{ height: 'auto', width: 'auto' }} />
+        <Image
+          src={theme.palette.mode === 'light' ? LoginLight : LoginDark}
+          alt='login image'
+          style={{ height: 'auto', width: 'auto' }}
+        />
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
         <CssBaseline />
@@ -135,7 +134,7 @@ const LoginPage: NextPage<TProps> = () => {
             Sign in
           </Typography>
           <form onSubmit={handleSubmit(onSubmit)} autoComplete='off' noValidate>
-            <Box sx={{ mt: 2 }}  width={{md:"300px", xs:"290px"}}>
+            <Box sx={{ mt: 2 }} width={{ md: '300px', xs: '290px' }}>
               <Controller
                 control={control}
                 rules={{
@@ -159,7 +158,7 @@ const LoginPage: NextPage<TProps> = () => {
               {/* {errors.email && <Typography>{errors?.email?.message}</Typography>} */}
             </Box>
 
-            <Box sx={{ mt: 2}} width={{md:"300px", xs:"290px"}}>
+            <Box sx={{ mt: 2 }} width={{ md: '300px', xs: '290px' }}>
               <Controller
                 control={control}
                 rules={{
@@ -209,9 +208,7 @@ const LoginPage: NextPage<TProps> = () => {
                 }
                 label='Remember me'
               />
-              <Typography  variant='body2'>
-                Forgot password?
-              </Typography>
+              <Typography variant='body2'>Forgot password?</Typography>
             </Box>
             <Button type='submit' fullWidth variant='contained' sx={{ mt: 3, mb: 2 }}>
               Sign In
@@ -222,10 +219,12 @@ const LoginPage: NextPage<TProps> = () => {
                 {"Don't have an account?"}
               </Grid>
               <Grid item>
-                <Link href='/register'
-                style={{
-                  color: theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.common.white
-                }}>
+                <Link
+                  href='/register'
+                  style={{
+                    color: theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.common.white
+                  }}
+                >
                   {'Register'}
                 </Link>
               </Grid>
