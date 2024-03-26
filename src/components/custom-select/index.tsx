@@ -14,12 +14,12 @@ const StyledSelect = styled(Select)<SelectProps>(({ theme }) => ({
   legend: {
     display: 'none'
   },
-  "svg" : {
-    top: "calc(50% - .6em) !important"
+  svg: {
+    top: 'calc(50% - .6em) !important'
   },
-  ".MuiOutlinedInput-notchedOutline": {
-    top: "-4px !important",
-    bottom: "2px !important"
+  '.MuiOutlinedInput-notchedOutline': {
+    top: '-4px !important',
+    bottom: '2px !important'
   }
 }))
 
