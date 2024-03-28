@@ -35,11 +35,11 @@ import { EMAIL_REG, PASSWORD_REG } from 'src/configs/regex'
 import RegisterDark from '/public/images/register-dark.png'
 import RegisterLight from '/public/images/register-light.png'
 import { useDispatch, useSelector } from 'react-redux'
-import { changePasswordMeAsync, registerAuthAsync } from 'src/stores/apps/auth/actions'
+import { changePasswordMeAsync, registerAuthAsync } from 'src/stores/auth/actions'
 import { AppDispatch, RootState } from 'src/stores'
 import toast from 'react-hot-toast'
 import FallbackSpinner from 'src/components/fall-back'
-import { resetInitialState } from 'src/stores/apps/auth'
+import { resetInitialState } from 'src/stores/auth'
 import { useRouter } from 'next/router'
 import { ROUTE_CONFIG } from 'src/configs/route'
 import { useTranslation } from 'react-i18next'
@@ -63,23 +63,25 @@ const ChangePasswordPage: NextPage<TProps> = () => {
   const router = useRouter()
 
   // ** Auth
-  const {logout} = useAuth()
+  const { logout } = useAuth()
 
   // ** Redux
-  const dispatch:AppDispatch = useDispatch()    //dùng để đưa actions vào reducer xử lý
-  const {isSuccessChangePassword, isLoading, isErrorChangePassword, messageChangePassword} = useSelector((state:RootState)=> state.auth) // dùng useSelector để lấy ra các state trong store
+  const dispatch: AppDispatch = useDispatch() //dùng để đưa actions vào reducer xử lý
+  const { isSuccessChangePassword, isLoading, isErrorChangePassword, messageChangePassword } = useSelector(
+    (state: RootState) => state.auth
+  ) // dùng useSelector để lấy ra các state trong store
 
   // ** theme
   const theme = useTheme()
 
   // ** Translate
-  const {t} = useTranslation()
+  const { t } = useTranslation()
 
   const schema = yup.object().shape({
     currentPassword: yup
-    .string()
-    .required('The field is required')
-    .matches(PASSWORD_REG, 'The password is contain charactor, special character, number'),
+      .string()
+      .required('The field is required')
+      .matches(PASSWORD_REG, 'The password is contain charactor, special character, number'),
     newPassword: yup
       .string()
       .required('The field is required')
@@ -110,201 +112,198 @@ const ChangePasswordPage: NextPage<TProps> = () => {
 
   const onSubmit = (data: { currentPassword: string; newPassword: string }) => {
     // console.log('data', { data, errors })
-    if(!Object.keys(errors).length){
-
-    dispatch(changePasswordMeAsync({currentPassword: data.currentPassword, newPassword: data.newPassword}))
-
+    if (!Object.keys(errors).length) {
+      dispatch(changePasswordMeAsync({ currentPassword: data.currentPassword, newPassword: data.newPassword }))
     }
   }
 
-  useEffect(()=>{
-    if(messageChangePassword){  // tất cả thằng dưới pahri có message thì mưới hiện thông báo toast(tranh việc mưới vào trang reggister đã hiện toast)
-      if(isErrorChangePassword){
+  useEffect(() => {
+    if (messageChangePassword) {
+      // tất cả thằng dưới pahri có message thì mưới hiện thông báo toast(tranh việc mưới vào trang reggister đã hiện toast)
+      if (isErrorChangePassword) {
         toast.error(messageChangePassword)
-      }else if(isSuccessChangePassword){
+      } else if (isSuccessChangePassword) {
         toast.success(messageChangePassword)
         router.push(ROUTE_CONFIG.LOGIN)
-        setTimeout(()=>{
+        setTimeout(() => {
           logout()
-        },500)
+        }, 500)
       }
 
       //khi ấn đky xong thì phải reset lại state để nếu ấn liên tục đky mà ko thành công sẽ hiện toast thông báo lỗi liên tục cho họ thấy
       dispatch(resetInitialState())
     }
-  
-  },[isErrorChangePassword,isSuccessChangePassword, messageChangePassword])
+  }, [isErrorChangePassword, isSuccessChangePassword, messageChangePassword])
 
   return (
     <>
-    {isLoading && <FallbackSpinner/>}
-    <Box
-      sx={{
-        backgroundColor: theme.palette.background.paper,
-        display: 'flex',
-        alignItems: 'center',
-        padding: '40px'
-      }}
-    >
+      {isLoading && <FallbackSpinner />}
       <Box
-        display={{
-          xs: 'none',
-          sm: 'flex'
-        }}
         sx={{
+          backgroundColor: theme.palette.background.paper,
+          display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          borderRadius: '20px',
-          backgroundColor: theme.palette.customColors.bodyBg,
-          height: '100%',
-          minWidth: '50vw'
+          padding: '40px'
         }}
       >
-        <Image
-          src={theme.palette.mode === 'light' ? RegisterLight : RegisterDark}
-          alt='login image'
-          style={{
-            height: 'auto',
-            width: 'auto'
-          }}
-        />
-      </Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-        <CssBaseline />
         <Box
+          display={{
+            xs: 'none',
+            sm: 'flex'
+          }}
           sx={{
-            marginTop: 8,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center'
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '20px',
+            backgroundColor: theme.palette.customColors.bodyBg,
+            height: '100%',
+            minWidth: '50vw'
           }}
         >
-          <Typography component='h1' variant='h5'>
-            {t("Change_password")}
-          </Typography>
-          <form onSubmit={handleSubmit(onSubmit)} autoComplete='off' noValidate>
-            
-          <Box sx={{ mt: 2 }} width={{md:"300px", xs:"290px"}}>
-              <Controller
-                control={control}
-                rules={{
-                  required: true
-                }}
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <CustomTextField
-                    required
-                    fullWidth
-                    autoFocus
-                    label= {t("Current_password")}
-                    onChange={onChange}
-                    onBlur={onBlur}
-                    value={value}
-                    placeholder={t("enter_password")}
-                    error={Boolean(errors?.currentPassword)}
-                    helperText={errors?.currentPassword?.message}
-                    type={showCurrentPassword ? 'text' : 'password'}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position='end'>
-                          <IconButton edge='end' onClick={() => setShowCurrentPassword(!showCurrentPassword)}>
-                            {showCurrentPassword ? (
-                              <Icon icon='material-symbols:visibility-outline' />
-                            ) : (
-                              <Icon icon='ic:outline-visibility-off' />
-                            )}
-                          </IconButton>
-                        </InputAdornment>
-                      )
-                    }}
-                  />
-                )}
-                name='currentPassword'
-              />
-            </Box>
+          <Image
+            src={theme.palette.mode === 'light' ? RegisterLight : RegisterDark}
+            alt='login image'
+            style={{
+              height: 'auto',
+              width: 'auto'
+            }}
+          />
+        </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+          <CssBaseline />
+          <Box
+            sx={{
+              marginTop: 8,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center'
+            }}
+          >
+            <Typography component='h1' variant='h5'>
+              {t('Change_password')}
+            </Typography>
+            <form onSubmit={handleSubmit(onSubmit)} autoComplete='off' noValidate>
+              <Box sx={{ mt: 2 }} width={{ md: '300px', xs: '290px' }}>
+                <Controller
+                  control={control}
+                  rules={{
+                    required: true
+                  }}
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <CustomTextField
+                      required
+                      fullWidth
+                      autoFocus
+                      label={t('Current_password')}
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      value={value}
+                      placeholder={t('enter_password')}
+                      error={Boolean(errors?.currentPassword)}
+                      helperText={errors?.currentPassword?.message}
+                      type={showCurrentPassword ? 'text' : 'password'}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position='end'>
+                            <IconButton edge='end' onClick={() => setShowCurrentPassword(!showCurrentPassword)}>
+                              {showCurrentPassword ? (
+                                <Icon icon='material-symbols:visibility-outline' />
+                              ) : (
+                                <Icon icon='ic:outline-visibility-off' />
+                              )}
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
+                    />
+                  )}
+                  name='currentPassword'
+                />
+              </Box>
 
-            <Box sx={{ mt: 2 }} width={{md:"300px", xs:"290px"}}>
-              <Controller
-                control={control}
-                rules={{
-                  required: true
-                }}
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <CustomTextField
-                    required
-                    fullWidth
-                    autoFocus
-                    label={t("New_password")}
-                    onChange={onChange}
-                    onBlur={onBlur}
-                    value={value}
-                    placeholder={t("enter_password")}
-                    error={Boolean(errors?.newPassword)}
-                    helperText={errors?.newPassword?.message}
-                    type={showNewPassword ? 'text' : 'password'}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position='end'>
-                          <IconButton edge='end' onClick={() => setShowNewPassword(!showNewPassword)}>
-                            {showNewPassword ? (
-                              <Icon icon='material-symbols:visibility-outline' />
-                            ) : (
-                              <Icon icon='ic:outline-visibility-off' />
-                            )}
-                          </IconButton>
-                        </InputAdornment>
-                      )
-                    }}
-                  />
-                )}
-                name='newPassword'
-              />
-            </Box>
+              <Box sx={{ mt: 2 }} width={{ md: '300px', xs: '290px' }}>
+                <Controller
+                  control={control}
+                  rules={{
+                    required: true
+                  }}
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <CustomTextField
+                      required
+                      fullWidth
+                      autoFocus
+                      label={t('New_password')}
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      value={value}
+                      placeholder={t('enter_password')}
+                      error={Boolean(errors?.newPassword)}
+                      helperText={errors?.newPassword?.message}
+                      type={showNewPassword ? 'text' : 'password'}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position='end'>
+                            <IconButton edge='end' onClick={() => setShowNewPassword(!showNewPassword)}>
+                              {showNewPassword ? (
+                                <Icon icon='material-symbols:visibility-outline' />
+                              ) : (
+                                <Icon icon='ic:outline-visibility-off' />
+                              )}
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
+                    />
+                  )}
+                  name='newPassword'
+                />
+              </Box>
 
-            <Box sx={{ mt: 2 }} width={{md:"300px", xs:"290px"}}>
-              <Controller
-                control={control}
-                rules={{
-                  required: true
-                }}
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <CustomTextField
-                    required
-                    fullWidth
-                    autoFocus
-                    label={t('Confirm_new_password')}
-                    onChange={onChange}
-                    onBlur={onBlur}
-                    value={value}
-                    placeholder={t("enter_password")}
-                    error={Boolean(errors?.confirmNewPassword)}
-                    helperText={errors?.confirmNewPassword?.message}
-                    type={showConfirmNewPassword ? 'text' : 'password'}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position='end'>
-                          <IconButton edge='end' onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}>
-                            {showConfirmNewPassword ? (
-                              <Icon icon='material-symbols:visibility-outline' />
-                            ) : (
-                              <Icon icon='ic:outline-visibility-off' />
-                            )}
-                          </IconButton>
-                        </InputAdornment>
-                      )
-                    }}
-                  />
-                )}
-                name='confirmNewPassword'
-              />
-            </Box>
+              <Box sx={{ mt: 2 }} width={{ md: '300px', xs: '290px' }}>
+                <Controller
+                  control={control}
+                  rules={{
+                    required: true
+                  }}
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <CustomTextField
+                      required
+                      fullWidth
+                      autoFocus
+                      label={t('Confirm_new_password')}
+                      onChange={onChange}
+                      onBlur={onBlur}
+                      value={value}
+                      placeholder={t('enter_password')}
+                      error={Boolean(errors?.confirmNewPassword)}
+                      helperText={errors?.confirmNewPassword?.message}
+                      type={showConfirmNewPassword ? 'text' : 'password'}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position='end'>
+                            <IconButton edge='end' onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}>
+                              {showConfirmNewPassword ? (
+                                <Icon icon='material-symbols:visibility-outline' />
+                              ) : (
+                                <Icon icon='ic:outline-visibility-off' />
+                              )}
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
+                    />
+                  )}
+                  name='confirmNewPassword'
+                />
+              </Box>
 
-            <Button type='submit' fullWidth variant='contained' sx={{ mt: 3, mb: 2 }}>
-              {t("Change")}
-            </Button>
-          </form>
+              <Button type='submit' fullWidth variant='contained' sx={{ mt: 3, mb: 2 }}>
+                {t('Change')}
+              </Button>
+            </form>
+          </Box>
         </Box>
       </Box>
-    </Box>
     </>
   )
 }

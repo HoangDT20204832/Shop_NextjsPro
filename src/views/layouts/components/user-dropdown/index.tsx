@@ -84,8 +84,12 @@ const UserDropdown = (props: TProps) => {
     handleClose()
   }
 
-  const handleNavigateChangePassword = () =>{
+  const handleNavigateChangePassword = () => {
     router.push(ROUTE_CONFIG.CHANGE_PASSWORD)
+    handleClose()
+  }
+  const handleNavigateManageSystem = () => {
+    router.push(ROUTE_CONFIG.DASHBOARD)
     handleClose()
   }
 
@@ -187,16 +191,33 @@ const UserDropdown = (props: TProps) => {
           </Box>
         </Box>
         <Divider />
+        <MenuItem onClick={handleNavigateManageSystem}>
+          <Avatar>
+            {' '}
+            <IconifyIcon icon='arcticons:phone-manager' />{' '}
+          </Avatar>{' '}
+          {t('manage_system')}
+        </MenuItem>
         <MenuItem onClick={handleNavigateMyProfile}>
-          <Avatar> <IconifyIcon icon='ph:user-thin' /> </Avatar> {t('my_profile')}
+          <Avatar>
+            {' '}
+            <IconifyIcon icon='ph:user-thin' />{' '}
+          </Avatar>{' '}
+          {t('my_profile')}
         </MenuItem>
 
         <MenuItem onClick={handleNavigateChangePassword}>
-          <Avatar ><IconifyIcon icon="arcticons:passwordgenerator"/></Avatar>{t("Change_password")}
+          <Avatar>
+            <IconifyIcon icon='arcticons:passwordgenerator' />
+          </Avatar>
+          {t('Change_password')}
         </MenuItem>
 
         <MenuItem onClick={logout}>
-          <Avatar sx={{backgroundColor:"transparent"}}><IconifyIcon icon="ic:baseline-log-in"/></Avatar>{t("Logout")}
+          <Avatar sx={{ backgroundColor: 'transparent' }}>
+            <IconifyIcon icon='ic:baseline-log-in' />
+          </Avatar>
+          {t('Logout')}
         </MenuItem>
       </Menu>
     </React.Fragment>

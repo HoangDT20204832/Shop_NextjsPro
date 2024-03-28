@@ -13,11 +13,11 @@ import authConfig from 'src/configs/auth'
 // ** Types
 import { AuthValuesType, LoginParams, ErrCallbackType, UserDataType } from './types'
 
-// ** Services 
+// ** Services
 import { loginAuth, logoutAuth } from 'src/services/auth'
 
-// ** Configs 
-import { CONFIG_API } from 'src/configs/api'
+// ** Configs
+import { API_ENDPOINT } from 'src/configs/api'
 
 // ** helpers
 import { clearLocalUserData, setLocalUserData, setTemporaryToken } from 'src/helpers/storage'
@@ -50,26 +50,27 @@ const AuthProvider = ({ children }: Props) => {
   const router = useRouter()
 
   // ** Language
-  const {t} = useTranslation()
+  const { t } = useTranslation()
 
   useEffect(() => {
-    //chaỵ vào initAuth() khi đã đăng nhập, rồi refresh lại trang 
-    
+    //chaỵ vào initAuth() khi đã đăng nhập, rồi refresh lại trang
+
     const initAuth = async (): Promise<void> => {
       const storedToken = window.localStorage.getItem(authConfig.storageTokenKeyName)!
       if (storedToken) {
         setLoading(true)
         await instanceAxios
-          .get(CONFIG_API.AUTH.AUTH_ME
+          .get(
+            API_ENDPOINT.AUTH.AUTH_ME
 
-          //   , {
-          //   headers: {
-          //     Authorization: `Bearer ${storedToken}`
-          //   }
-          // }
+            //   , {
+            //   headers: {
+            //     Authorization: `Bearer ${storedToken}`
+            //   }
+            // }
           )
           .then(async response => {
-            console.log("response: ",response)
+            console.log('response: ', response)
             setLoading(false)
             setUser({ ...response.data.data })
           })
@@ -91,18 +92,17 @@ const AuthProvider = ({ children }: Props) => {
   }, [])
 
   const handleLogin = (params: LoginParams, errorCallback?: ErrCallbackType) => {
-      loginAuth({email: params.email, password:params.password })  // gọi hàm loginAuth từ folder services/auth
-      .then(async response => { // đăng nhập thành công sẽ chyaj vào nhánh này
-        if(params.rememberMe){  ////nếu tích vào Rememberme thì sẽ lưu userData,accesstoken,refresh_token vào localstorgate
-          setLocalUserData(
-            JSON.stringify(response.data.user),
-            response.data.access_token,
-            response.data.refresh_token
-          )
-        }else{ // nếu ko thì chỉ cấp cho nó 1 TemporaryToken có thời hạn => khi refresh lại trang thì sẽ xóa thoogn tin user và đá sang trang login để đăng nhập lại
+    loginAuth({ email: params.email, password: params.password }) // gọi hàm loginAuth từ folder services/auth
+      .then(async response => {
+        // đăng nhập thành công sẽ chyaj vào nhánh này
+        if (params.rememberMe) {
+          ////nếu tích vào Rememberme thì sẽ lưu userData,accesstoken,refresh_token vào localstorgate
+          setLocalUserData(JSON.stringify(response.data.user), response.data.access_token, response.data.refresh_token)
+        } else {
+          // nếu ko thì chỉ cấp cho nó 1 TemporaryToken có thời hạn => khi refresh lại trang thì sẽ xóa thoogn tin user và đá sang trang login để đăng nhập lại
           setTemporaryToken(response.data.access_token)
         }
-        toast.success(t("login_success"));
+        toast.success(t('login_success'))
         const returnUrl = router.query.returnUrl
         console.log('res', response)
 
@@ -115,14 +115,15 @@ const AuthProvider = ({ children }: Props) => {
         router.replace(redirectURL as string)
       })
 
-      .catch((err : any) => {  // đăng nhập thất bại sẽ chạy vào nhánh này
-        console.log("err", {err})
+      .catch((err: any) => {
+        // đăng nhập thất bại sẽ chạy vào nhánh này
+        console.log('err', { err })
         if (errorCallback) errorCallback(err)
       })
   }
 
   const handleLogout = () => {
-    logoutAuth().then((res)=>{
+    logoutAuth().then(res => {
       setUser(null)
       clearLocalUserData()
       router.push('/login')

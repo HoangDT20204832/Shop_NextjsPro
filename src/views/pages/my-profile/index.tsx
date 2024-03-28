@@ -49,12 +49,13 @@ import { convertBase64, separationFullName, toFullName } from 'src/utils'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from 'src/stores'
 import toast from 'react-hot-toast'
-import { resetInitialState } from 'src/stores/apps/auth'
+import { resetInitialState } from 'src/stores/auth'
 import { ROUTE_CONFIG } from 'src/configs/route'
-import { updateAuthMeAsync } from 'src/stores/apps/auth/actions'
+import { updateAuthMeAsync } from 'src/stores/auth/actions'
 import FallbackSpinner from 'src/components/fall-back'
 import Spinner from 'src/components/spinner'
 import CustomSelect from 'src/components/custom-select'
+import CustomModal from 'src/components/custom-modal'
 
 type TProps = {}
 

@@ -1,16 +1,17 @@
 // 'use client'
 // import { useTheme } from '@emotion/react'
-import { Box,useTheme } from '@mui/material'
+import { Box, useTheme } from '@mui/material'
 import Head from 'next/head'
 import { ReactNode } from 'react'
+import CustomDataGrid from 'src/components/custom-data-grid'
 import CustomTextField from 'src/components/text-field'
 import { useSettings } from 'src/hooks/useSettings'
 import LayoutNotApp from 'src/views/layouts/LayoutNotApp'
 
 export default function Home() {
-  const theme =useTheme()
-  const {settings} = useSettings()
-  
+  const theme = useTheme()
+  const { settings } = useSettings()
+
   // console.log('theme', {theme, settings})
 
   return (
@@ -21,7 +22,6 @@ export default function Home() {
         <meta name='viewport' content='width=device-width, initial-scale=1' />
         <link rel='icon' href='/favicon.ico' />
       </Head>
-      <Box sx={{margin:6, width:"200px"}}><CustomTextField  id="outlined-multiline-flexible" label="Multiline" /></Box>
     </>
   )
 }
