@@ -8,7 +8,7 @@ import instanceAxios from 'src/helpers/axios'
 
 //** Type
 import { TChangePassword, TLoginAuth, TRegisterAuth } from 'src/types/auth'
-import { TParamsGetRoles } from 'src/types/role'
+import { TParamsCreateRole, TParamsDeleteRole, TParamsEditRole, TParamsGetRoles } from 'src/types/role'
 
 //giống vs cách dưới nhưng sẽ gọn hơn,có tính mở rộng hơn, chỉ cần khai báo limit, page,... ở trong params
 export const getAllRoles = async (data: { params: TParamsGetRoles }) => {
@@ -33,3 +33,51 @@ export const getAllRoles = async (data: { params: TParamsGetRoles }) => {
 //       return error
 //     }
 //   }
+
+// Tạo role
+export const createRole = async (data: TParamsCreateRole) => {
+  try {
+    const res = await instanceAxios.post(`${API_ENDPOINT.ROLE.INDEX}`, data)
+    console.log('res', res)
+
+    return res.data
+  } catch (error) {
+    return error
+  }
+}
+
+// Update role
+export const updateRole = async (data: TParamsEditRole) => {
+  const { id, ...rests } = data
+  try {
+    const res = await instanceAxios.put(`${API_ENDPOINT.ROLE.INDEX}/${id}`, rests)
+    console.log('res', res)
+
+    return res.data
+  } catch (error) {
+    return error
+  }
+}
+
+// dealete role
+export const deleteRole = async (id: string) => {
+  try {
+    const res = await instanceAxios.delete(`${API_ENDPOINT.ROLE.INDEX}/${id}`)
+    console.log('res', res)
+
+    return res.data
+  } catch (error) {
+    return error
+  }
+}
+
+export const getDetailsRole = async (id: string) => {
+  try {
+    const res = await instanceAxios.get(`${API_ENDPOINT.ROLE.INDEX}/${id}`)
+    console.log('res', res)
+
+    return res.data
+  } catch (error) {
+    return error
+  }
+}

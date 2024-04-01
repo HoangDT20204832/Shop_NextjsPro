@@ -90,12 +90,12 @@ const MyProfilePage: NextPage<TProps> = () => {
   )
 
   const schema = yup.object().shape({
-    email: yup.string().required('The field is required').matches(EMAIL_REG, 'The field is must email type'),
+    email: yup.string().required(t('required_field')).matches(EMAIL_REG, 'The field is must email type'),
     fullName: yup.string().notRequired(),
     city: yup.string().notRequired(),
-    phoneNumber: yup.string().required('The field is required').min(8, 'The phone number is min 8 number'),
+    phoneNumber: yup.string().required(t('required_field')).min(8, 'The phone number is min 8 number'),
     address: yup.string().notRequired(),
-    role: yup.string().required('The field is required')
+    role: yup.string().required(t('required_field'))
   })
 
   const defaultValues: TDefaultValue = {

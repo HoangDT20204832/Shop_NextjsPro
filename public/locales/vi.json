@@ -19,5 +19,11 @@
     "Logout": "Đăng xuất",
     "the_email_or_password_is_wrong": "Email hoặc mật khẩu không đúng",
     "login_success": "Đăng nhập thành công",
-    "manage_system": "Quản trị hệ thống"
+    "manage_system": "Quản trị hệ thống",
+    "Name":"Tên",
+    "Edit":"Sửa",
+    "Actions": "Thao tác",
+    "Create": "Tạo",
+    "Delete": "Xoá",
+    "required_field": "Trường này là bắt buộc"
 }

@@ -28,7 +28,7 @@ export const updateAuthMeAsync = createAsyncThunk(
   'auth/update-me', //type của actions
   async (data: any) => {
     const response = await updateAuthMe(data)
-    console.log('response: ', { response })
+    // console.log('response: ', { response })
 
     if (response?.data) {
       return response
@@ -48,7 +48,7 @@ export const changePasswordMeAsync = createAsyncThunk(
   'auth/change-password-me', //type của actions
   async (data: TChangePassword) => {
     const response = await changePasswordMe(data)
-    console.log('responseUpdate ', { response })
+    // console.log('responseUpdate ', { response })
 
     if (response?.status === 'Success') {
       return { ...response, data: 1 }
