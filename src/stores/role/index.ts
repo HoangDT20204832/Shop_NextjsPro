@@ -4,7 +4,8 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
 // ** Axios Imports
 import axios from 'axios'
-import { getAllRolesAsync } from './actions'
+import { createRoleAsync, deleteRoleAsync, getAllRolesAsync, updateRoleAsync } from './actions'
+import { updateRole } from 'src/services/role'
 
 interface DataParams {
   q: string
@@ -19,19 +20,19 @@ interface Redux {
 }
 
 export const roleSlice = createSlice({
-  name: 'appUsers',
+  name: 'role',
   initialState: {
     isLoading: false,
     isSuccess: true,
     isError: false,
     message: '',
     typeError: '',
-    isSuccessUpdateMe: true,
-    isErrorUpdateMe: false,
-    messageUpdateMe: '',
-    isSuccessChangePassword: true,
-    isErrorChangePassword: false,
-    messageChangePassword: '',
+    isSuccessCreateEdit: false,
+    isErrorCreateEdit: false,
+    messageCreateEdit: '',
+    isSuccessDelete: false,
+    isErrorDelete: false,
+    messagErrorDelete: '',
     roles: {
       data: [],
       total: 0
@@ -44,12 +45,12 @@ export const roleSlice = createSlice({
       state.isError = true
       state.message = ''
       state.typeError = ''
-      state.isSuccessUpdateMe = false
-      state.isErrorUpdateMe = true
-      state.messageUpdateMe = ''
-      state.isSuccessChangePassword = false
-      state.isErrorChangePassword = true
-      state.messageChangePassword = ''
+      state.isSuccessCreateEdit = false
+      state.isErrorCreateEdit = false
+      state.messageCreateEdit = ''
+      state.isSuccessDelete = false
+      state.isErrorDelete = false
+      state.messagErrorDelete = ''
     }
   },
 
@@ -71,6 +72,58 @@ export const roleSlice = createSlice({
         state.isLoading = false
         state.roles.data = []
         state.roles.total = 0
+      })
+
+    // ** Create Role
+    builder.addCase(createRoleAsync.pending, (state, action) => {
+      //khi đang call
+      state.isLoading = true
+    }),
+      builder.addCase(createRoleAsync.fulfilled, (state, action) => {
+        //khi call thành công
+        state.isLoading = false
+        console.log('actionRole', action)
+        state.isSuccessCreateEdit = !!action.payload?.data?._id // nêu có dât.id thì sẽ thành công
+        state.isErrorCreateEdit = !action.payload?.data?._id
+        state.messageCreateEdit = action.payload.message
+        state.typeError = action.payload.typeError
+      })
+    // ,
+    // builder.addCase(createRoleAsync.rejected, (state, action) => {
+    //   // khi call thất bại
+    //   state.isLoading = false
+    //   state.roles.data = []
+    //   state.roles.total = 0
+    // })
+
+    // ** Update Role
+    builder.addCase(updateRoleAsync.pending, (state, action) => {
+      //khi đang call
+      state.isLoading = true
+    }),
+      builder.addCase(updateRoleAsync.fulfilled, (state, action) => {
+        //khi call thành công
+        state.isLoading = false
+        console.log('actionRole', action)
+        state.isSuccessCreateEdit = !!action.payload?.data?._id // nêu có dât.id thì sẽ thành công
+        state.isErrorCreateEdit = !action.payload?.data?._id
+        state.messageCreateEdit = action.payload.message
+        state.typeError = action.payload.typeError
+      })
+
+    // ** Delete Role
+    builder.addCase(deleteRoleAsync.pending, (state, action) => {
+      //khi đang call
+      state.isLoading = true
+    }),
+      builder.addCase(deleteRoleAsync.fulfilled, (state, action) => {
+        //khi call thành công
+        state.isLoading = false
+        console.log('actionRole', action)
+        state.isSuccessDelete = !!action.payload?.data?._id // nêu có dât.id thì sẽ thành công
+        state.isErrorDelete = !action.payload?.data?._id
+        state.messagErrorDelete = action.payload.message
+        state.typeError = action.payload.typeError
       })
   }
 })
