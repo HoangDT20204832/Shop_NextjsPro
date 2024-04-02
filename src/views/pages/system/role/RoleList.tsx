@@ -48,7 +48,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from 'src/hooks/useAuth'
 import { deleteRoleAsync, getAllRolesAsync } from 'src/stores/role/actions'
 import CustomDataGrid from 'src/components/custom-data-grid'
-import { GridColDef, GridValueGetterParams } from '@mui/x-data-grid'
+import { GridColDef, GridSortModel, GridValueGetterParams } from '@mui/x-data-grid'
 import { PAGE_SIZE_OPTION } from 'src/configs/gridConfig'
 import CustomPagination from 'src/components/custom-pagination'
 import IconifyIcon from 'src/components/Icon'
@@ -58,6 +58,8 @@ import GridCreate from 'src/components/grid-create'
 import InputSearch from 'src/components/input-search'
 import CreateEditRole from './component/CreateEditRole'
 import Spinner from 'src/components/spinner'
+import ConfirmationDialog from 'src/components/confirmation-dialog'
+import { deleteRole } from 'src/services/role'
 
 type TProps = {}
 
@@ -75,6 +77,14 @@ const RoleListPage: NextPage<TProps> = () => {
     open: false,
     id: ''
   })
+
+  const [openDeleteRole, setOpenDeleteRole] = useState({
+    open: false,
+    id: ''
+  })
+
+  const [sortBy, setSortBy] = useState('created asc')
+  const [searchBy, setSearchBy] = useState('')
 
   // ** Router
   const router = useRouter()
@@ -101,12 +111,12 @@ const RoleListPage: NextPage<TProps> = () => {
   // ** Translate
   const { t } = useTranslation()
   const handleGetListRoles = () => {
-    dispatch(getAllRolesAsync({ params: { limit: -1, page: -1 } }))
+    dispatch(getAllRolesAsync({ params: { limit: -1, page: -1, search: searchBy, order: sortBy } }))
   }
 
   useEffect(() => {
     handleGetListRoles()
-  }, [])
+  }, [sortBy, searchBy])
 
   // xử lý thông báo khi tạo hoặc update thành công, thất bại
   useEffect(() => {
@@ -132,6 +142,7 @@ const RoleListPage: NextPage<TProps> = () => {
       toast.success(t('delete-role-success'))
       handleGetListRoles()
       dispatch(resetInitialState())
+      handleConfirmCloseDelete()
     } else if (isErrorDelete) {
       toast.error(t(messagErrorDelete))
       dispatch(resetInitialState())
@@ -150,18 +161,34 @@ const RoleListPage: NextPage<TProps> = () => {
       width: 150,
       align: 'left',
       sortable: false,
-      renderCell: row => {
+      renderCell: params => {
+        // console.log('params', params)
+        const { row } = params
+        // console.log('rrrr', row)
+
         return (
           <Box>
-            <GridEdit
-              onClick={() =>
-                setOpenCreateEdit({
-                  open: true,
-                  id: String(row.id)
-                })
-              }
-            />
-            <GridDelete onClick={() => dispatch(deleteRoleAsync(String(row.id)))} />
+            {/* nếu role có permisson là 'ADMIN.GRANTED' hoặc 'BASIC.PUBLIC' thì hiện 2 nút chỉnh sửa và xoá */}
+            {!row?.permissions?.some((per: string) => ['ADMIN.GRANTED', 'BASIC.PUBLIC']?.includes(per)) && (
+              <>
+                <GridEdit
+                  onClick={() =>
+                    setOpenCreateEdit({
+                      open: true,
+                      id: String(row._id)
+                    })
+                  }
+                />
+                <GridDelete
+                  onClick={() =>
+                    setOpenDeleteRole({
+                      open: true,
+                      id: String(row._id)
+                    })
+                  }
+                />
+              </>
+            )}
           </Box>
         )
       }
@@ -188,8 +215,33 @@ const RoleListPage: NextPage<TProps> = () => {
     })
   }
 
+  const handleSort = (sort: GridSortModel) => {
+    console.log('check', sort)
+    const sortOption = sort[0]
+    setSortBy(`${sortOption.field} ${sortOption.sort}`) // đtặ lại sortBy = "name asc" hoặc "name desc"
+    // sắp xếp theo field với thuộc tính sort là ...
+  }
+
+  const handleConfirmCloseDelete = () => {
+    setOpenDeleteRole({
+      open: false,
+      id: ''
+    })
+  }
+  const handleDeleteRole = () => {
+    dispatch(deleteRoleAsync(openDeleteRole.id))
+  }
+
   return (
     <>
+      <ConfirmationDialog
+        open={openDeleteRole.open}
+        handleClose={handleConfirmCloseDelete}
+        handleCancle={handleConfirmCloseDelete}
+        handleConfirm={handleDeleteRole}
+        title={t('title_delete_role')}
+        description={t('confirm_delete_role')}
+      />
       <CreateEditRole open={openCreateEdit.open} onClose={handleCloseCreateEdit} idRole={openCreateEdit.id} />
       {isLoading && <Spinner />}
       <Box
@@ -213,7 +265,7 @@ const RoleListPage: NextPage<TProps> = () => {
                 }
               />
               <Box sx={{ width: '200px' }}>
-                <InputSearch />
+                <InputSearch value={searchBy} onChangeSearch={(value: string) => setSearchBy(value)} />
               </Box>
             </Box>
             <CustomDataGrid
@@ -229,6 +281,10 @@ const RoleListPage: NextPage<TProps> = () => {
                 pagination: PaginationComponent //custom lại thanh pagination
               }}
               pageSizeOptions={[5]}
+              //cài đặt sort
+              sortingMode='server' // đặt sắp xếp theo phía server, mặc định sẽ là client
+              onSortModelChange={handleSort}
+              sortingOrder={['asc', 'desc']} // quy định những lựa chọn cho sorting
             />
           </Grid>
           <Grid item md={7} xs={12}>
