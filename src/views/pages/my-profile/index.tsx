@@ -56,6 +56,7 @@ import FallbackSpinner from 'src/components/fall-back'
 import Spinner from 'src/components/spinner'
 import CustomSelect from 'src/components/custom-select'
 import CustomModal from 'src/components/custom-modal'
+import { getAllRoles } from 'src/services/role'
 
 type TProps = {}
 
@@ -72,7 +73,8 @@ const MyProfilePage: NextPage<TProps> = () => {
   // State
   const [loading, setLoading] = useState(false)
   const [avatar, setAvatar] = useState('')
-  const [roleId, setRoleId] = useState('')
+  // const [roleId, setRoleId] = useState('')
+  const [optionRoles, setOptionRoles] = useState<{label:string, value:string}[]>([])
 
   // const [user, setUser] = useState<UserDataType | null>(null);
 
@@ -118,6 +120,7 @@ const MyProfilePage: NextPage<TProps> = () => {
     resolver: yupResolver(schema)
   })
 
+  //fetch api
   const fetchGetAuthMe = async () => {
     setLoading(true)
     await getAuthMe()
@@ -126,14 +129,14 @@ const MyProfilePage: NextPage<TProps> = () => {
         setLoading(false)
         const data = response?.data
         if (data) {
-          setRoleId(data?.roleId?._id)
+          // setRoleId(data?.roleId?._id)
           setAvatar(data?.avatar)
           reset({
             email: data?.email,
             address: data?.address,
             city: data?.city,
             phoneNumber: data?.phoneNumber,
-            role: data?.role?.name,
+            role: data?.role?._id,
             fullName: toFullName(data?.lastName, data?.middleName, data?.firstName, i18n?.language)
           })
         }
@@ -142,6 +145,28 @@ const MyProfilePage: NextPage<TProps> = () => {
         setLoading(false)
       })
   }
+
+  const fetchAllRole = async() =>{
+    setLoading(true)
+    await getAllRoles({params : {limit:-1, page : -1}}).then(res =>{
+      const data = res?.data?.roles
+      if(data) {
+        setOptionRoles(data?.map((item : {name:string, _id:string}) =>{
+          return ({
+            label: item?.name,
+            value: item?._id
+          })
+        }))
+      }
+      setLoading(false)
+    }).catch( e =>{
+        setLoading(false)
+    })
+  }
+
+  useEffect(() =>{
+    fetchAllRole()
+  },[])
 
   useEffect(() => {
     fetchGetAuthMe()
@@ -169,7 +194,7 @@ const MyProfilePage: NextPage<TProps> = () => {
     dispatch(
       updateAuthMeAsync({
         email: data.email,
-        role: roleId,
+        role: data.role,
         phoneNumber: data.phoneNumber,
         firstName: firstName,
         middleName: middleName,
@@ -317,7 +342,7 @@ const MyProfilePage: NextPage<TProps> = () => {
                         <CustomSelect
                           fullWidth
                           onChange={onChange}
-                          options={[]}
+                          options={optionRoles}
                           error={Boolean(errors?.role)}
                           onBlur={onBlur}
                           value={value}

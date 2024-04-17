@@ -198,6 +198,7 @@ const ListVerticalLayout: NextPage<TProps> = ({ open }) => {
       setOpenItems({})
     }
   }, [open])
+  const listVerticalItems = VerticalItems()
 
   return (
     <List
@@ -206,7 +207,7 @@ const ListVerticalLayout: NextPage<TProps> = ({ open }) => {
       aria-labelledby='nested-list-subheader'
     >
       <RecursiveListItems
-        items={VerticalItems}
+        items={listVerticalItems}
         level={1}
         openItems={openItems}
         setOpenItems={setOpenItems}

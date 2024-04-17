@@ -97,10 +97,10 @@ const CreateEditRole = (props: TCreateEditRole) => {
 
       <CustomModal open={open} onClose={onClose}>
         <Box
-          sx={{ backgroundColor: theme.palette.background.paper, padding: '20px', borderRadius: '15px' }}
+          sx={{ backgroundColor: theme.palette.customColors.bodyBg, padding: '20px', borderRadius: '15px' }}
           minWidth={{ md: '500px', xs: '80vw' }}
         >
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' ,paddingBottom:"10px"}}>
             <Typography variant='h4' sx={{ fontWeight: 600 }}>
               {idRole ? t('Chỉnh sửa nhóm vai trò') : t('Tạo nhóm vai trò')}
             </Typography>
@@ -110,7 +110,14 @@ const CreateEditRole = (props: TCreateEditRole) => {
           </Box>
 
           <form onSubmit={handleSubmit(onSubmit)} autoComplete='off' noValidate>
-            <Box>
+            <Box sx={
+              {
+                width:"100%",
+                padding:"30px 20px",
+                backgroundColor: theme.palette.background.paper,
+                borderRadius:"15px"
+              }
+            }>
               <Controller
                 control={control}
                 rules={{

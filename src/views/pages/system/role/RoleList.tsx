@@ -18,6 +18,8 @@ import {
   InputAdornment,
   Tooltip,
   Typography,
+
+
   useTheme
 } from '@mui/material'
 
@@ -167,9 +169,9 @@ const RoleListPage: NextPage<TProps> = () => {
         // console.log('rrrr', row)
 
         return (
-          <Box>
+          <Box sx={{width:"100%"}}>
             {/* nếu role có permisson là 'ADMIN.GRANTED' hoặc 'BASIC.PUBLIC' thì hiện 2 nút chỉnh sửa và xoá */}
-            {!row?.permissions?.some((per: string) => ['ADMIN.GRANTED', 'BASIC.PUBLIC']?.includes(per)) && (
+            {!row?.permissions?.some((per: string) => ['ADMIN.GRANTED', 'BASIC.PUBLIC']?.includes(per)) ? (
               <>
                 <GridEdit
                   onClick={() =>
@@ -188,7 +190,8 @@ const RoleListPage: NextPage<TProps> = () => {
                   }
                 />
               </>
-            )}
+            ) : (<IconifyIcon icon="material-symbols-light:lock-outline" fontSize={27}/> ) 
+              }
           </Box>
         )
       }

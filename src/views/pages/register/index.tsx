@@ -71,16 +71,16 @@ const RegisterPage: NextPage<TProps> = () => {
   const { t } = useTranslation()
 
   const schema = yup.object().shape({
-    email: yup.string().required(t('required_field')).matches(EMAIL_REG, 'The field is must email type'),
+    email: yup.string().required(t('required_field')).matches(EMAIL_REG, t("Rules_email")),
     password: yup
       .string()
       .required(t('required_field'))
-      .matches(PASSWORD_REG, 'The password is contain charactor, special character, number'),
+      .matches(PASSWORD_REG, t("Rules_password")),
     confirmPassword: yup
       .string()
       .required(t('required_field'))
-      .matches(PASSWORD_REG, 'The password is contain charactor, special character, number')
-      .oneOf([yup.ref('password'), ''], 'The confirm is must match with password')
+      .matches(PASSWORD_REG, t("Rules_password"))
+      .oneOf([yup.ref('password'), ''], t("Rules_confirm_password"))
   })
 
   const defaultValues: TDefaultValue = {
@@ -169,7 +169,7 @@ const RegisterPage: NextPage<TProps> = () => {
             }}
           >
             <Typography component='h1' variant='h5'>
-              Register
+              {t("Register")}
             </Typography>
             <form onSubmit={handleSubmit(onSubmit)} autoComplete='off' noValidate>
               <Box sx={{ mt: 2 }} width={{ md: '300px', xs: '290px' }}>
@@ -183,11 +183,11 @@ const RegisterPage: NextPage<TProps> = () => {
                       required
                       autoFocus
                       fullWidth
-                      label='Email'
+                      label={t("Email")}
                       onChange={onChange}
                       onBlur={onBlur}
                       value={value}
-                      placeholder='Input email'
+                      placeholder={t("Enter_email")}
                       error={Boolean(errors?.email)}
                       helperText={errors?.email?.message}
                     />
@@ -207,11 +207,11 @@ const RegisterPage: NextPage<TProps> = () => {
                       required
                       fullWidth
                       autoFocus
-                      label='Password'
+                      label={t('Password')}
                       onChange={onChange}
                       onBlur={onBlur}
                       value={value}
-                      placeholder='Input password'
+                      placeholder= {t("Enter_password")}
                       error={Boolean(errors?.password)}
                       helperText={errors?.password?.message}
                       type={showPassword ? 'text' : 'password'}
@@ -245,11 +245,11 @@ const RegisterPage: NextPage<TProps> = () => {
                       required
                       fullWidth
                       autoFocus
-                      label='Confirm password'
+                      label= {t('Confirm_password')}
                       onChange={onChange}
                       onBlur={onBlur}
                       value={value}
-                      placeholder='Enter confirm password'
+                      placeholder={t("Enter_confirm_password")}
                       error={Boolean(errors?.confirmPassword)}
                       helperText={errors?.confirmPassword?.message}
                       type={showConfirmPassword ? 'text' : 'password'}
@@ -273,17 +273,17 @@ const RegisterPage: NextPage<TProps> = () => {
               </Box>
 
               <Button type='submit' fullWidth variant='contained' sx={{ mt: 3, mb: 2 }}>
-                Register
+                {t("Register")}
               </Button>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                <Typography>{'Do you have already account?'}</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: "space-between", gap: '4px' }}>
+                <Typography>{t("You_have_account")}?</Typography>
                 <Link
                   href='/login'
                   style={{
                     color: theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.common.white
                   }}
                 >
-                  {'Login'}
+                  {t('Login')}
                 </Link>
               </Box>
               <Typography sx={{ textAlign: 'center', mt: 2, mb: 2 }}>Or</Typography>

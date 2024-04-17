@@ -59,8 +59,8 @@ const LoginPage: NextPage<TProps> = () => {
   const { login } = useAuth() //lấy login: handleLogin từ AuthContext thoogn qua hàm useAuth ở folder hooks
 
   const schema = yup.object().shape({
-    email: yup.string().required('Email là bắt buộc').matches(EMAIL_REG, 'Kiểu Email không đúng'),
-    password: yup.string().required('Password là bắt buộc').matches(PASSWORD_REG, 'Kiểu mật khẩu không đúng')
+    email: yup.string().required(t("required_field")).matches(EMAIL_REG, t("Rules_email")),
+    password: yup.string().required(t("required_field")).matches(PASSWORD_REG, t("Rules_password"))
   })
 
   const {
@@ -131,7 +131,7 @@ const LoginPage: NextPage<TProps> = () => {
           }}
         >
           <Typography component='h1' variant='h5'>
-            Sign in
+            {t("Login")}
           </Typography>
           <form onSubmit={handleSubmit(onSubmit)} autoComplete='off' noValidate>
             <Box sx={{ mt: 2 }} width={{ md: '300px', xs: '290px' }}>
@@ -143,13 +143,13 @@ const LoginPage: NextPage<TProps> = () => {
                 render={({ field: { onChange, onBlur, value } }) => (
                   <CustomTextField
                     required
-                    label='Email'
+                    label= {t("Email")}
                     fullWidth
                     onChange={onChange}
                     onBlur={onBlur}
                     value={value}
                     error={Boolean(errors?.email)}
-                    placeholder='Nhập email'
+                    placeholder={t("Enter_email")}
                     helperText={errors?.email?.message}
                   />
                 )}
@@ -167,13 +167,13 @@ const LoginPage: NextPage<TProps> = () => {
                 render={({ field: { onChange, onBlur, value } }) => (
                   <CustomTextField
                     required
-                    label='Password'
+                    label={t('Password')}
                     fullWidth
                     onChange={onChange}
                     onBlur={onBlur}
                     value={value}
                     error={Boolean(errors?.password)}
-                    placeholder='Nhập password'
+                    placeholder={t("Enter_password")}
                     helperText={errors?.password?.message}
                     type={showPassword ? 'text' : 'password'}
                     InputProps={{
@@ -206,17 +206,17 @@ const LoginPage: NextPage<TProps> = () => {
                     onChange={e => setIsRemember(e.target.checked)}
                   />
                 }
-                label='Remember me'
+                label= {t('Remember_me')}
               />
-              <Typography variant='body2'>Forgot password?</Typography>
+              <Typography variant='body2'>{t("Forgot_password")}?</Typography>
             </Box>
             <Button type='submit' fullWidth variant='contained' sx={{ mt: 3, mb: 2 }}>
-              Sign In
+               {t("Login")}
             </Button>
 
             <Grid container>
               <Grid item xs>
-                {"Don't have an account?"}
+                {t("You_have_account")}?
               </Grid>
               <Grid item>
                 <Link
@@ -225,7 +225,7 @@ const LoginPage: NextPage<TProps> = () => {
                     color: theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.common.white
                   }}
                 >
-                  {'Register'}
+                  {t('Register')}
                 </Link>
               </Grid>
             </Grid>
