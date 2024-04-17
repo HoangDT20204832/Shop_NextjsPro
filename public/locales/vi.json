@@ -26,9 +26,12 @@
     "Create": "Tạo",
     "Delete": "Xoá",
     "required_field": "Trường này là bắt buộc",
-    "create-role-success": "Tạo nhóm vai trò thành công",
-    "update-role-success": "Thay đổi nhóm vai trò thành công",
-    "delete-role-success": "Xoá nhóm vai trò thành công",
+    "Create_role_success": "Tạo nhóm vai trò thành công",
+    "Update_role_success": "Thay đổi nhóm vai trò thành công",
+    "Delete_role_success": "Xoá nhóm vai trò thành công",
+    "Create_role_error": "Tạo nhóm vai trò thất bại",
+    "Update_role_error": "Thay đổi nhóm vai trò thất bại",
+    "Delete_role_error": "Xoá nhóm vai trò thất bại",
     "title_delete_role": "Xác nhận xoá nhóm vai trò",
     "confirm_delete_role": "Bạn có chắc xoá nhóm vai trò này?",
     "System": "Hệ thống",
@@ -60,5 +63,7 @@
     "Remember_me":"Nhớ mật khẩu",
     "Login": "Đăng nhập",
     "Register" :"Đăng ký",
-    "Password":"Mật khẩu"
+    "Password":"Mật khẩu",
+    "Data_existed_in_system" :"Dữ liệu đã tồn tại trong hệ thống",
+    "Server_is_error": "Hệ thống bị lỗi"
 }

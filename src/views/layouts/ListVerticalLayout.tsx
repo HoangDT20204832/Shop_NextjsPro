@@ -24,7 +24,7 @@ import {
 import IconifyIcon from 'src/components/Icon'
 
 // ** Configs
-import { VerticalItems } from 'src/configs/layout'
+import { TVertical, VerticalItems } from 'src/configs/layout'
 import { useRouter } from 'next/router'
 import { hexToRGBA } from 'src/utils/hex-to-rgba'
 
@@ -94,16 +94,27 @@ const RecursiveListItems: NextPage<TListItems> = ({
   }
   console.log('activePath', { activePath })
 
+  const isParentHaveChildActive = (item : TVertical):boolean =>{  //kiêm tra xem Parent có chứa con đang đc active ko
+    if(!item.childrens){ //nếu item ko có con
+      return item.path === activePath
+    }else //nếu item có con
+    {
+      return item.childrens.some((item:TVertical) => isParentHaveChildActive(item))
+    }
+  }
+
   return (
     <>
       {items?.map((item: any) => {
+        const isParentActive = isParentHaveChildActive(item)  // isParentActive= true nếu chứa thg con đang active
+
         return (
           <React.Fragment key={item.title}>
             <ListItemButton
               sx={{
                 padding: `8px 10px 8px ${level * (level === 1 ? 28 : 20)}px`,
                 backgroundColor:
-                  (activePath && item.path === activePath) || openItems[item.title]
+                  (activePath && item.path === activePath) || openItems[item.title] ||isParentActive
                     ? `${hexToRGBA(theme.palette.primary.main, 0.08)} !important`
                     : theme.palette.background.paper
               }}
@@ -111,7 +122,9 @@ const RecursiveListItems: NextPage<TListItems> = ({
                 if (item.childrens) {
                   handleClick(item.title)
                 }
-                handleSelectItem(item.path)
+                if(item.path){ //nếu có path thid mới set lại activePath
+                  handleSelectItem(item.path)
+                }
               }}
             >
               <ListItemIcon>
@@ -124,7 +137,7 @@ const RecursiveListItems: NextPage<TListItems> = ({
                     height: '30px',
                     width: '30px',
                     backgroundColor:
-                      (activePath && item.path === activePath) || !!openItems[item.title]
+                      (activePath && item.path === activePath) || !!openItems[item.title] || isParentActive
                         ? `${theme.palette.primary.main} !important`
                         : theme.palette.background.paper
                   }}
@@ -132,7 +145,7 @@ const RecursiveListItems: NextPage<TListItems> = ({
                   <IconifyIcon
                     style={{
                       color:
-                        (activePath && item.path === activePath) || !!openItems[item.title]
+                        (activePath && item.path === activePath) || !!openItems[item.title] || isParentActive
                           ? `${theme.palette.customColors.lightPaperBg}`
                           : `rgba(${theme.palette.customColors.main}, 0.78)`
                     }}
@@ -144,7 +157,7 @@ const RecursiveListItems: NextPage<TListItems> = ({
                 <Tooltip title={item.title}>
                   <StyleListItemText
                     primary={item.title}
-                    active={(activePath && item.path === activePath) || openItems[item.title]}
+                    active={(activePath && item.path === activePath) || openItems[item.title] || isParentActive} 
                   />
                 </Tooltip>
               )}
@@ -155,13 +168,18 @@ const RecursiveListItems: NextPage<TListItems> = ({
                       icon='material-symbols-light:expand-less-rounded'
                       style={{
                         transform: 'rotate(180deg)',
-                        color: !!openItems[item.title]
+                        color: !!openItems[item.title] || isParentActive
                           ? `${theme.palette.primary.main}`
                           : `rgba(${theme.palette.customColors.main}, 0.78)`
                       }}
                     />
                   ) : (
-                    <IconifyIcon icon='material-symbols-light:expand-less-rounded' />
+                    <IconifyIcon icon='material-symbols-light:expand-less-rounded'
+                    style={{
+                      color:  isParentActive
+                        ? `${theme.palette.primary.main}`
+                        : `rgba(${theme.palette.customColors.main}, 0.78)`
+                    }} />
                   )}
                 </>
               )}

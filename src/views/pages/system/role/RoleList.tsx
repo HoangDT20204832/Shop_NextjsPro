@@ -62,6 +62,7 @@ import CreateEditRole from './component/CreateEditRole'
 import Spinner from 'src/components/spinner'
 import ConfirmationDialog from 'src/components/confirmation-dialog'
 import { deleteRole } from 'src/services/role'
+import { OBJECT_TYPE_ERROR_ROLE } from 'src/configs/role'
 
 type TProps = {}
 
@@ -100,7 +101,7 @@ const RoleListPage: NextPage<TProps> = () => {
     typeError,
     isSuccessDelete,
     isErrorDelete,
-    messagErrorDelete
+    messagErrorDelete,
   } = useSelector((state: RootState) => state.role)
   console.log('roles', roles)
 
@@ -124,29 +125,39 @@ const RoleListPage: NextPage<TProps> = () => {
   useEffect(() => {
     if (isSuccessCreateEdit) {
       if (openCreateEdit.id) {
-        toast.success(t('update-role-success'))
+        toast.success(t('Update_role_success'))
       } else {
-        toast.success(t('create-role-success'))
+        toast.success(t('Create_role_success'))
       }
       // toast.success(t(messageCreateEdit))
       handleGetListRoles()
       dispatch(resetInitialState())
       handleCloseCreateEdit()
-    } else if (isErrorCreateEdit) {
-      toast.error(t(messageCreateEdit))
+    } else if (isErrorCreateEdit && typeError) { //nêu sko thành công     
+      const errorConfig = OBJECT_TYPE_ERROR_ROLE[typeError]
+      if(errorConfig){ //nếu thao tác sai để trả về typeError  vd = "ALREADY_EXIST" hoặc INTERNAL_SERVER_ERROR
+        toast.error(t(errorConfig))
+      }else{ // nếu bị lỗi nhưng trả  về typeError ko nằm trong khai báo
+        if (openCreateEdit.id) {
+          toast.error(t('Update_role_error'))
+        } else {
+          toast.error(t('Create_role_error'))
+        }
+      }
       dispatch(resetInitialState())
     }
-  }, [isSuccessCreateEdit, isErrorCreateEdit, messageCreateEdit])
+  }, [isSuccessCreateEdit, isErrorCreateEdit, messageCreateEdit,typeError])
 
   // xử lý khi Delete thành công, thất bại
   useEffect(() => {
     if (isSuccessDelete) {
-      toast.success(t('delete-role-success'))
+      toast.success(t('Delete_role_success'))
       handleGetListRoles()
       dispatch(resetInitialState())
       handleConfirmCloseDelete()
     } else if (isErrorDelete) {
-      toast.error(t(messagErrorDelete))
+      // toast.error(t(messagErrorDelete))
+      toast.success(t('Delete_role_error'))
       dispatch(resetInitialState())
     }
   }, [isSuccessDelete, isErrorDelete, messagErrorDelete])
