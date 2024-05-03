@@ -65,5 +65,12 @@
     "Register" :"Đăng ký",
     "Password":"Mật khẩu",
     "Data_existed_in_system" :"Dữ liệu đã tồn tại trong hệ thống",
-    "Server_is_error": "Hệ thống bị lỗi"
+    "Server_is_error": "Hệ thống bị lỗi",
+    "Manage_order": "Quản trị đơn hàng",
+    "Product": "Sản phẩm",
+    "Product_type":"Loại sản phẩm",
+    "Review":"Đánh giá",
+    "Order" : "Đơn hàng",
+    "Payment_type":"Phương thức thanh toán",
+    "Delivery_type":"Phương thức giao hàng"
 }

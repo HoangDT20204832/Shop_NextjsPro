@@ -56,6 +56,7 @@ const UserLayout: NextPage<TProps> = ({ children }) => {
         >
           {children}
         </Container>
+        
       </Box>
     </Box>
   )

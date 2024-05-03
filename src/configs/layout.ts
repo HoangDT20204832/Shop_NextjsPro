@@ -47,6 +47,12 @@ export const VerticalItems = () =>{
           icon: 'material-symbols-light:category-outline',
           path: ROUTE_CONFIG.MANAGE_PRODUCT.MANAGE_TYPE_PRODUCT,
         },
+      ]
+    },
+    {
+      title: t("Manage_order"),
+      icon: 'material-symbols-light:order-approve-outline-rounded',
+      childrens: [
         {
           title: t("List_order"),
           icon: 'lets-icons:order-light',

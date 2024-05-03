@@ -18,8 +18,6 @@ import {
   InputAdornment,
   Tooltip,
   Typography,
-
-
   useTheme
 } from '@mui/material'
 
@@ -48,21 +46,25 @@ import { useRouter } from 'next/router'
 import { ROUTE_CONFIG } from 'src/configs/route'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from 'src/hooks/useAuth'
-import { deleteRoleAsync, getAllRolesAsync } from 'src/stores/role/actions'
+import { deleteRoleAsync, getAllRolesAsync, updateRoleAsync } from 'src/stores/role/actions'
 import CustomDataGrid from 'src/components/custom-data-grid'
-import { GridColDef, GridSortModel, GridValueGetterParams } from '@mui/x-data-grid'
+import { GridColDef, GridRowClassNameParams, GridSortModel, GridValueGetterParams } from '@mui/x-data-grid'
 import { PAGE_SIZE_OPTION } from 'src/configs/gridConfig'
 import CustomPagination from 'src/components/custom-pagination'
 import IconifyIcon from 'src/components/Icon'
-import GridEdit from 'src/components/grid-delete'
-import GridDelete from 'src/components/grid-edit'
+import GridEdit from 'src/components/grid-edit'
+import GridDelete from 'src/components/grid-delete'
 import GridCreate from 'src/components/grid-create'
 import InputSearch from 'src/components/input-search'
 import CreateEditRole from './component/CreateEditRole'
 import Spinner from 'src/components/spinner'
 import ConfirmationDialog from 'src/components/confirmation-dialog'
-import { deleteRole } from 'src/services/role'
+import { deleteRole, getDetailsRole } from 'src/services/role'
 import { OBJECT_TYPE_ERROR_ROLE } from 'src/configs/role'
+import TablePermisson from './component/TablePermission'
+import { PERMISSIONS } from 'src/configs/permission'
+import { getAllValueOfObject } from 'src/utils'
+import { hexToRGBA } from 'src/utils/hex-to-rgba'
 
 type TProps = {}
 
@@ -73,6 +75,7 @@ type TDefaultValue = {
 }
 
 const RoleListPage: NextPage<TProps> = () => {
+  const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTION[0])
   // truyền thêm id vào để phân biệt nếu id ko phải chuỗi rỗng thì nghĩa là mở Modal Edit, ngược lại thì là mở Modal Create
@@ -88,6 +91,12 @@ const RoleListPage: NextPage<TProps> = () => {
 
   const [sortBy, setSortBy] = useState('created asc')
   const [searchBy, setSearchBy] = useState('')
+  const [permissonSelected, setPermissonSelected] = useState<string[]>([])
+  const [selectedRow, setSelectedRow] = useState({
+    id: '',
+    name: ''
+  })
+  const [isDisablePermisson, setIsDisablePermisson] = useState(false)
 
   // ** Router
   const router = useRouter()
@@ -101,7 +110,7 @@ const RoleListPage: NextPage<TProps> = () => {
     typeError,
     isSuccessDelete,
     isErrorDelete,
-    messagErrorDelete,
+    messagErrorDelete
   } = useSelector((state: RootState) => state.role)
   console.log('roles', roles)
 
@@ -113,54 +122,22 @@ const RoleListPage: NextPage<TProps> = () => {
 
   // ** Translate
   const { t } = useTranslation()
+
+  // fetch Api
   const handleGetListRoles = () => {
     dispatch(getAllRolesAsync({ params: { limit: -1, page: -1, search: searchBy, order: sortBy } }))
   }
 
-  useEffect(() => {
-    handleGetListRoles()
-  }, [sortBy, searchBy])
-
-  // xử lý thông báo khi tạo hoặc update thành công, thất bại
-  useEffect(() => {
-    if (isSuccessCreateEdit) {
-      if (openCreateEdit.id) {
-        toast.success(t('Update_role_success'))
-      } else {
-        toast.success(t('Create_role_success'))
-      }
-      // toast.success(t(messageCreateEdit))
-      handleGetListRoles()
-      dispatch(resetInitialState())
-      handleCloseCreateEdit()
-    } else if (isErrorCreateEdit && typeError) { //nêu sko thành công     
-      const errorConfig = OBJECT_TYPE_ERROR_ROLE[typeError]
-      if(errorConfig){ //nếu thao tác sai để trả về typeError  vd = "ALREADY_EXIST" hoặc INTERNAL_SERVER_ERROR
-        toast.error(t(errorConfig))
-      }else{ // nếu bị lỗi nhưng trả  về typeError ko nằm trong khai báo
-        if (openCreateEdit.id) {
-          toast.error(t('Update_role_error'))
-        } else {
-          toast.error(t('Create_role_error'))
-        }
-      }
-      dispatch(resetInitialState())
-    }
-  }, [isSuccessCreateEdit, isErrorCreateEdit, messageCreateEdit,typeError])
-
-  // xử lý khi Delete thành công, thất bại
-  useEffect(() => {
-    if (isSuccessDelete) {
-      toast.success(t('Delete_role_success'))
-      handleGetListRoles()
-      dispatch(resetInitialState())
-      handleConfirmCloseDelete()
-    } else if (isErrorDelete) {
-      // toast.error(t(messagErrorDelete))
-      toast.success(t('Delete_role_error'))
-      dispatch(resetInitialState())
-    }
-  }, [isSuccessDelete, isErrorDelete, messagErrorDelete])
+  const handleUpdateRoles = () => {
+    dispatch(updateRoleAsync({ name: selectedRow.name, id: selectedRow.id, permissions: permissonSelected }))
+    
+    // để khi ấn vào update trên bảng permisson thì sẽ thay đổi id để useEffect thấy có id ở openCreateEdit để thông báo Cập nhật thành công
+    // nếu ko có id thì sẽ thông báo Tạo nhóm vai trò thành công
+    setOpenCreateEdit({
+      open: false,
+      id: '1'
+    })
+  }
 
   const columns: GridColDef[] = [
     {
@@ -177,10 +154,10 @@ const RoleListPage: NextPage<TProps> = () => {
       renderCell: params => {
         // console.log('params', params)
         const { row } = params
-        // console.log('rrrr', row)
+        console.log('rrrr', row)
 
         return (
-          <Box sx={{width:"100%"}}>
+          <Box sx={{ width: '100%' }}>
             {/* nếu role có permisson là 'ADMIN.GRANTED' hoặc 'BASIC.PUBLIC' thì hiện 2 nút chỉnh sửa và xoá */}
             {!row?.permissions?.some((per: string) => ['ADMIN.GRANTED', 'BASIC.PUBLIC']?.includes(per)) ? (
               <>
@@ -201,13 +178,15 @@ const RoleListPage: NextPage<TProps> = () => {
                   }
                 />
               </>
-            ) : (<IconifyIcon icon="material-symbols-light:lock-outline" fontSize={27}/> ) 
-              }
+            ) : (
+              <IconifyIcon icon='material-symbols-light:lock-outline' fontSize={27} />
+            )}
           </Box>
         )
       }
     }
   ]
+
   const handleOnchangePagination = (page: number, pageSize: number) => {}
 
   const PaginationComponent = () => {
@@ -246,8 +225,89 @@ const RoleListPage: NextPage<TProps> = () => {
     dispatch(deleteRoleAsync(openDeleteRole.id))
   }
 
+  const handleGetDetailsRole = async (id: string) => {
+    setLoading(true)
+    await getDetailsRole(id)
+      .then(res => {
+        if (res?.data) {
+          if (res?.data?.permissions.includes(PERMISSIONS.ADMIN)) {
+            setPermissonSelected(getAllValueOfObject(PERMISSIONS, [PERMISSIONS.ADMIN, PERMISSIONS.BASIC]))
+            setIsDisablePermisson(true)
+          } else if (res?.data?.permissions.includes(PERMISSIONS.BASIC)) {
+            setPermissonSelected(PERMISSIONS.DASHBOARD)
+            setIsDisablePermisson(true)
+          } else {
+            setPermissonSelected(res?.data?.permissions || [])
+            setIsDisablePermisson(false)
+          }
+        }
+        setLoading(false)
+      })
+      .catch(e => {
+        setLoading(false)
+      })
+  }
+
+  useEffect(() => {
+    handleGetListRoles()
+  }, [sortBy, searchBy])
+
+  // xử lý thông báo khi tạo hoặc update thành công, thất bại
+  useEffect(() => {
+    if (isSuccessCreateEdit) {
+      if (!openCreateEdit.id) {
+        toast.success(t('Create_role_success'))
+      } else {
+        toast.success(t('Update_role_success'))
+      }
+      // toast.success(t(messageCreateEdit))
+      handleGetListRoles()
+      dispatch(resetInitialState())
+      handleCloseCreateEdit()
+    } else if (isErrorCreateEdit && typeError) {
+      //nêu sko thành công
+      const errorConfig = OBJECT_TYPE_ERROR_ROLE[typeError]
+      if (errorConfig) {
+        //nếu thao tác sai để trả về typeError  vd = "ALREADY_EXIST" hoặc INTERNAL_SERVER_ERROR
+        toast.error(t(errorConfig))
+      } else {
+        // nếu bị lỗi nhưng trả  về typeError ko nằm trong khai báo
+        if (openCreateEdit.id) {
+          toast.error(t('Update_role_error'))
+        } else {
+          toast.error(t('Create_role_error'))
+        }
+      }
+      dispatch(resetInitialState())
+    }
+  }, [isSuccessCreateEdit, isErrorCreateEdit, messageCreateEdit, typeError])
+
+  // xử lý khi Delete thành công, thất bại
+  useEffect(() => {
+    if (isSuccessDelete) {
+      toast.success(t('Delete_role_success'))
+      handleGetListRoles()
+      dispatch(resetInitialState())
+      handleConfirmCloseDelete()
+    } else if (isErrorDelete) {
+      // toast.error(t(messagErrorDelete))
+      toast.success(t('Delete_role_error'))
+      dispatch(resetInitialState())
+    }
+  }, [isSuccessDelete, isErrorDelete, messagErrorDelete])
+
+  useEffect(() => {
+    // console.log("selectedRow", selectedRow)
+    if (selectedRow.id) {
+      handleGetDetailsRole(selectedRow.id)
+    }
+  }, [selectedRow.id])
+
+  console.log('openCE', openCreateEdit)
+
   return (
     <>
+      {loading && <Spinner />}
       <ConfirmationDialog
         open={openDeleteRole.open}
         handleClose={handleConfirmCloseDelete}
@@ -268,7 +328,7 @@ const RoleListPage: NextPage<TProps> = () => {
         }}
       >
         <Grid container sx={{ height: '100%', width: '100%' }}>
-          <Grid item md={5} xs={12}>
+          <Grid item md={4} xs={12} sx={{ maxHeight: '100%' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
               <GridCreate
                 onClick={() =>
@@ -282,27 +342,76 @@ const RoleListPage: NextPage<TProps> = () => {
                 <InputSearch value={searchBy} onChangeSearch={(value: string) => setSearchBy(value)} />
               </Box>
             </Box>
-            <CustomDataGrid
-              rows={roles.data}
-              columns={columns}
-              getRowId={row => row._id}
-              checkboxSelection={false} // ẩn đi checkbox
-              disableRowSelectionOnClick
-              autoHeight
-              disableColumnMenu //ẩn tuỳ chọn menu ở các cột
-              hideFooter //ẩn thanh paginate
-              slots={{
-                pagination: PaginationComponent //custom lại thanh pagination
-              }}
-              pageSizeOptions={[5]}
-              //cài đặt sort
-              sortingMode='server' // đặt sắp xếp theo phía server, mặc định sẽ là client
-              onSortModelChange={handleSort}
-              sortingOrder={['asc', 'desc']} // quy định những lựa chọn cho sorting
-            />
+            <Box sx={{ height: `calc(100% - 47px)` }}>
+              <CustomDataGrid
+                rows={roles.data}
+                columns={columns}
+                getRowId={row => row._id}
+                checkboxSelection={false} // ẩn đi checkbox
+                disableRowSelectionOnClick
+                autoHeight
+                disableColumnMenu //ẩn tuỳ chọn menu ở các cột
+                hideFooter //ẩn thanh paginate
+                slots={{
+                  pagination: PaginationComponent //custom lại thanh pagination
+                }}
+                pageSizeOptions={[5]}
+                //cài đặt sort
+                sortingMode='server' // đặt sắp xếp theo phía server, mặc định sẽ là client
+                onSortModelChange={handleSort}
+                sortingOrder={['asc', 'desc']} // quy định những lựa chọn cho sorting
+
+                //thêm class  "selected-row" vào dòng được click vào => có id = selectedRow.id  để css cho nó nổi lên
+                getRowClassName={(params: GridRowClassNameParams) =>{
+                  // console.log("GridRowClassNameParams", params)
+                  const {row} = params
+
+                  return row._id === selectedRow.id ? "selected-row": ""
+                }}
+                sx={{
+                  cursor:"pointer",
+                  ".selected-row":{
+                    backgroundColor: `${hexToRGBA(theme.palette.primary.main, 0.08)} !important `,
+                    color: `${theme.palette.primary.main} !important `,
+                    fontWeight: 600
+                  }
+                }}
+                onRowClick={row => {
+                  console.log('roww', { row })
+                  setSelectedRow({ id: String(row.id), name: row?.row?.name }) //cập nhật selectedRow = id đã click
+                }}
+              />
+            </Box>
           </Grid>
-          <Grid item md={7} xs={12}>
-            List Permisson
+          <Grid
+            item
+            md={8}
+            xs={12}
+            sx={{ maxHeight: '100%' }}
+            paddingLeft={{ md: '40px', xs: '0' }}
+            paddingTop={{ md: '0px', xs: '20px' }}
+          >
+            {selectedRow?.id && (
+              <>
+                <Box sx={{ height: 'calc(100% - 40px)' }}>
+                  <TablePermisson
+                    permissonSelected={permissonSelected}
+                    setPermissonSelected={setPermissonSelected}
+                    isDisablePermisson={isDisablePermisson}
+                  />
+                </Box>
+                <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end' }}>
+                  <Button
+                    variant='contained'
+                    sx={{ mt: 3, mb: 2 }}
+                    onClick={handleUpdateRoles}
+                    disabled={isDisablePermisson}
+                  >
+                    {t('Update')}
+                  </Button>
+                </Box>
+              </>
+            )}
           </Grid>
         </Grid>
       </Box>

@@ -2,22 +2,22 @@ import { IconButton, Tooltip } from '@mui/material'
 import IconifyIcon from '../Icon'
 import { useTranslation } from 'react-i18next'
 
-interface TGridEdit {
+interface TGridDelete {
   onClick: () => void
   disabled?: boolean
 }
 
-const GridEdit = (props: TGridEdit) => {
+const GridDelete = (props: TGridDelete) => {
   const { onClick, disabled } = props
   const { t } = useTranslation()
 
   return (
-    <Tooltip title={t('Edit')}>
+    <Tooltip title={t('Delete')}>
       <IconButton onClick={onClick} disabled={disabled}>
-        <IconifyIcon icon='tabler:edit' />
+        <IconifyIcon icon='mdi:delete-outline' />
       </IconButton>
     </Tooltip>
   )
 }
 
-export default GridEdit
+export default GridDelete
