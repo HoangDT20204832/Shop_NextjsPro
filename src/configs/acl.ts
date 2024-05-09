@@ -1,4 +1,5 @@
 import { AbilityBuilder, Ability } from '@casl/ability'
+import { PERMISSIONS } from './permission'
 
 export type Subjects = string
 export type Actions = 'manage' | 'create' | 'read' | 'update' | 'delete'
@@ -16,18 +17,22 @@ export type ACLObj = {
  * We have just shown Admin and Client rules for demo purpose where
  * admin can manage everything and client can just visit ACL page
  */
-const defineRulesFor = (permission: string[], subject: string) => {
+const defineRulesFor = (permissionUser: string[], permisson?:string[]) => {
   const { can, rules } = new AbilityBuilder(AppAbility)
 
-  if (permission.includes("ADMIN.GRANTED" ) || !permission.length) { //tạm thời xử lý để khi nào cấp role xử lý sau
+  //permisson: permisson đặt ở mỗi trang Page; permissionUser: permisson của tài khoản đăng nhập
+  //sẽ cho vào trang nếu trang đó không đặt permisson
+  // hoặc user có permissionUser= PERMISSIONS.ADMIN
+  // hoặc permisson được đặt của trang đấy có trong mảng permisson của tài khoản đăng nhập(permissionUser)
+  if (!permisson?.length || permissionUser.includes(PERMISSIONS.ADMIN) || permisson.every((item) => permissionUser.includes(item)) ) {
     can('manage', 'all')
   } 
 
   return rules
 }
 
-export const buildAbilityFor = (permission: string[], subject: string): AppAbility => {
-  return new AppAbility(defineRulesFor(permission, subject), {
+export const buildAbilityFor = (permissionUser: string[], permisson?:string[]): AppAbility => {
+  return new AppAbility(defineRulesFor(permissionUser,permisson), {
     // https://casl.js.org/v5/en/guide/subject-type-detection
     // @ts-ignore
     detectSubjectType: object => object!.type

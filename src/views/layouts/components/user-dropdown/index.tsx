@@ -66,6 +66,7 @@ const UserDropdown = (props: TProps) => {
 
   //lấy thoogn tin user khi đăng nhập và chức năng logout
   const { user, logout } = useAuth()
+  const permissonUser = user?.role?.permissions ?? []
 
   const open = Boolean(anchorEl)
   const router = useRouter()
@@ -191,13 +192,16 @@ const UserDropdown = (props: TProps) => {
           </Box>
         </Box>
         <Divider />
-        <MenuItem onClick={handleNavigateManageSystem}>
-          <Avatar>
-            {' '}
-            <IconifyIcon icon='arcticons:phone-manager' />{' '}
-          </Avatar>{' '}
-          {t('manage_system')}
-        </MenuItem>
+        {permissonUser.length > 0 && (
+          <MenuItem onClick={handleNavigateManageSystem}>
+            <Avatar>
+              {' '}
+              <IconifyIcon icon='arcticons:phone-manager' />{' '}
+            </Avatar>{' '}
+            {t('manage_system')}
+          </MenuItem>
+        )}
+
         <MenuItem onClick={handleNavigateMyProfile}>
           <Avatar>
             {' '}

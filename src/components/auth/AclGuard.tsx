@@ -8,27 +8,37 @@ import NotAuthorized from 'src/pages/401'
 import { useAuth } from 'src/hooks/useAuth'
 import { useRouter } from 'next/router'
 import { AbilityContext } from '../acl/Can'
+import { PERMISSIONS } from 'src/configs/permission'
 
 interface AclGuardProps {
   children: ReactNode
   authGuard?: boolean
   guestGuard?: boolean
   aclAbilities: ACLObj
+  permisson?: string[]
 }
 
 const AclGuard = (props: AclGuardProps) => {
   // ** Props
-  const { aclAbilities, children, guestGuard = false, authGuard = true } = props
+  const { aclAbilities, children, guestGuard = false, authGuard = true, permisson } = props
 
   const auth = useAuth()
-  const permissionUser = auth.user?.role?.permissions ?? []
+  //nếu permissionUser chứa PERMISSIONS.BASIC thì sẽ đặt permissionUser = [PERMISSIONS.DASHBOARD] (vì BASIC chỉ có quyền Dashboard)
+  // còn nếu ko có thì vẫn gán bình thường(auth.user?.role?.permissions)
+  const permissionUser = auth.user?.role?.permissions
+    ? (auth.user?.role?.permissions.includes(PERMISSIONS.BASIC)
+      ? [PERMISSIONS.DASHBOARD]
+      : auth.user?.role?.permissions
+      )
+    : []
+  // const permissionUser = [PERMISSIONS.SYSTEM.USER.VIEW]
   const router = useRouter()
 
   let ability: AppAbility //khai baos der phan quyen
 
   if (auth.user && !ability) {
-    //nếu đã đăng nhập mà kiểm tra chauw có ability(quyền) thì sẽ cấp quyền cho nó
-    ability = buildAbilityFor(permissionUser, aclAbilities.subject)
+    //nếu đã đăng nhập mà kiểm tra chưa có ability(quyền) thì sẽ cấp quyền cho nó
+    ability = buildAbilityFor(permissionUser, permisson)
   }
 
   //với những trang là khách hoặc ko yêu cầu guard hoặc những trang bị lỗi
