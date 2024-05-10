@@ -66,6 +66,9 @@ import { PERMISSIONS } from 'src/configs/permission'
 import { getAllValueOfObject } from 'src/utils'
 import { hexToRGBA } from 'src/utils/hex-to-rgba'
 
+// ** Hooks
+import { usePermission } from 'src/hooks/usePermission'
+
 type TProps = {}
 
 type TDefaultValue = {
@@ -100,6 +103,9 @@ const RoleListPage: NextPage<TProps> = () => {
 
   // ** Router
   const router = useRouter()
+  // check permission xem, thêm, xoá, sửa của User  trên từng trang
+  const {VIEW, CREATE, UPDATE, DELETE} = usePermission("SYSTEM.ROLE", ["CREATE","VIEW","UPDATE", "DELETE"])
+  console.log("permisson", {VIEW, CREATE, UPDATE, DELETE})
 
   const {
     roles,
@@ -188,6 +194,7 @@ const RoleListPage: NextPage<TProps> = () => {
   ]
 
   const handleOnchangePagination = (page: number, pageSize: number) => {}
+
 
   const PaginationComponent = () => {
     return (

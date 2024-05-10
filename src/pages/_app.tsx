@@ -109,8 +109,8 @@ export default function App(props: ExtendedAppProps) {
 
   const aclAbilities = Component.acl ?? defaultACLObj
 
-  const permission = Component.permisson ?? []
-  console.log("permisson", permission)
+  const permission = Component.permisson ?? [] //permison của từng trang mà ta vào
+  // console.log("permisson", permission)
 
   const toastOptions = {
     success: {

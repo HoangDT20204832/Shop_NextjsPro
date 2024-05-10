@@ -37,7 +37,7 @@ const AclGuard = (props: AclGuardProps) => {
   let ability: AppAbility //khai baos der phan quyen
 
   if (auth.user && !ability) {
-    //nếu đã đăng nhập mà kiểm tra chưa có ability(quyền) thì sẽ cấp quyền cho nó
+    //nếu đã đăng nhập mà kiểm tra chưa có ability(quyền) thì sẽ cấp quyền cho nó (buildAbilityFor)
     ability = buildAbilityFor(permissionUser, permisson)
   }
 
@@ -45,8 +45,9 @@ const AclGuard = (props: AclGuardProps) => {
   if (guestGuard || router.route === '/500' || router.route === '/404' || !authGuard) {
     if (auth.user && ability) {
       //  với những thg đã đăng nhập và đã có ability(đã buildAbilityFor )
-      //<AbilityContext.Provider value={ability}></AbilityContext.Provider>   =>tạo ra context để tái sawur dụng lại, có thể check quyền xem ở trang đó thì người đó có quyền được xem; được tạo sản phẩm,... dựa vào value={ability}
-      return <AbilityContext.Provider value={ability}>{children}</AbilityContext.Provider>
+
+      //<AbilityContext.Provider value={ability}></AbilityContext.Provider>   =>tạo ra context để tái sawur dụng lại, có thể check quyền xem, xoá , sửa, tạo ở trang đó của User dựa vào value={ability}
+      return <AbilityContext.Provider value={ability}>{children}</AbilityContext.Provider> //nhưng hơi khó hiểu nên đã tạo 1 hook mới là usePermission để gọi ra check quyền của User trên từng ttrang thay thế cho AbilityContext
     } else {
       // với guestGuard vafg ko đăng nhập => ko có role để check quyền => return thanwhf về children
       return children

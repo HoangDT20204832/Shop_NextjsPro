@@ -229,7 +229,7 @@ const ListVerticalLayout: NextPage<TProps> = ({ open }) => {
       : auth.user?.role?.permissions
       )
     : []
-  // const permissionUser:any[] = [PERMISSIONS.DASHBOARD]
+  // const permissionUser:any[] = [PERMISSIONS.DASHBOARD, PERMISSIONS.SYSTEM.USER.VIEW]
 
   //tìm ra thg cha đang có thg con đang đc active để có thể mở thg cha ra bằng cách setOpenItems thg cha
   const findParentActivePath = (items : TVertical[], activePath:string) =>{
