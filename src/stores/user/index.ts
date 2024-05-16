@@ -1,74 +1,118 @@
 // ** Redux Imports
-import { Dispatch } from 'redux'
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit'
 
-// ** Axios Imports
-import axios from 'axios'
+// ** Action
+import { createUserAsync, deleteUserAsync, getAllUsersAsync, serviceName, updateUserAsync } from './actions'
 
-interface DataParams {
-  q: string
-  role: string
-  status: string
-  currentPlan: string
-}
 
-interface Redux {
-  getState: any
-  dispatch: Dispatch<any>
-}
-
-// ** Fetch Users
-export const fetchData = createAsyncThunk('appUsers/fetchData', async (params: DataParams) => {
-  const response = await axios.get('/apps/users/list', {
-    params
-  })
-
-  return response.data
-})
-
-// ** Add User
-export const addUser = createAsyncThunk(
-  'appUsers/addUser',
-  async (data: { [key: string]: number | string }, { getState, dispatch }: Redux) => {
-    const response = await axios.post('/apps/users/add-user', {
-      data
-    })
-    dispatch(fetchData(getState().user.params))
-
-    return response.data
-  }
-)
-
-// ** Delete User
-export const deleteUser = createAsyncThunk(
-  'appUsers/deleteUser',
-  async (id: number | string, { getState, dispatch }: Redux) => {
-    const response = await axios.delete('/apps/users/delete', {
-      data: id
-    })
-    dispatch(fetchData(getState().user.params))
-
-    return response.data
-  }
-)
-
-export const appUsersSlice = createSlice({
-  name: 'appUsers',
+export const userSlice = createSlice({
+  name: serviceName,
   initialState: {
-    data: [],
-    total: 1,
-    params: {},
-    allData: []
+    isLoading: false,
+    isSuccess: true,
+    isError: false,
+    message: '',
+    typeError: '',
+    isSuccessCreateEdit: false,
+    isErrorCreateEdit: false,
+    messageCreateEdit: '',
+    isSuccessDelete: false,
+    isErrorDelete: false,
+    messagErrorDelete: '',
+    users: {
+      data: [],
+      total: 0
+    }
   },
-  reducers: {},
+  reducers: {
+    resetInitialState: state => {
+      state.isLoading = false
+      state.isSuccess = false
+      state.isError = true
+      state.message = ''
+      state.typeError = ''
+      state.isSuccessCreateEdit = false
+      state.isErrorCreateEdit = false
+      state.messageCreateEdit = ''
+      state.isSuccessDelete = false
+      state.isErrorDelete = false
+      state.messagErrorDelete = ''
+    }
+  },
+
   extraReducers: builder => {
-    builder.addCase(fetchData.fulfilled, (state, action) => {
-      state.data = action.payload.users
-      state.total = action.payload.total
-      state.params = action.payload.params
-      state.allData = action.payload.allData
-    })
+    // ** Get all Users
+    builder.addCase(getAllUsersAsync.pending, (state, action) => {
+      //khi đang call
+      state.isLoading = true
+    }),
+      builder.addCase(getAllUsersAsync.fulfilled, (state, action) => {
+        //khi call thành công
+        state.isLoading = false
+        console.log('actionnUser', action)
+        state.users.data = action.payload.data.users
+        state.users.total = action.payload.data.totalCount
+      }),
+      builder.addCase(getAllUsersAsync.rejected, (state, action) => {
+        // khi call thất bại
+        state.isLoading = false
+        state.users.data = []
+        state.users.total = 0
+      })
+
+    // ** Create User
+    builder.addCase(createUserAsync.pending, (state, action) => {
+      //khi đang call
+      state.isLoading = true
+    }),
+      builder.addCase(createUserAsync.fulfilled, (state, action) => {
+        //khi call thành công
+        state.isLoading = false
+        console.log('actionRole', action)
+        state.isSuccessCreateEdit = !!action.payload?.data?._id // nêu có dât.id thì sẽ thành công
+        state.isErrorCreateEdit = !action.payload?.data?._id
+        state.messageCreateEdit = action.payload.message
+        state.typeError = action.payload.typeError
+      })
+    // ,
+    // builder.addCase(createUserAsync.rejected, (state, action) => {
+    //   // khi call thất bại
+    //   state.isLoading = false
+    //   state.users.data = []
+    //   state.users.total = 0
+    // })
+
+    // ** Update User
+    builder.addCase(updateUserAsync.pending, (state, action) => {
+      //khi đang call
+      state.isLoading = true
+    }),
+      builder.addCase(updateUserAsync.fulfilled, (state, action) => {
+        //khi call thành công
+        state.isLoading = false
+        console.log('actionRole', action)
+        state.isSuccessCreateEdit = !!action.payload?.data?._id // nêu có dât.id thì sẽ thành công
+        state.isErrorCreateEdit = !action.payload?.data?._id
+        state.messageCreateEdit = action.payload.message
+        state.typeError = action.payload.typeError
+      })
+
+    // ** Delete Role
+    builder.addCase(deleteUserAsync.pending, (state, action) => {
+      //khi đang call
+      state.isLoading = true
+    }),
+      builder.addCase(deleteUserAsync.fulfilled, (state, action) => {
+        //khi call thành công
+        state.isLoading = false
+        console.log('actionRole', action)
+        state.isSuccessDelete = !!action.payload?.data?._id // nêu có dât.id thì sẽ thành công
+        state.isErrorDelete = !action.payload?.data?._id
+        state.messagErrorDelete = action.payload.message
+        state.typeError = action.payload.typeError
+      })
   }
 })
 
-export default appUsersSlice.reducer
+export const { resetInitialState } = userSlice.actions
+export default userSlice.reducer

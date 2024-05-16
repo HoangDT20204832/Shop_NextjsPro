@@ -1,5 +1,5 @@
 // ** React
-import React from 'react'
+import React, { useEffect } from 'react'
 
 // ** Mui Imports
 import Box from '@mui/material/Box'
@@ -21,6 +21,8 @@ import { useRouter } from 'next/router'
 import { ROUTE_CONFIG } from 'src/configs/route'
 import { toFullName } from 'src/utils'
 import { Badge, styled } from '@mui/material'
+import { useSelector } from 'react-redux'
+import { RootState } from 'src/stores'
 
 // import PersonAdd from '@mui/icons-material/PersonAdd';
 // import Settings from '@mui/icons-material/Settings';
@@ -65,7 +67,8 @@ const UserDropdown = (props: TProps) => {
   const { t, i18n } = useTranslation()
 
   //lấy thoogn tin user khi đăng nhập và chức năng logout
-  const { user, logout } = useAuth()
+  const { user, logout, setUser } = useAuth()
+  const {userData} = useSelector((state:RootState) => state.auth)
   const permissonUser = user?.role?.permissions ?? []
 
   const open = Boolean(anchorEl)
@@ -93,6 +96,11 @@ const UserDropdown = (props: TProps) => {
     router.push(ROUTE_CONFIG.DASHBOARD)
     handleClose()
   }
+  useEffect(() =>{
+      if(userData){
+        setUser({...userData})
+      }
+  },[userData])
 
   return (
     <React.Fragment>

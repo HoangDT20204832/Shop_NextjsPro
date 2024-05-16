@@ -7,6 +7,12 @@ const StyleCustomGrid = styled(DataGrid)<DataGridProps>(({ theme }) => ({
   '& .MuiDataGrid-main': {
     border: `1px solid ${theme.palette.customColors.borderColor}`,
     borderRadius: '8px'
+  },
+  '.MuiDataGrid-withBorderColor':{
+    outline: "none !important"
+  },
+  '.MuiDataGrid-columnHeaderTitle' :{
+    color : theme.palette.primary.main
   }
 }))
 

@@ -291,7 +291,7 @@ const MyProfilePage: NextPage<TProps> = () => {
                     <WrapperFileUpload
                       uploadFunc={handleUploadAvatar}
                       objectAcceptFile={{
-                        'image/jpeg': ['.jpg', 'jpeg'],
+                        'image/jpeg': ['.jpg'],
                         'image/png': ['.png']
                       }}
                     >
@@ -360,10 +360,10 @@ const MyProfilePage: NextPage<TProps> = () => {
                             placeholder={t('enter_your_role')}
                           />
 
-                          {!errors?.email?.message && (
+                          {errors?.role?.message && (
                             <FormHelperText
                               sx={{
-                                color: !errors?.role
+                                color: errors?.role
                                   ? theme.palette.error.main
                                   : `rgba(${theme.palette.customColors.main}, 0.42)`
                               }}
@@ -458,15 +458,15 @@ const MyProfilePage: NextPage<TProps> = () => {
                           value={value}
                           placeholder={t('enter_your_city')}
                         />
-                        {!errors?.email?.message && (
+                        {errors?.city?.message && (
                           <FormHelperText
                             sx={{
-                              color: !errors?.role
+                              color: !errors?.city
                                 ? theme.palette.error.main
                                 : `rgba(${theme.palette.customColors.main}, 0.42)`
                             }}
                           >
-                            {errors?.email?.message}
+                            {errors?.city?.message}
                           </FormHelperText>
                         )}
                       </Box>

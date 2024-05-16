@@ -1,26 +1,12 @@
 // ** Redux Imports
-import { Dispatch } from 'redux'
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit'
 
 // ** Axios Imports
-import axios from 'axios'
-import { createRoleAsync, deleteRoleAsync, getAllRolesAsync, updateRoleAsync } from './actions'
-import { updateRole } from 'src/services/role'
+import { createRoleAsync, deleteRoleAsync, getAllRolesAsync, serviceName, updateRoleAsync } from './actions'
 
-interface DataParams {
-  q: string
-  role: string
-  status: string
-  currentPlan: string
-}
-
-interface Redux {
-  getState: any
-  dispatch: Dispatch<any>
-}
 
 export const roleSlice = createSlice({
-  name: 'role',
+  name: serviceName,
   initialState: {
     isLoading: false,
     isSuccess: true,

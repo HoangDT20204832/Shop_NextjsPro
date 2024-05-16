@@ -3,9 +3,11 @@ import { createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
 import { TChangePassword } from 'src/types/auth'
 
+export const serviceName = "auth"
+
 export const registerAuthAsync = createAsyncThunk(
   // dùng redux think để xử lý bất đồng bộ
-  'auth/register', //type của actions
+  `${serviceName}/register`, //type của actions
   async (data: any) => {
     const response = await registerAuth(data)
     console.log('response: ', { response })
@@ -25,7 +27,7 @@ export const registerAuthAsync = createAsyncThunk(
 
 export const updateAuthMeAsync = createAsyncThunk(
   // dùng redux think để xử lý bất đồng bộ
-  'auth/update-me', //type của actions
+  `${serviceName}/update-me`, //type của actions
   async (data: any) => {
     const response = await updateAuthMe(data)
     // console.log('response: ', { response })
@@ -45,7 +47,7 @@ export const updateAuthMeAsync = createAsyncThunk(
 
 export const changePasswordMeAsync = createAsyncThunk(
   // dùng redux think để xử lý bất đồng bộ
-  'auth/change-password-me', //type của actions
+  `${serviceName}/change-password-me`, //type của actions
   async (data: TChangePassword) => {
     const response = await changePasswordMe(data)
     // console.log('responseUpdate ', { response })

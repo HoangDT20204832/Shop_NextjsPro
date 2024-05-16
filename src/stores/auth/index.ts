@@ -4,7 +4,8 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 
 // ** Axios Imports
 import axios from 'axios'
-import { changePasswordMeAsync, registerAuthAsync, updateAuthMeAsync } from './actions'
+import { changePasswordMeAsync, registerAuthAsync, serviceName, updateAuthMeAsync } from './actions'
+import { UserDataType } from 'src/contexts/types'
 
 interface DataParams {
   q: string
@@ -18,21 +19,39 @@ interface Redux {
   dispatch: Dispatch<any>
 }
 
+type TInitialState = {
+  isLoading: boolean,
+  isSuccess: boolean,
+  isError: boolean,
+  message: string,
+  typeError: string,
+  isSuccessUpdateMe: boolean,
+  isErrorUpdateMe: boolean,
+  messageUpdateMe: string,
+  isSuccessChangePassword: boolean,
+  isErrorChangePassword: boolean,
+  messageChangePassword: string,
+  userData: UserDataType | null
+}
+
+const initialState: TInitialState = {
+  isLoading: false,
+  isSuccess: true,
+  isError: false,
+  message: '',
+  typeError: '',
+  isSuccessUpdateMe: true,
+  isErrorUpdateMe: false,
+  messageUpdateMe: '',
+  isSuccessChangePassword: true,
+  isErrorChangePassword: false,
+  messageChangePassword: '',
+  userData: null
+}
+
 export const authSlice = createSlice({
-  name: 'auth',
-  initialState: {
-    isLoading: false,
-    isSuccess: true,
-    isError: false,
-    message: '',
-    typeError: '',
-    isSuccessUpdateMe: true,
-    isErrorUpdateMe: false,
-    messageUpdateMe: '',
-    isSuccessChangePassword: true,
-    isErrorChangePassword: false,
-    messageChangePassword: ''
-  },
+  name: serviceName,
+  initialState,
   reducers: {
     resetInitialState: state => {
       state.isLoading = false
@@ -84,6 +103,7 @@ export const authSlice = createSlice({
         state.isErrorUpdateMe = !action.payload?.data?.email // true khi ko có email
         state.messageUpdateMe = action.payload?.message
         state.typeError = action.payload?.typeError
+        state.userData = action.payload?.data
       }),
       builder.addCase(updateAuthMeAsync.rejected, (state, action) => {
         // khi call thất bại
@@ -92,6 +112,7 @@ export const authSlice = createSlice({
         state.isErrorUpdateMe = true
         state.messageUpdateMe = ''
         state.typeError = ''
+        state.userData= null
       })
 
     // ** Change-password-me

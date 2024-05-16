@@ -72,5 +72,21 @@
     "Review":"Đánh giá",
     "Order" : "Đơn hàng",
     "Payment_type":"Phương thức thanh toán",
-    "Delivery_type":"Phương thức giao hàng"
+    "Delivery_type":"Phương thức giao hàng",
+    "Create_user":"Thêm người dùng",
+    "Edit_user":"Chỉnh sửa người dùng",
+    "Active":"Đang hoạt động",
+    "Block":"Tạm khoá",
+    "Create_user_success":"Tạo người dùng thành công",
+    "Update_user_success":"Cập nhật người dùng thành công",
+    "Update_user_error":"Cập nhật người dùng thất bại",
+    "Create_user_error":"Tạo người dùng thất bại",
+    "Delete_user_success":"Xoá người dùng thành công",
+    "Delete_user_error":"Xoá người dùng thất bại",
+    "Title_delete_user": "Xác nhận xoá người dùng",
+    "Confirm_delete_user": "Bạn có chắc xoá người dùng này?",
+    "Confirm":"Xác nhận",
+    "Cancel": "Huỷ bỏ"
+    
+
 }

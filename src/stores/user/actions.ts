@@ -1,27 +1,26 @@
 import { changePasswordMe, registerAuth, updateAuthMe } from '../../services/auth'
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
-import { createRole, deleteRole, getAllRoles, updateRole } from 'src/services/role'
+import { createUser, deleteUser, getAllUsers, updateUser } from 'src/services/user'
 import { TChangePassword } from 'src/types/auth'
-import { TParamsCreateRole, TParamsDeleteRole, TParamsEditRole, TParamsGetRoles } from 'src/types/role'
+import { TParamsCreateUser, TParamsEditUser, TParamsGetUsers } from 'src/types/user'
 
-export const serviceName = "role"
-
-export const getAllRolesAsync = createAsyncThunk(
+export const serviceName = "user"
+export const getAllUsersAsync = createAsyncThunk(
   `${serviceName}/get-all`, //type của actions
-  async (data: { params: TParamsGetRoles }) => {
-    const response = await getAllRoles(data)
+  async (data: { params: TParamsGetUsers }) => {
+    const response = await getAllUsers(data)
 
     return response
   }
 )
 
-export const createRoleAsync = createAsyncThunk(
+export const createUserAsync = createAsyncThunk(
   // dùng redux think để xử lý bất đồng bộ
   `${serviceName}/create`, //type của actions
-  async (data: TParamsCreateRole) => {
-    const response = await createRole(data)
-    console.log('responseRole ', { response })
+  async (data: TParamsCreateUser) => {
+    const response = await createUser(data)
+    console.log('responseUser ', { response })
 
     if (response?.data) {
       return response
@@ -36,12 +35,12 @@ export const createRoleAsync = createAsyncThunk(
   }
 )
 
-export const updateRoleAsync = createAsyncThunk(
+export const updateUserAsync = createAsyncThunk(
   // dùng redux think để xử lý bất đồng bộ
   `${serviceName}/update`, //type của actions
-  async (data: TParamsEditRole) => {
-    const response = await updateRole(data)
-    console.log('responseRole ', { response })
+  async (data: TParamsEditUser) => {
+    const response = await updateUser(data)
+    console.log('responseUser', { response })
 
     if (response?.data) {
       return response
@@ -56,12 +55,12 @@ export const updateRoleAsync = createAsyncThunk(
   }
 )
 
-export const deleteRoleAsync = createAsyncThunk(
+export const deleteUserAsync = createAsyncThunk(
   // dùng redux think để xử lý bất đồng bộ
   `${serviceName}/delete`, //type của actions
   async (id: string) => {
-    const response = await deleteRole(id)
-    console.log('responseRole ', { response })
+    const response = await deleteUser(id)
+    console.log('responseUser ', { response })
 
     if (response?.data) {
       return response
