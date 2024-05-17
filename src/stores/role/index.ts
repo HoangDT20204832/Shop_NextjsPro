@@ -50,8 +50,8 @@ export const roleSlice = createSlice({
         //khi call thành công
         state.isLoading = false
         console.log('actionn', action)
-        state.roles.data = action.payload.data.roles
-        state.roles.total = action.payload.data.totalCount
+        state.roles.data = action.payload?.data?.roles
+        state.roles.total = action.payload?.data?.totalCount
       }),
       builder.addCase(getAllRolesAsync.rejected, (state, action) => {
         // khi call thất bại

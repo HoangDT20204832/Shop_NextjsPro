@@ -11,6 +11,8 @@ import {
   Box,
   Button,
   Checkbox,
+  Chip,
+  ChipProps,
   CssBaseline,
   FormControlLabel,
   Grid,
@@ -18,6 +20,7 @@ import {
   InputAdornment,
   Tooltip,
   Typography,
+  styled,
   useTheme
 } from '@mui/material'
 
@@ -47,7 +50,13 @@ import { ROUTE_CONFIG } from 'src/configs/route'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from 'src/hooks/useAuth'
 import CustomDataGrid from 'src/components/custom-data-grid'
-import { GridColDef, GridRowClassNameParams, GridRowSelectionModel, GridSortModel, GridValueGetterParams } from '@mui/x-data-grid'
+import {
+  GridColDef,
+  GridRowClassNameParams,
+  GridRowSelectionModel,
+  GridSortModel,
+  GridValueGetterParams
+} from '@mui/x-data-grid'
 import { PAGE_SIZE_OPTION } from 'src/configs/gridConfig'
 import CustomPagination from 'src/components/custom-pagination'
 import IconifyIcon from 'src/components/Icon'
@@ -58,7 +67,7 @@ import InputSearch from 'src/components/input-search'
 import CreateEditRole from './component/CreateEditUser'
 import Spinner from 'src/components/spinner'
 import ConfirmationDialog from 'src/components/confirmation-dialog'
-import { deleteRole, getDetailsRole } from 'src/services/role'
+import { deleteRole, getAllRoles, getDetailsRole } from 'src/services/role'
 import { OBJECT_TYPE_ERROR_ROLE } from 'src/configs/role'
 import { PERMISSIONS } from 'src/configs/permission'
 import { getAllValueOfObject, toFullName } from 'src/utils'
@@ -70,6 +79,8 @@ import { deleteMultipleUserAsync, deleteUserAsync, getAllUsersAsync } from 'src/
 import { getDetailsUser } from 'src/services/user'
 import CreateEditUser from './component/CreateEditUser'
 import TableHeader from 'src/components/table-header'
+import CustomSelect from 'src/components/custom-select'
+import { OBJECT_STATUS_USER } from 'src/configs/user'
 
 type TProps = {}
 
@@ -81,11 +92,25 @@ type TDefaultValue = {
 
 type TSelectedRow = { id: string; role: { name: string; permissions: string[] } }
 
+const ActiveUserStyled = styled(Chip)<ChipProps>(({ theme }) => ({
+  backgroundColor: '#28c76f29',
+  color: '#3a843f',
+  fontSize: '14px',
+  padding: '8px 4px',
+  fontWeight: 400
+}))
+
+const DeactivateUserStyled = styled(Chip)<ChipProps>(({ theme }) => ({
+  backgroundColor: '#da251d29',
+  color: '#da251d',
+  fontSize: '14px',
+  padding: '8px 4px',
+  fontWeight: 400
+}))
 
 const UserListPage: NextPage<TProps> = () => {
-
-    // ** Translate
-    const { t , i18n} = useTranslation()
+  // ** Translate
+  const { t, i18n } = useTranslation()
 
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
@@ -102,21 +127,26 @@ const UserListPage: NextPage<TProps> = () => {
   })
   const [openDeleteMultipleUser, setOpenDeleteMultipleUser] = useState(false)
 
-  const [sortBy, setSortBy] = useState('created asc')
+  const [sortBy, setSortBy] = useState('createdAt desc')
   const [searchBy, setSearchBy] = useState('')
   const [permissonSelected, setPermissonSelected] = useState<string[]>([])
   const [selectedRow, setSelectedRow] = useState<TSelectedRow[]>([])
   const [isDisablePermisson, setIsDisablePermisson] = useState(false)
-  const tableActions = [{label:t("Xoá"), value: "delete"}]
+  const tableActions = [{ label: t('Xoá'), value: 'delete' }]
+  const [optionRoles, setOptionRoles] = useState<{ label: string; value: string }[]>([])
+  const [roleSelected, setRoleSelected] = useState('')
+  const [filterBy, setFilterBy] = useState<Record<string, string>>({})
+  const [statusSelected, setStatusSelected] = useState('')
 
-  console.log("selectedRow", selectedRow)
+  console.log('selectedRow', selectedRow)
 
+  const CONSTANT_STATUS_USER = OBJECT_STATUS_USER()
 
   // ** Router
   const router = useRouter()
   // check permission xem, thêm, xoá, sửa của User  trên từng trang(trang UserList)
-  const {VIEW, CREATE, UPDATE, DELETE} = usePermission("SYSTEM.USER", ["CREATE","VIEW","UPDATE", "DELETE"])
-  console.log("permisson", {VIEW, CREATE, UPDATE, DELETE})
+  const { VIEW, CREATE, UPDATE, DELETE } = usePermission('SYSTEM.USER', ['CREATE', 'VIEW', 'UPDATE', 'DELETE'])
+  console.log('permisson', { VIEW, CREATE, UPDATE, DELETE })
 
   const {
     users,
@@ -133,7 +163,7 @@ const UserListPage: NextPage<TProps> = () => {
     messageErrorMultipleDelete
   } = useSelector((state: RootState) => state.user)
 
-  console.log("userr", users)
+  console.log('userr', users)
 
   // ** Redux
   const dispatch: AppDispatch = useDispatch() //dùng để đưa actions vào reducer xử lý
@@ -141,32 +171,29 @@ const UserListPage: NextPage<TProps> = () => {
   // ** theme
   const theme = useTheme()
 
-
-
   // fetch Api
-
 
   const columns: GridColDef[] = [
     {
-      field: 'fullName', // Trường field sẽ tìm đến key="name" trong data mà mình truyền vào ở dòng row={roles.data}
+      field: i18n.language === 'vi' ? 'lastName' : 'firstName', // Trường field sẽ tìm đến key="name" trong data mà mình truyền vào ở dòng row={roles.data}
       headerName: t('Full_name'),
       flex: 1,
-      minWidth:200,
-      maxWidth:200,
-      renderCell: params =>{
-        const {row} = params
+      minWidth: 200,
+      maxWidth: 200,
+      renderCell: params => {
+        const { row } = params
         const fullName = toFullName(row?.lastName || '', row?.middleName || '', row?.firstName || '', i18n?.language)
-      
+
         return <Typography>{fullName}</Typography>
       }
     },
     {
       field: 'email', // Trường field sẽ tìm đến key="name" trong data mà mình truyền vào ở dòng row={roles.data}
       headerName: t('Email'),
-      minWidth:200,
-      maxWidth:200,
-      renderCell: params =>{
-        const {row} = params  
+      minWidth: 200,
+      maxWidth: 200,
+      renderCell: params => {
+        const { row } = params
 
         return <Typography>{row?.email}</Typography>
       }
@@ -174,10 +201,10 @@ const UserListPage: NextPage<TProps> = () => {
     {
       field: 'role', // Trường field sẽ tìm đến key="name" trong data mà mình truyền vào ở dòng row={roles.data}
       headerName: t('Role'),
-      minWidth:100,
-      maxWidth:100,
-      renderCell: params =>{
-        const {row} = params  
+      minWidth: 100,
+      maxWidth: 100,
+      renderCell: params => {
+        const { row } = params
 
         return <Typography>{row?.role?.name}</Typography>
       }
@@ -185,10 +212,10 @@ const UserListPage: NextPage<TProps> = () => {
     {
       field: 'phoneNumber', // Trường field sẽ tìm đến key="name" trong data mà mình truyền vào ở dòng row={roles.data}
       headerName: t('Phone_number'),
-      minWidth:150,
-      maxWidth:150,
-      renderCell: params =>{
-        const {row} = params  
+      minWidth: 150,
+      maxWidth: 150,
+      renderCell: params => {
+        const { row } = params
 
         return <Typography>{row?.phoneNumber}</Typography>
       }
@@ -196,12 +223,25 @@ const UserListPage: NextPage<TProps> = () => {
     {
       field: 'city', // Trường field sẽ tìm đến key="name" trong data mà mình truyền vào ở dòng row={roles.data}
       headerName: t('City'),
-      minWidth:150,
-      maxWidth:150,
-      renderCell: params =>{
-        const {row} = params  
+      minWidth: 150,
+      maxWidth: 150,
+      renderCell: params => {
+        const { row } = params
 
         return <Typography>{row?.city}</Typography>
+      }
+    },
+    {
+      field: 'status', // Trường field sẽ tìm đến key="name" trong data mà mình truyền vào ở dòng row={roles.data}
+      headerName: t('Status'),
+      minWidth: 180,
+      maxWidth: 180,
+      renderCell: params => {
+        const { row } = params
+
+        return (
+          <>{row?.status ? <ActiveUserStyled label={t('Active')} /> : <DeactivateUserStyled label={t('Block')} />}</>
+        )
       }
     },
     {
@@ -217,36 +257,58 @@ const UserListPage: NextPage<TProps> = () => {
 
         return (
           <Box sx={{ width: '100%' }}>
-              <>
-                <GridEdit
-                  disabled={!UPDATE}
-                  onClick={() =>
-                    setOpenCreateEdit({
-                      open: true,
-                      id: String(row._id)
-                    })
-                  }
-                />
-                <GridDelete
-                  disabled={!DELETE}
-                  onClick={() =>
-                    setOpenDeleteUser({
-                      open: true,
-                      id: String(row._id)
-                    })
-                  }
-                />
-              </>
+            <Box>
+              <GridEdit
+                disabled={!UPDATE}
+                onClick={() =>
+                  setOpenCreateEdit({
+                    open: true,
+                    id: String(row._id)
+                  })
+                }
+              />
+              <GridDelete
+                disabled={!DELETE}
+                onClick={() =>
+                  setOpenDeleteUser({
+                    open: true,
+                    id: String(row._id)
+                  })
+                }
+              />
+            </Box>
           </Box>
         )
       }
     }
   ]
 
-  const handleOnchangePagination = (page: number, pageSize: number) => {
-    
+  const fetchAllRole = async () => {
+    setLoading(true)
+    await getAllRoles({ params: { limit: -1, page: -1 } })
+      .then(res => {
+        const data = res?.data?.roles
+        if (data) {
+          setOptionRoles(
+            data?.map((item: { name: string; _id: string }) => {
+              return {
+                label: item?.name,
+                value: item?._id
+              }
+            })
+          )
+        }
+        setLoading(false)
+      })
+      .catch(e => {
+        setLoading(false)
+      })
   }
 
+  const handleOnchangePagination = (page: number, pageSize: number) => {
+    setPage(page)
+    setPageSize(pageSize)
+  }
 
   const PaginationComponent = () => {
     return (
@@ -270,8 +332,12 @@ const UserListPage: NextPage<TProps> = () => {
   const handleSort = (sort: GridSortModel) => {
     console.log('check', sort)
     const sortOption = sort[0]
-    setSortBy(`${sortOption.field} ${sortOption.sort}`) // đtặ lại sortBy = "name asc" hoặc "name desc"
-    // sắp xếp theo field với thuộc tính sort là ...
+    if (sortOption) {
+      setSortBy(`${sortOption.field} ${sortOption.sort}`) // đtặ lại sortBy = "name asc" hoặc "name desc"
+      // sắp xếp theo field với thuộc tính sort là ...
+    } else {
+      setSortBy('createAt desc')
+    }
   }
 
   const handleConfirmCloseDelete = () => {
@@ -288,7 +354,9 @@ const UserListPage: NextPage<TProps> = () => {
     dispatch(deleteUserAsync(openDeleteUser.id))
   }
   const handleGetListUsers = () => {
-    dispatch(getAllUsersAsync({ params: { limit: -1, page: -1, search: searchBy, order: sortBy } }))
+  const query =  { params: { limit: pageSize, page: page, search: searchBy, order: sortBy, ...filterBy } }
+
+    dispatch(getAllUsersAsync(query))
   }
 
   const handleDeleteMultipleUser = () => {
@@ -299,13 +367,13 @@ const UserListPage: NextPage<TProps> = () => {
     )
   }
 
-  const handleAction = (action:string) =>{
-      switch(action) {
-        case "delete":{
-          setOpenDeleteMultipleUser(true)
-          break;
-        }
+  const handleAction = (action: string) => {
+    switch (action) {
+      case 'delete': {
+        setOpenDeleteMultipleUser(true)
+        break
       }
+    }
   }
 
   const memoDisabledDeleteUser = useMemo(() => {
@@ -313,8 +381,17 @@ const UserListPage: NextPage<TProps> = () => {
   }, [selectedRow])
 
   useEffect(() => {
+    fetchAllRole()
+  }, [])
+
+//khi filter theo Role, Status  (roleSelected (id của role)) thay đổi) thì set lại filterBy
+  useEffect(() =>{
+    setFilterBy({roleId: roleSelected, status: statusSelected})
+  },[roleSelected, statusSelected])
+
+  useEffect(() => {
     handleGetListUsers()
-  }, [sortBy, searchBy])
+  }, [sortBy, searchBy, i18n.language, page, pageSize, filterBy])
 
   // xử lý thông báo khi tạo hoặc update thành công, thất bại
   useEffect(() => {
@@ -373,7 +450,6 @@ const UserListPage: NextPage<TProps> = () => {
     }
   }, [isSuccessMultipleDelete, isErrorMultipleDelete, messageErrorMultipleDelete])
 
-
   console.log('openCE', openCreateEdit)
 
   return (
@@ -408,46 +484,73 @@ const UserListPage: NextPage<TProps> = () => {
         }}
       >
         <Grid container sx={{ height: '100%', width: '100%' }}>
-            {!selectedRow?.length && (
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', mb: 4, width:"100%", gap:4 }}>
-              <Box sx={{ width: '200px' }}>
-                  <InputSearch value={searchBy} onChangeSearch={(value: string) => setSearchBy(value)} />
-                </Box>
-                <GridCreate
-                  disabled={!CREATE}
-                  onClick={() =>
-                    setOpenCreateEdit({
-                      open: true,
-                      id: ''
-                    })
-                  }
+          {!selectedRow?.length && (
+            <Box
+              sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', mb: 4, width: '100%', gap: 4 }}
+            >
+               <Box sx={{ width: '200px' }}>
+                <CustomSelect
+                  fullWidth
+                  onChange={e => {
+                    setStatusSelected(String(e.target.value))
+                  }}
+                  options={Object.values(CONSTANT_STATUS_USER)}
+                  value={statusSelected}
+                  placeholder={t('Status')}
                 />
-               
               </Box>
-            )}
+              <Box sx={{ width: '200px' }}>
+                <CustomSelect
+                  fullWidth
+                  onChange={e => {
+                    setRoleSelected(String(e.target.value))
+                  }}
+                  options={optionRoles}
+                  value={roleSelected}
+                  placeholder={t('Role')}
+                />
+              </Box>
+              <Box sx={{ width: '200px' }}>
+                <InputSearch value={searchBy} onChangeSearch={(value: string) => setSearchBy(value)} />
+              </Box>
+              <GridCreate
+                disabled={!CREATE}
+                onClick={() =>
+                  setOpenCreateEdit({
+                    open: true,
+                    id: ''
+                  })
+                }
+              />
+            </Box>
+          )}
 
-            {selectedRow?.length >0 && (
-              <TableHeader numRow={selectedRow?.length} onClear={() => setSelectedRow([])}
-            actions={[{ label: t('Xóa'), value: 'delete', disabled: memoDisabledDeleteUser }]}  handleAction={handleAction}/>
-            )}
-              <CustomDataGrid
-                rows={users.data}
-                columns={columns}
-                getRowId={row => row._id}
-                disableRowSelectionOnClick
-                autoHeight
-                disableColumnMenu //ẩn tuỳ chọn menu ở các cột
-                // hideFooter //ẩn thanh paginate
-                slots={{
-                  pagination: PaginationComponent //custom lại thanh pagination
-                }}
-                pageSizeOptions={[5]}
-                //cài đặt sort
-                sortingMode='server' // đặt sắp xếp theo phía server, mặc định sẽ là client
-                onSortModelChange={handleSort}
-                sortingOrder={['asc', 'desc']} // quy định những lựa chọn cho sorting
-                checkboxSelection
-                rowSelectionModel={selectedRow?.map(item => item.id)} //set lai checkbox của các dòng : vd khi ấn nút X thì selectedRow=[] => các nút checkbox đã checked sẽ bỏ check
+          {selectedRow?.length > 0 && (
+            <TableHeader
+              numRow={selectedRow?.length}
+              onClear={() => setSelectedRow([])}
+              actions={[{ label: t('Xóa'), value: 'delete', disabled: memoDisabledDeleteUser }]}
+              handleAction={handleAction}
+            />
+          )}
+          <CustomDataGrid
+            rows={users.data}
+            columns={columns}
+            getRowId={row => row._id}
+            disableRowSelectionOnClick
+            autoHeight
+            disableColumnMenu //ẩn tuỳ chọn menu ở các cột
+            // hideFooter //ẩn thanh paginate
+            slots={{
+              pagination: PaginationComponent //custom lại thanh pagination
+            }}
+            pageSizeOptions={[5]}
+            //cài đặt sort
+            sortingMode='server' // đặt sắp xếp theo phía server, mặc định sẽ là client
+            onSortModelChange={handleSort}
+            sortingOrder={['asc', 'desc']} // quy định những lựa chọn cho sorting
+            checkboxSelection
+            rowSelectionModel={selectedRow?.map(item => item.id)} //set lai checkbox của các dòng : vd khi ấn nút X thì selectedRow=[] => các nút checkbox đã checked sẽ bỏ check
             onRowSelectionModelChange={(row: GridRowSelectionModel) => {
               const formatData: any = row.map(id => {
                 const findRow: any = users?.data?.find((item: any) => item._id === id)
@@ -456,9 +559,8 @@ const UserListPage: NextPage<TProps> = () => {
                 }
               })
               setSelectedRow(formatData)
-            }}  
-                
-              />
+            }}
+          />
         </Grid>
       </Box>
     </>
