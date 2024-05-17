@@ -6,7 +6,7 @@ import { API_ENDPOINT } from 'src/configs/api'
 import instanceAxios from 'src/helpers/axios'
 
 //** Type
-import { TParamsCreateUser, TParamsEditUser, TParamsGetUsers } from 'src/types/user'
+import { TParamsCreateUser, TParamsDeleteMultipleUser, TParamsEditUser, TParamsGetUsers } from 'src/types/user'
 
 //giống vs cách dưới nhưng sẽ gọn hơn,có tính mở rộng hơn, chỉ cần khai báo limit, page,... ở trong params
 export const getAllUsers = async (data: { params: TParamsGetUsers }) => {
@@ -57,7 +57,7 @@ export const updateUser = async (data: TParamsEditUser) => {
   }
 }
 
-// dealete role
+// dealete user
 export const deleteUser = async (id: string) => {
   try {
     const res = await instanceAxios.delete(`${API_ENDPOINT.USER.INDEX}/${id}`)
@@ -66,6 +66,24 @@ export const deleteUser = async (id: string) => {
     return res.data
   } catch (error) {
     return error
+  }
+}
+
+//delete many user
+export const deleteMultipleUser = async (data: TParamsDeleteMultipleUser) => {
+  try {
+    const res = await instanceAxios.delete(`${API_ENDPOINT.USER.INDEX}/delete-many`, { data })
+    if (res?.data?.status === 'Success') {
+      return {
+        data: []
+      }
+    }
+
+    return {
+      data: null
+    }
+  } catch (error: any) {
+    return error?.response?.data
   }
 }
 

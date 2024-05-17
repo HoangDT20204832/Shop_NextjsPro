@@ -19,7 +19,7 @@ import {
 interface TConfirmationDialog {
   open: boolean
   handleClose: () => void
-  handleCancle: () => void
+  handleCancel: () => void
   handleConfirm: () => void
   title: string
   description: string
@@ -37,7 +37,7 @@ const StyledDialog = styled(Dialog)(() => ({
 const ConfirmationDialog = (props: TConfirmationDialog) => {
   const { t } = useTranslation()
   const theme = useTheme()
-  const { open, handleClose, handleCancle, handleConfirm, title, description } = props
+  const { open, handleClose, handleCancel, handleConfirm, title, description } = props
 
   return (
     <StyledDialog
@@ -63,7 +63,7 @@ const ConfirmationDialog = (props: TConfirmationDialog) => {
         <Button variant='contained' onClick={handleConfirm}>
           {t('Confirm')}
         </Button>
-        <Button variant='outlined' color='error' onClick={handleCancle} autoFocus>
+        <Button variant='outlined' color='error' onClick={handleCancel} autoFocus>
           {t('Cancel')}
         </Button>
       </DialogActions>

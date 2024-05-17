@@ -1,9 +1,9 @@
 import { changePasswordMe, registerAuth, updateAuthMe } from '../../services/auth'
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
-import { createUser, deleteUser, getAllUsers, updateUser } from 'src/services/user'
+import { createUser, deleteMultipleUser, deleteUser, getAllUsers, updateUser } from 'src/services/user'
 import { TChangePassword } from 'src/types/auth'
-import { TParamsCreateUser, TParamsEditUser, TParamsGetUsers } from 'src/types/user'
+import { TParamsCreateUser, TParamsDeleteMultipleUser, TParamsEditUser, TParamsGetUsers } from 'src/types/user'
 
 export const serviceName = "user"
 export const getAllUsersAsync = createAsyncThunk(
@@ -74,3 +74,9 @@ export const deleteUserAsync = createAsyncThunk(
     }
   }
 )
+
+export const deleteMultipleUserAsync = createAsyncThunk(`${serviceName}/delete-multiple`, async (data: TParamsDeleteMultipleUser) => {
+  const response = await deleteMultipleUser(data)
+
+  return response
+})

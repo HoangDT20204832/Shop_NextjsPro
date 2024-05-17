@@ -116,6 +116,7 @@ const CreateEditUser = (props: TCreateEditUser) => {
           address: data?.address,
           city: data?.city,
           avatar: avatar,
+          status: data?.status
         }))
       } else {
         dispatch(
@@ -200,6 +201,8 @@ const CreateEditUser = (props: TCreateEditUser) => {
       reset({
         ...defaultValues
       })
+      setAvatar("")
+      setShowPassword(false)
     } else if (idUser) {
       fetchDetailsUser(idUser)
     }
@@ -348,7 +351,9 @@ const CreateEditUser = (props: TCreateEditUser) => {
                                     : `rgba(${theme.palette.customColors.main}, 0.42)`
                                 }}
                               >
-                                {t('Role')}
+                                {t('Role')} <span style={{     color: errors?.role
+                                    ? theme.palette.error.main
+                                    : `rgba(${theme.palette.customColors.main}, 0.42)`}}>*</span>
                               </label>
                               <CustomSelect
                                 fullWidth
@@ -452,6 +457,7 @@ const CreateEditUser = (props: TCreateEditUser) => {
                           control={control}
                           render={({ field: { onChange, onBlur, value } }) => (
                             <CustomTextField
+                            required
                               fullWidth
                               label={t('Full_name')}
                               onChange={onChange}

@@ -4,7 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 // ** React
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 // ** Mui
 import {
@@ -47,7 +47,7 @@ import { ROUTE_CONFIG } from 'src/configs/route'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from 'src/hooks/useAuth'
 import CustomDataGrid from 'src/components/custom-data-grid'
-import { GridColDef, GridRowClassNameParams, GridSortModel, GridValueGetterParams } from '@mui/x-data-grid'
+import { GridColDef, GridRowClassNameParams, GridRowSelectionModel, GridSortModel, GridValueGetterParams } from '@mui/x-data-grid'
 import { PAGE_SIZE_OPTION } from 'src/configs/gridConfig'
 import CustomPagination from 'src/components/custom-pagination'
 import IconifyIcon from 'src/components/Icon'
@@ -66,9 +66,10 @@ import { hexToRGBA } from 'src/utils/hex-to-rgba'
 
 // ** Hooks
 import { usePermission } from 'src/hooks/usePermission'
-import { deleteUserAsync, getAllUsersAsync } from 'src/stores/user/actions'
+import { deleteMultipleUserAsync, deleteUserAsync, getAllUsersAsync } from 'src/stores/user/actions'
 import { getDetailsUser } from 'src/services/user'
 import CreateEditUser from './component/CreateEditUser'
+import TableHeader from 'src/components/table-header'
 
 type TProps = {}
 
@@ -78,7 +79,14 @@ type TDefaultValue = {
   confirmNewPassword: string
 }
 
+type TSelectedRow = { id: string; role: { name: string; permissions: string[] } }
+
+
 const UserListPage: NextPage<TProps> = () => {
+
+    // ** Translate
+    const { t , i18n} = useTranslation()
+
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTION[0])
@@ -92,15 +100,17 @@ const UserListPage: NextPage<TProps> = () => {
     open: false,
     id: ''
   })
+  const [openDeleteMultipleUser, setOpenDeleteMultipleUser] = useState(false)
 
   const [sortBy, setSortBy] = useState('created asc')
   const [searchBy, setSearchBy] = useState('')
   const [permissonSelected, setPermissonSelected] = useState<string[]>([])
-  // const [selectedRow, setSelectedRow] = useState({
-  //   id: '',
-  //   name: ''
-  // })
+  const [selectedRow, setSelectedRow] = useState<TSelectedRow[]>([])
   const [isDisablePermisson, setIsDisablePermisson] = useState(false)
+  const tableActions = [{label:t("Xoá"), value: "delete"}]
+
+  console.log("selectedRow", selectedRow)
+
 
   // ** Router
   const router = useRouter()
@@ -117,7 +127,10 @@ const UserListPage: NextPage<TProps> = () => {
     typeError,
     isSuccessDelete,
     isErrorDelete,
-    messagErrorDelete
+    messagErrorDelete,
+    isSuccessMultipleDelete,
+    isErrorMultipleDelete,
+    messageErrorMultipleDelete
   } = useSelector((state: RootState) => state.user)
 
   console.log("userr", users)
@@ -128,8 +141,7 @@ const UserListPage: NextPage<TProps> = () => {
   // ** theme
   const theme = useTheme()
 
-  // ** Translate
-  const { t , i18n} = useTranslation()
+
 
   // fetch Api
 
@@ -173,8 +185,8 @@ const UserListPage: NextPage<TProps> = () => {
     {
       field: 'phoneNumber', // Trường field sẽ tìm đến key="name" trong data mà mình truyền vào ở dòng row={roles.data}
       headerName: t('Phone_number'),
-      minWidth:200,
-      maxWidth:200,
+      minWidth:150,
+      maxWidth:150,
       renderCell: params =>{
         const {row} = params  
 
@@ -268,12 +280,37 @@ const UserListPage: NextPage<TProps> = () => {
       id: ''
     })
   }
+  const handleCloseConfirmDeleteMultipleUser = () => {
+    setOpenDeleteMultipleUser(false)
+  }
+
   const handleDeleteUser = () => {
     dispatch(deleteUserAsync(openDeleteUser.id))
   }
   const handleGetListUsers = () => {
     dispatch(getAllUsersAsync({ params: { limit: -1, page: -1, search: searchBy, order: sortBy } }))
   }
+
+  const handleDeleteMultipleUser = () => {
+    dispatch(
+      deleteMultipleUserAsync({
+        userIds: selectedRow?.map((item: TSelectedRow) => item.id)
+      })
+    )
+  }
+
+  const handleAction = (action:string) =>{
+      switch(action) {
+        case "delete":{
+          setOpenDeleteMultipleUser(true)
+          break;
+        }
+      }
+  }
+
+  const memoDisabledDeleteUser = useMemo(() => {
+    return selectedRow.some((item: TSelectedRow) => item?.role?.permissions?.includes(PERMISSIONS.ADMIN))
+  }, [selectedRow])
 
   useEffect(() => {
     handleGetListUsers()
@@ -323,6 +360,19 @@ const UserListPage: NextPage<TProps> = () => {
     }
   }, [isSuccessDelete, isErrorDelete, messagErrorDelete])
 
+  useEffect(() => {
+    if (isSuccessMultipleDelete) {
+      toast.success(t('Delete_multiple_user_success'))
+      handleGetListUsers()
+      dispatch(resetInitialState())
+      handleCloseConfirmDeleteMultipleUser()
+      setSelectedRow([])
+    } else if (isErrorMultipleDelete && messageErrorMultipleDelete) {
+      toast.error(t('Delete_multiple_user_error'))
+      dispatch(resetInitialState())
+    }
+  }, [isSuccessMultipleDelete, isErrorMultipleDelete, messageErrorMultipleDelete])
+
 
   console.log('openCE', openCreateEdit)
 
@@ -332,10 +382,19 @@ const UserListPage: NextPage<TProps> = () => {
       <ConfirmationDialog
         open={openDeleteUser.open}
         handleClose={handleConfirmCloseDelete}
-        handleCancle={handleConfirmCloseDelete}
+        handleCancel={handleConfirmCloseDelete}
         handleConfirm={handleDeleteUser}
         title={t('Title_delete_user')}
         description={t('Confirm_delete_user')}
+      />
+
+      <ConfirmationDialog
+        open={openDeleteMultipleUser}
+        handleClose={handleCloseConfirmDeleteMultipleUser}
+        handleCancel={handleCloseConfirmDeleteMultipleUser}
+        handleConfirm={handleDeleteMultipleUser}
+        title={t('Title_delete_multiple_user')}
+        description={t('Confirm_delete_multiple_user')}
       />
       <CreateEditUser open={openCreateEdit.open} onClose={handleCloseCreateEdit} idUser={openCreateEdit.id} />
       {isLoading && <Spinner />}
@@ -349,26 +408,32 @@ const UserListPage: NextPage<TProps> = () => {
         }}
       >
         <Grid container sx={{ height: '100%', width: '100%' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', mb: 4, width:"100%", gap:4 }}>
-            <Box sx={{ width: '200px' }}>
-                <InputSearch value={searchBy} onChangeSearch={(value: string) => setSearchBy(value)} />
+            {!selectedRow?.length && (
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', mb: 4, width:"100%", gap:4 }}>
+              <Box sx={{ width: '200px' }}>
+                  <InputSearch value={searchBy} onChangeSearch={(value: string) => setSearchBy(value)} />
+                </Box>
+                <GridCreate
+                  disabled={!CREATE}
+                  onClick={() =>
+                    setOpenCreateEdit({
+                      open: true,
+                      id: ''
+                    })
+                  }
+                />
+               
               </Box>
-              <GridCreate
-                disabled={!CREATE}
-                onClick={() =>
-                  setOpenCreateEdit({
-                    open: true,
-                    id: ''
-                  })
-                }
-              />
-             
-            </Box>
+            )}
+
+            {selectedRow?.length >0 && (
+              <TableHeader numRow={selectedRow?.length} onClear={() => setSelectedRow([])}
+            actions={[{ label: t('Xóa'), value: 'delete', disabled: memoDisabledDeleteUser }]}  handleAction={handleAction}/>
+            )}
               <CustomDataGrid
                 rows={users.data}
                 columns={columns}
                 getRowId={row => row._id}
-                checkboxSelection={false} // ẩn đi checkbox
                 disableRowSelectionOnClick
                 autoHeight
                 disableColumnMenu //ẩn tuỳ chọn menu ở các cột
@@ -381,25 +446,18 @@ const UserListPage: NextPage<TProps> = () => {
                 sortingMode='server' // đặt sắp xếp theo phía server, mặc định sẽ là client
                 onSortModelChange={handleSort}
                 sortingOrder={['asc', 'desc']} // quy định những lựa chọn cho sorting
-                //thêm class  "selected-row" vào dòng được click vào => có id = selectedRow.id  để css cho nó nổi lên
-                // getRowClassName={(params: GridRowClassNameParams) =>{
-                //   // console.log("GridRowClassNameParams", params)
-                //   const {row} = params
-
-                //   return row._id === selectedRow.id ? "selected-row": ""
-                // }}
-                // sx={{
-                //   cursor:"pointer",
-                //   ".selected-row":{
-                //     backgroundColor: `${hexToRGBA(theme.palette.primary.main, 0.08)} !important `,
-                //     color: `${theme.palette.primary.main} !important `,
-                //     fontWeight: 600
-                //   }
-                // }}
-                // onRowClick={row => {
-                //   console.log('roww', { row })
-                //   setSelectedRow({ id: String(row.id), name: row?.row?.name }) //cập nhật selectedRow = id đã click
-                // }}
+                checkboxSelection
+                rowSelectionModel={selectedRow?.map(item => item.id)} //set lai checkbox của các dòng : vd khi ấn nút X thì selectedRow=[] => các nút checkbox đã checked sẽ bỏ check
+            onRowSelectionModelChange={(row: GridRowSelectionModel) => {
+              const formatData: any = row.map(id => {
+                const findRow: any = users?.data?.find((item: any) => item._id === id)
+                if (findRow) {
+                  return { id: findRow?._id, role: findRow?.role }
+                }
+              })
+              setSelectedRow(formatData)
+            }}  
+                
               />
         </Grid>
       </Box>
