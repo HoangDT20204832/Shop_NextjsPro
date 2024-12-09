@@ -321,7 +321,7 @@ const RoleListPage: NextPage<TProps> = () => {
       <ConfirmationDialog
         open={openDeleteRole.open}
         handleClose={handleConfirmCloseDelete}
-        handleCancle={handleConfirmCloseDelete}
+        handleCancel={handleConfirmCloseDelete}
         handleConfirm={handleDeleteRole}
         title={t('title_delete_role')}
         description={t('confirm_delete_role')}
