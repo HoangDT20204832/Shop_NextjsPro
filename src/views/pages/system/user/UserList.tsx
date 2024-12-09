@@ -66,7 +66,7 @@ const UserListPage: NextPage<TProps> = () => {
   const { t } = useTranslation()
 
   // State
-
+  // truyền thêm id vào để phân biệt nếu id ko phải chuỗi rỗng thì nghĩa là mở Modal Edit, ngược lại thì là mở Modal Create
   const [openCreateEdit, setOpenCreateEdit] = useState({
     open: false,
     id: ''
@@ -95,6 +95,7 @@ const UserListPage: NextPage<TProps> = () => {
   const CONSTANT_STATUS_USER = OBJECT_STATUS_USER()
 
   // ** Hooks
+    // check permission xem, thêm, xoá, sửa của User  trên từng trang(trang UserList)
   const { VIEW, UPDATE, DELETE, CREATE } = usePermission('SYSTEM.USER', ['CREATE', 'VIEW', 'UPDATE', 'DELETE'])
   const { i18n } = useTranslation()
 
@@ -139,7 +140,8 @@ const UserListPage: NextPage<TProps> = () => {
   const handleSort = (sort: GridSortModel) => {
     const sortOption = sort[0]
     if (sortOption) {
-      setSortBy(`${sortOption.field} ${sortOption.sort}`)
+      setSortBy(`${sortOption.field} ${sortOption.sort}`)  // đặt lại sortBy = "name asc" hoặc "name desc"
+      // sắp xếp theo field với thuộc tính sort là ...
     } else {
       setSortBy('createdAt desc')
     }
@@ -180,7 +182,7 @@ const UserListPage: NextPage<TProps> = () => {
 
   const columns: GridColDef[] = [
     {
-      field: i18n.language === 'vi' ? 'lastName' : 'firstName',
+      field: i18n.language === 'vi' ? 'lastName' : 'firstName',    // Trường field sẽ tìm đến key="name" trong data mà mình truyền vào ở dòng row={roles.data}
       headerName: t('Full_name'),
       flex: 1,
       minWidth: 200,
@@ -192,7 +194,7 @@ const UserListPage: NextPage<TProps> = () => {
       }
     },
     {
-      field: 'email',
+      field: 'email',           // Trường field sẽ tìm đến key="name" trong data mà mình truyền vào ở dòng row={roles.data}
       headerName: t('Email'),
       minWidth: 200,
       maxWidth: 200,
@@ -320,6 +322,7 @@ const UserListPage: NextPage<TProps> = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortBy, searchBy, i18n.language, page, pageSize, filterBy])
 
+  //khi filter theo Role, Status  (roleSelected (id của role)) thay đổi) thì set lại filterBy
   useEffect(() => {
     setFilterBy({ roleId: roleSelected, status: statusSelected })
   }, [roleSelected, statusSelected])
@@ -328,6 +331,7 @@ const UserListPage: NextPage<TProps> = () => {
     fetchAllRoles()
   }, [])
 
+ // xử lý thông báo khi tạo hoặc update thành công, thất bại
   useEffect(() => {
     if (isSuccessCreateEdit) {
       if (!openCreateEdit.id) {
@@ -339,10 +343,13 @@ const UserListPage: NextPage<TProps> = () => {
       handleCloseCreateEdit()
       dispatch(resetInitialState())
     } else if (isErrorCreateEdit && messageCreateEdit && typeError) {
+     //nêu ko thành công
       const errorConfig = OBJECT_TYPE_ERROR_ROLE[typeError]
       if (errorConfig) {
+      //nếu thao tác sai để trả về typeError  vd = "ALREADY_EXIST" hoặc INTERNAL_SERVER_ERROR
         toast.error(t(errorConfig))
       } else {
+      // nếu bị lỗi nhưng trả  về typeError ko nằm trong khai báo
         if (openCreateEdit.id) {
           toast.error(t('Update_user_error'))
         } else {
@@ -354,6 +361,7 @@ const UserListPage: NextPage<TProps> = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSuccessCreateEdit, isErrorCreateEdit, messageCreateEdit, typeError])
 
+// xử lý khi Delete thành công, thất bại
   useEffect(() => {
     if (isSuccessMultipleDelete) {
       toast.success(t('Delete_multiple_user_success'))
@@ -470,15 +478,16 @@ const UserListPage: NextPage<TProps> = () => {
               }
             }}
             checkboxSelection
-            sortingOrder={['desc', 'asc']}
-            sortingMode='server'
+            //cài đặt sort
+            sortingOrder={['desc', 'asc']}  // quy định những lựa chọn cho sorting
+            sortingMode='server'  // đặt sắp xếp theo phía server, mặc định sẽ là client
             onSortModelChange={handleSort}
             getRowId={row => row._id}
             disableRowSelectionOnClick
             slots={{
-              pagination: PaginationComponent
+              pagination: PaginationComponent   //custom lại thanh pagination
             }}
-            rowSelectionModel={selectedRow?.map(item => item.id)}
+            rowSelectionModel={selectedRow?.map(item => item.id)}  //set lai checkbox của các dòng : vd khi ấn nút X thì selectedRow=[] => các nút checkbox đã checked sẽ bỏ check
             onRowSelectionModelChange={(row: GridRowSelectionModel) => {
               const formatData: any = row.map(id => {
                 const findRow: any = users?.data?.find((item: any) => item._id === id)
@@ -489,7 +498,8 @@ const UserListPage: NextPage<TProps> = () => {
               setSelectedRow(formatData)
             }}
             disableColumnFilter
-            disableColumnMenu
+            disableColumnMenu //ẩn tuỳ chọn menu ở các cột
+            // hideFooter //ẩn thanh paginate
           />
         </Grid>
       </Box>
