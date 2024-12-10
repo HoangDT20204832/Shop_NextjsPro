@@ -1,23 +1,17 @@
+// ** Import Next
+import { NextPage } from 'next'
 
-// Next
-import {NextPage} from 'next'
-
-// ** React
-import { ReactNode } from 'react'
-
-// ** Views
-import BlackLayout from 'src/views/layouts/BlackLayout'
-import RegisterPage from 'src/views/pages/register'
+// ** Config
+import { PERMISSIONS } from 'src/configs/permission'
+// ** Pages
+import DeliveryTypeListPage from 'src/views/pages/settings/delivery-type/DeliveryTypeList'
 
 type TProps = {}
 
- const DeliveryType:NextPage<TProps>=()=> {
-
-  return (
-    <> Day la trang DeliveryType</>
-  )
+const Index: NextPage<TProps> = () => {
+  return <DeliveryTypeListPage />
 }
-  
-export default DeliveryType
 
+Index.permission = [PERMISSIONS.SETTING.DELIVERY_TYPE.VIEW]
 
+export default Index

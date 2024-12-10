@@ -55,7 +55,7 @@ export const getAllValueOfObject = (obj:any, exclude?:string[]) =>{  // lấy t�
     try {
       const values : string[] = [];
       for(const key in obj){
-        if(typeof obj[key] === "object"){
+        if(typeof obj[key] === 'object'){
             values.push(...getAllValueOfObject(obj[key], exclude))
         }else{
           if(!exclude?.includes(obj[key])){
@@ -68,4 +68,13 @@ export const getAllValueOfObject = (obj:any, exclude?:string[]) =>{  // lấy t�
     } catch (error) {
       return []
     }
+}
+
+export const formatDate = (        //chuyển đổi thành giá trị thời gian theo khu vực ta chọn (vi-VN)
+  value: Date | string,
+  formatting: Intl.DateTimeFormatOptions = { month: 'numeric', day: 'numeric', year: 'numeric' }
+) => {
+  if (!value) return value
+
+  return Intl.DateTimeFormat('vi-VN', formatting).format(new Date(value))
 }

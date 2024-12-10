@@ -18,7 +18,7 @@ type TProps = {}
   return <CityListPage/>
 }
 
-City.permisson = [PERMISSIONS.SETTING.CITY.VIEW] 
+City.permission = [PERMISSIONS.SETTING.CITY.VIEW] 
 
 export default City
 

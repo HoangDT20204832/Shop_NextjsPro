@@ -13,7 +13,7 @@ import { TParamsCreateRole, TParamsDeleteRole, TParamsEditRole, TParamsGetRoles 
 //giống vs cách dưới nhưng sẽ gọn hơn,có tính mở rộng hơn, chỉ cần khai báo limit, page,... ở trong params
 export const getAllRoles = async (data: { params: TParamsGetRoles }) => {
   try {
-    const res = await instanceAxios.get(`${API_ENDPOINT.ROLE.INDEX}`, data)
+    const res = await instanceAxios.get(`${API_ENDPOINT.SYSTEM.ROLE.INDEX}`, data)
     console.log('res', res)
 
     return res.data
@@ -25,7 +25,7 @@ export const getAllRoles = async (data: { params: TParamsGetRoles }) => {
 // tương tự vs cách trên nhưng sẽ phải khai báo và mửo dài hơn nếu có nhiêud tham số params hơn
 // export const getAllRoles = async ({ params: TParamsGetRoles }) => {
 //     try {
-//       const res = await instanceAxios.get(`${API_ENDPOINT.ROLE.INDEX}?limit=${params.limit}&page=${params.page}`)
+//       const res = await instanceAxios.get(`${API_ENDPOINT.SYSTEM.ROLE.INDEX}?limit=${params.limit}&page=${params.page}`)
 //       console.log('res', res)
 
 //       return res.data
@@ -37,7 +37,7 @@ export const getAllRoles = async (data: { params: TParamsGetRoles }) => {
 // Tạo role
 export const createRole = async (data: TParamsCreateRole) => {
   try {
-    const res = await instanceAxios.post(`${API_ENDPOINT.ROLE.INDEX}`, data)
+    const res = await instanceAxios.post(`${API_ENDPOINT.SYSTEM.ROLE.INDEX}`, data)
     console.log('res', res)
 
     return res.data
@@ -50,7 +50,7 @@ export const createRole = async (data: TParamsCreateRole) => {
 export const updateRole = async (data: TParamsEditRole) => {
   const { id, ...rests } = data
   try {
-    const res = await instanceAxios.put(`${API_ENDPOINT.ROLE.INDEX}/${id}`, rests)
+    const res = await instanceAxios.put(`${API_ENDPOINT.SYSTEM.ROLE.INDEX}/${id}`, rests)
     console.log('res', res)
 
     return res.data
@@ -62,7 +62,7 @@ export const updateRole = async (data: TParamsEditRole) => {
 // dealete role
 export const deleteRole = async (id: string) => {
   try {
-    const res = await instanceAxios.delete(`${API_ENDPOINT.ROLE.INDEX}/${id}`)
+    const res = await instanceAxios.delete(`${API_ENDPOINT.SYSTEM.ROLE.INDEX}/${id}`)
     console.log('res', res)
 
     return res.data
@@ -74,7 +74,7 @@ export const deleteRole = async (id: string) => {
 //
 export const getDetailsRole = async (id: string) => {
   try {
-    const res = await instanceAxios.get(`${API_ENDPOINT.ROLE.INDEX}/${id}`)
+    const res = await instanceAxios.get(`${API_ENDPOINT.SYSTEM.ROLE.INDEX}/${id}`)
     console.log('res', res)
 
     return res.data

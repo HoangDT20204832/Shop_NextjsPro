@@ -13,36 +13,43 @@ import CustomModal from 'src/components/custom-modal'
 import Spinner from 'src/components/spinner'
 import CustomTextField from 'src/components/text-field'
 // ** Services
-import { getDetailsCity } from 'src/services/city'
+import { getDetailsDeliveryType } from 'src/services/delivery-type'
 // ** Redux
 import { AppDispatch } from 'src/stores'
 import { useDispatch } from 'react-redux'
-import { getAllRoles } from 'src/services/role'
-import { createCityAsync, updateCityAsync } from 'src/stores/city/actions'
+import { createDeliveryTypeAsync, updateDeliveryTypeAsync } from 'src/stores/delivery-type/actions'
 
-interface TCreateEditCity {
+interface TCreateEditDeliveryType {
   open: boolean
   onClose: () => void
-  idCity?: string
+  idDeliveryType?: string
 }
 type TDefaultValue = {
-  name: string
+  name: string,
+  price: string
 }
-const CreateEditCity = (props: TCreateEditCity) => {
+const CreateEditDeliveryType = (props: TCreateEditDeliveryType) => {
   // State
   const [loading, setLoading] = useState(false)
   // ** Props
-  const { open, onClose, idCity } = props
+  const { open, onClose, idDeliveryType } = props
   // Hooks
   const theme = useTheme()
   const { t, i18n } = useTranslation()
   // ** Redux
   const dispatch: AppDispatch = useDispatch()
   const schema = yup.object().shape({
-    name: yup.string().required(t('Required_field'))
+    name: yup.string().required(t('Required_field')),
+    price: yup
+    .string()
+    .required(t('Required_field'))
+    .test('least_value_price', t('least_1000_in_price'), value => {
+      return Number(value) >= 1000
+    })
   })
   const defaultValues: TDefaultValue = {
-    name: ''
+    name: '',
+    price: ''
   }
   const {
     handleSubmit,
@@ -57,32 +64,35 @@ const CreateEditCity = (props: TCreateEditCity) => {
   // handle
   const onSubmit = (data: TDefaultValue) => {
     if (!Object.keys(errors).length) {
-      if (idCity) {
+      if (idDeliveryType) {
         // update
         dispatch(
-          updateCityAsync({
+          updateDeliveryTypeAsync({
             name: data.name,
-            id: idCity
+            id: idDeliveryType,
+            price: data.price
           })
         )
       } else {
         dispatch(
-          createCityAsync({
-            name: data.name
+          createDeliveryTypeAsync({
+            name: data.name,
+            price: data.price
           })
         )
       }
     }
   }
   // fetch
-  const fetchDetailsCity = async (id: string) => {
+  const fetchDetailsDeliveryType = async (id: string) => {
     setLoading(true)
-    await getDetailsCity(id)
+    await getDetailsDeliveryType(id)
       .then(res => {
         const data = res.data
         if (data) {
           reset({
-            name: data?.name
+            name: data?.name,
+            price: data?.price
           })
         }
         setLoading(false)
@@ -96,11 +106,11 @@ const CreateEditCity = (props: TCreateEditCity) => {
       reset({
         ...defaultValues
       })
-    } else if (idCity && open) {
-      fetchDetailsCity(idCity)
+    } else if (idDeliveryType && open) {
+      fetchDetailsDeliveryType(idDeliveryType)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, idCity])
+  }, [open, idDeliveryType])
 
   return (
     <>
@@ -112,13 +122,13 @@ const CreateEditCity = (props: TCreateEditCity) => {
             borderRadius: '15px',
             backgroundColor: theme.palette.customColors.bodyBg
           }}
-          minWidth={{ md: '400px', xs: '80vw' }}
+          minWidth={{ md: '500px', xs: '80vw' }}
           maxWidth={{ md: '50vw', xs: '80vw' }}
         >
           <Box sx={{ display: 'flex', justifyContent: 'center', position: 'relative', paddingBottom: '20px' }}>
             <Typography variant='h4' sx={{ fontWeight: 600 }}>
               {' '}
-              {idCity ? t('Edit_city') : t('Create_city')}
+              {idDeliveryType ? t('Edit_delivery_type') : t('Create_delivery_type')}
             </Typography>
             <IconButton sx={{ position: 'absolute', top: '-4px', right: '-10px' }} onClick={onClose}>
               <Icon icon='material-symbols-light:close' fontSize={'30px'} />
@@ -127,18 +137,18 @@ const CreateEditCity = (props: TCreateEditCity) => {
           <form onSubmit={handleSubmit(onSubmit)} autoComplete='off' noValidate>
             <Box sx={{ backgroundColor: theme.palette.background.paper, borderRadius: '15px', py: 5, px: 4 }}>
               <Grid container item md={12} xs={12}>
-                <Grid item md={12} xs={12}>
+                <Grid item md={12} xs={12} mb={2}>
                   <Controller
                     control={control}
                     render={({ field: { onChange, onBlur, value } }) => (
                       <CustomTextField
                         required
                         fullWidth
-                        label={t('Name_city')}
+                        label={t('Name_delivery_type')}
                         onChange={onChange}
                         onBlur={onBlur}
                         value={value}
-                        placeholder={t('Enter_name_city')}
+                        placeholder={t('Enter_name_delivery_type')}
                         error={Boolean(errors?.name)}
                         helperText={errors?.name?.message}
                       />
@@ -146,11 +156,38 @@ const CreateEditCity = (props: TCreateEditCity) => {
                     name='name'
                   />
                 </Grid>
+
+                <Grid item md={12} xs={12}>
+                  <Controller
+                    control={control}
+                    render={({ field: { onChange, onBlur, value } }) => (
+                      <CustomTextField
+                        required
+                        fullWidth
+                        label={t('Price_delivery_type')}
+                        onChange={e => {
+                          const numValue = e.target.value.replace(/\D/g, '')
+                          onChange(numValue)
+                        }}
+                        inputProps={{
+                          inputMode: 'numeric',
+                          pattern: '[0-9]*'
+                        }}
+                        onBlur={onBlur}
+                        value={value}
+                        placeholder={t('Enter_price_delivery_type')}
+                        error={Boolean(errors?.price)}
+                        helperText={errors?.price?.message}
+                      />
+                    )}
+                    name='price'
+                  />
+                </Grid>
               </Grid>
             </Box>
             <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
               <Button type='submit' variant='contained' sx={{ mt: 3, mb: 2 }}>
-                {!idCity ? t('Create') : t('Update')}
+                {!idDeliveryType ? t('Create') : t('Update')}
               </Button>
             </Box>
           </form>
@@ -159,4 +196,4 @@ const CreateEditCity = (props: TCreateEditCity) => {
     </>
   )
 }
-export default CreateEditCity
+export default CreateEditDeliveryType
