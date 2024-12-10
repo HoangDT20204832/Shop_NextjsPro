@@ -4,20 +4,22 @@ import {NextPage} from 'next'
 
 // ** React
 import { ReactNode } from 'react'
+import { PERMISSIONS } from 'src/configs/permission'
 
 // ** Views
 import BlackLayout from 'src/views/layouts/BlackLayout'
 import RegisterPage from 'src/views/pages/register'
+import CityListPage from 'src/views/pages/settings/city/CityList'
 
 type TProps = {}
 
  const City:NextPage<TProps>=()=> {
 
-  return (
-    <> Day la trang City</>
-  )
+  return <CityListPage/>
 }
-  
+
+City.permisson = [PERMISSIONS.SETTING.CITY.VIEW] 
+
 export default City
 
 
