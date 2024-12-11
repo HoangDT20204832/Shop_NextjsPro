@@ -88,7 +88,7 @@ export const LIST_DATA_PERMISSIONS: any = [
     isParent: false,
     parentValue: 'MANAGE_PRODUCT',
     value: 'PRODUCT_TYPE',
-    isHideView: true
+    // isHideView: true
   },
   { id: 4, name: 'System', isParent: true, value: 'SYSTEM' },
   {

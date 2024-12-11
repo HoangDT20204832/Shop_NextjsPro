@@ -9,12 +9,12 @@ import { GridColDef, GridRowSelectionModel, GridSortModel } from '@mui/x-data-gr
 // ** Redux
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from 'src/stores'
+import { resetInitialState } from 'src/stores/product-type'
 import {
-  deleteDeliveryTypeAsync,
-  deleteMultipleDeliveryTypeAsync,
-  getAllDeliveryTypesAsync
-} from 'src/stores/delivery-type/actions'
-import { resetInitialState } from 'src/stores/delivery-type'
+  deleteMultipleProductTypeAsync,
+  deleteProductTypeAsync,
+  getAllProductTypesAsync
+} from 'src/stores/product-type/actions'
 // ** Components
 import GridDelete from 'src/components/grid-delete'
 import GridEdit from 'src/components/grid-edit'
@@ -25,7 +25,7 @@ import Spinner from 'src/components/spinner'
 import ConfirmationDialog from 'src/components/confirmation-dialog'
 import CustomPagination from 'src/components/custom-pagination'
 import TableHeader from 'src/components/table-header'
-import CreateEditDeliveryType from 'src/views/pages/settings/delivery-type/component/CreateEditDeliveryType'
+import CreateEditProductType from 'src/views/pages/manage-product/product-type/component/CreateEditProductType'
 // ** Others
 import toast from 'react-hot-toast'
 import { OBJECT_TYPE_ERROR_ROLE } from 'src/configs/role'
@@ -38,7 +38,7 @@ import { PAGE_SIZE_OPTION } from 'src/configs/gridConfig'
 import { formatDate } from 'src/utils'
 
 type TProps = {}
-const DeliveryTypeListPage: NextPage<TProps> = () => {
+const ProductTypeListPage: NextPage<TProps> = () => {
   // ** Translate
   const { t } = useTranslation()
   // State
@@ -46,11 +46,11 @@ const DeliveryTypeListPage: NextPage<TProps> = () => {
     open: false,
     id: ''
   })
-  const [openDeleteCity, setOpenDeleteCity] = useState({
+  const [openDeleteProductType, setOpenDeleteProductType] = useState({
     open: false,
     id: ''
   })
-  const [openDeleteMultipleDelivery, setOpenDeleteMultipleDelivery] = useState(false)
+  const [openDeleteMultipleProduct, setOpenDeleteMultipleProduct] = useState(false)
   const [sortBy, setSortBy] = useState('createdAt desc')
   const [searchBy, setSearchBy] = useState('')
   const [loading, setLoading] = useState(false)
@@ -58,7 +58,7 @@ const DeliveryTypeListPage: NextPage<TProps> = () => {
   const [page, setPage] = useState(1)
   const [selectedRow, setSelectedRow] = useState<string[]>([])
   // ** Hooks
-  const { VIEW, UPDATE, DELETE, CREATE } = usePermission('SETTING.DELIVERY_TYPE', [
+  const { VIEW, UPDATE, DELETE, CREATE } = usePermission('MANAGE_PRODUCT.PRODUCT_TYPE', [
     'CREATE',
     'VIEW',
     'UPDATE',
@@ -67,7 +67,7 @@ const DeliveryTypeListPage: NextPage<TProps> = () => {
   /// ** redux
   const dispatch: AppDispatch = useDispatch()
   const {
-    deliveryTypes,
+    productTypes,
     isSuccessCreateEdit,
     isErrorCreateEdit,
     isLoading,
@@ -79,23 +79,23 @@ const DeliveryTypeListPage: NextPage<TProps> = () => {
     isSuccessMultipleDelete,
     isErrorMultipleDelete,
     messageErrorMultipleDelete
-  } = useSelector((state: RootState) => state.deliveryType)
+  } = useSelector((state: RootState) => state.productType)
   // ** theme
   const theme = useTheme()
   // fetch api
-  const handleGetListDeliveryTypes = () => {
+  const handleGetListProductTypes = () => {
     const query = { params: { limit: pageSize, page: page, search: searchBy, order: sortBy } }
-    dispatch(getAllDeliveryTypesAsync(query))
+    dispatch(getAllProductTypesAsync(query))
   }
   // handle
-  const handleCloseConfirmDeleteDeliveryType = () => {
-    setOpenDeleteCity({
+  const handleCloseConfirmDeleteCity = () => {
+    setOpenDeleteProductType({
       open: false,
       id: ''
     })
   }
-  const handleCloseConfirmDeleteMultipleCity = () => {
-    setOpenDeleteMultipleDelivery(false)
+  const handleCloseConfirmDeleteMultipleProductType = () => {
+    setOpenDeleteMultipleProduct(false)
   }
   const handleSort = (sort: GridSortModel) => {
     const sortOption = sort[0]
@@ -111,20 +111,20 @@ const DeliveryTypeListPage: NextPage<TProps> = () => {
       id: ''
     })
   }
-  const handleDeleteDeliveryType = () => {
-    dispatch(deleteDeliveryTypeAsync(openDeleteCity.id))
+  const handleDeleteProductType = () => {
+    dispatch(deleteProductTypeAsync(openDeleteProductType.id))
   }
-  const handleDeleteMultipleDeliveryType = () => {
+  const handleDeleteMultipleCity = () => {
     dispatch(
-      deleteMultipleDeliveryTypeAsync({
-        deliveryTypeIds: selectedRow
+      deleteMultipleProductTypeAsync({
+        productTypeIds: selectedRow
       })
     )
   }
   const handleAction = (action: string) => {
     switch (action) {
       case 'delete': {
-        setOpenDeleteMultipleDelivery(true)
+        setOpenDeleteMultipleProduct(true)
         break
       }
     }
@@ -146,14 +146,14 @@ const DeliveryTypeListPage: NextPage<TProps> = () => {
       }
     },
     {
-      field: 'price',
-      headerName: t('Price'),
+      field: 'slug',
+      headerName: t('Slug'),
       minWidth: 200,
       maxWidth: 200,
       renderCell: params => {
         const { row } = params
-        
-        return <Typography>{row?.price}</Typography>
+
+        return <Typography>{row?.slug}</Typography>
       }
     },
     {
@@ -164,7 +164,7 @@ const DeliveryTypeListPage: NextPage<TProps> = () => {
       renderCell: params => {
         const { row } = params
 
-        return <Typography>{formatDate(row?.createdAt, {dateStyle: "short"})}</Typography>
+        return <Typography>{formatDate(row?.createdAt, { dateStyle: 'short' })}</Typography>
       }
     },
     {
@@ -190,7 +190,7 @@ const DeliveryTypeListPage: NextPage<TProps> = () => {
             <GridDelete
               disabled={!DELETE}
               onClick={() =>
-                setOpenDeleteCity({
+                setOpenDeleteProductType({
                   open: true,
                   id: String(params.id)
                 })
@@ -208,22 +208,22 @@ const DeliveryTypeListPage: NextPage<TProps> = () => {
         pageSizeOptions={PAGE_SIZE_OPTION}
         pageSize={pageSize}
         page={page}
-        rowLength={deliveryTypes.total}
+        rowLength={productTypes.total}
       />
     )
   }
   useEffect(() => {
-    handleGetListDeliveryTypes()
+    handleGetListProductTypes()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortBy, searchBy, page, pageSize])
   useEffect(() => {
     if (isSuccessCreateEdit) {
       if (!openCreateEdit.id) {
-        toast.success(t('Create_delivery_type_success'))
+        toast.success(t('Create_product_type_success'))
       } else {
-        toast.success(t('Update_delivery_type_success'))
+        toast.success(t('Update_product_type_success'))
       }
-      handleGetListDeliveryTypes()
+      handleGetListProductTypes()
       handleCloseCreateEdit()
       dispatch(resetInitialState())
     } else if (isErrorCreateEdit && messageErrorCreateEdit && typeError) {
@@ -232,9 +232,9 @@ const DeliveryTypeListPage: NextPage<TProps> = () => {
         toast.error(t(errorConfig))
       } else {
         if (openCreateEdit.id) {
-          toast.error(t('Update_delivery_type_error'))
+          toast.error(t('Update_product_type_error'))
         } else {
-          toast.error(t('Create_delivery_type_error'))
+          toast.error(t('Create_product_type_error'))
         }
       }
       dispatch(resetInitialState())
@@ -243,24 +243,24 @@ const DeliveryTypeListPage: NextPage<TProps> = () => {
   }, [isSuccessCreateEdit, isErrorCreateEdit, messageErrorCreateEdit, typeError])
   useEffect(() => {
     if (isSuccessMultipleDelete) {
-      toast.success(t('Delete_multiple_delivery_type_success'))
-      handleGetListDeliveryTypes()
+      toast.success(t('Delete_multiple_product_type_success'))
+      handleGetListProductTypes()
       dispatch(resetInitialState())
-      handleCloseConfirmDeleteMultipleCity()
+      handleCloseConfirmDeleteMultipleProductType()
       setSelectedRow([])
     } else if (isErrorMultipleDelete && messageErrorMultipleDelete) {
-      toast.error(t('Delete_multiple_delivery_type_error'))
+      toast.error(t('Delete_multiple_product_type_error'))
       dispatch(resetInitialState())
     }
   }, [isSuccessMultipleDelete, isErrorMultipleDelete, messageErrorMultipleDelete])
   useEffect(() => {
     if (isSuccessDelete) {
-      toast.success(t('Delete_delivery_type_success'))
-      handleGetListDeliveryTypes()
+      toast.success(t('Delete_product_type_success'))
+      handleGetListProductTypes()
       dispatch(resetInitialState())
-      handleCloseConfirmDeleteDeliveryType()
+      handleCloseConfirmDeleteCity()
     } else if (isErrorDelete && messageErrorDelete) {
-      toast.error(t('Delete_delivery_type_error'))
+      toast.error(t('Delete_product_type_error'))
       dispatch(resetInitialState())
     }
   }, [isSuccessDelete, isErrorDelete, messageErrorDelete])
@@ -269,25 +269,25 @@ const DeliveryTypeListPage: NextPage<TProps> = () => {
     <>
       {loading && <Spinner />}
       <ConfirmationDialog
-        open={openDeleteCity.open}
-        handleClose={handleCloseConfirmDeleteDeliveryType}
-        handleCancel={handleCloseConfirmDeleteDeliveryType}
-        handleConfirm={handleDeleteDeliveryType}
-        title={t('Title_delete_delivery_type')}
-        description={t('Confirm_delete_delivery_type')}
+        open={openDeleteProductType.open}
+        handleClose={handleCloseConfirmDeleteCity}
+        handleCancel={handleCloseConfirmDeleteCity}
+        handleConfirm={handleDeleteProductType}
+        title={t('Title_delete_product_type')}
+        description={t('Confirm_delete_product_type')}
       />
       <ConfirmationDialog
-        open={openDeleteMultipleDelivery}
-        handleClose={handleCloseConfirmDeleteMultipleCity}
-        handleCancel={handleCloseConfirmDeleteMultipleCity}
-        handleConfirm={handleDeleteMultipleDeliveryType}
-        title={t('Title_delete_multiple_delivery_type')}
-        description={t('Confirm_delete_multiple_delivery_type')}
+        open={openDeleteMultipleProduct}
+        handleClose={handleCloseConfirmDeleteMultipleProductType}
+        handleCancel={handleCloseConfirmDeleteMultipleProductType}
+        handleConfirm={handleDeleteMultipleCity}
+        title={t('Title_delete_multiple_product_type')}
+        description={t('Confirm_delete_multiple_product_type')}
       />
-      <CreateEditDeliveryType
+      <CreateEditProductType
         open={openCreateEdit.open}
         onClose={handleCloseCreateEdit}
-        idDeliveryType={openCreateEdit.id}
+        idProductType={openCreateEdit.id}
       />
       {isLoading && <Spinner />}
       <Box
@@ -328,7 +328,7 @@ const DeliveryTypeListPage: NextPage<TProps> = () => {
             />
           )}
           <CustomDataGrid
-            rows={deliveryTypes.data}
+            rows={productTypes.data}
             columns={columns}
             autoHeight
             sx={{
@@ -358,4 +358,4 @@ const DeliveryTypeListPage: NextPage<TProps> = () => {
     </>
   )
 }
-export default DeliveryTypeListPage
+export default ProductTypeListPage

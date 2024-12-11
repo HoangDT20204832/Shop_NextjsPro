@@ -90,13 +90,13 @@ const PaymentTypeListPage: NextPage<TProps> = () => {
     dispatch(getAllPaymentTypesAsync(query))
   }
   // handle
-  const handleCloseConfirmDeleteCity = () => {
+  const handleCloseConfirmDeletePaymentType = () => {
     setOpenDeleteCity({
       open: false,
       id: ''
     })
   }
-  const handleCloseConfirmDeleteMultipleCity = () => {
+  const handleCloseConfirmDeleteMultiplePaymentType = () => {
     setOpenDeleteMultiplePayment(false)
   }
   const handleSort = (sort: GridSortModel) => {
@@ -113,10 +113,10 @@ const PaymentTypeListPage: NextPage<TProps> = () => {
       id: ''
     })
   }
-  const handleDeleteCity = () => {
+  const handleDeletePaymentType = () => {
     dispatch(deletePaymentTypeAsync(openDeleteCity.id))
   }
-  const handleDeleteMultipleCity = () => {
+  const handleDeleteMultiplePaymentType = () => {
     dispatch(
       deleteMultiplePaymentTypeAsync({
         paymentTypeIds: selectedRow
@@ -248,7 +248,7 @@ const PaymentTypeListPage: NextPage<TProps> = () => {
       toast.success(t('Delete_multiple_payment_type_success'))
       handleGetListPaymentTypes()
       dispatch(resetInitialState())
-      handleCloseConfirmDeleteMultipleCity()
+      handleCloseConfirmDeleteMultiplePaymentType()
       setSelectedRow([])
     } else if (isErrorMultipleDelete && messageErrorMultipleDelete) {
       toast.error(t('Delete_multiple_payment_type_error'))
@@ -260,7 +260,7 @@ const PaymentTypeListPage: NextPage<TProps> = () => {
       toast.success(t('Delete_payment_type_success'))
       handleGetListPaymentTypes()
       dispatch(resetInitialState())
-      handleCloseConfirmDeleteCity()
+      handleCloseConfirmDeletePaymentType()
     } else if (isErrorDelete && messageErrorDelete) {
       toast.error(t('Delete_payment_type_error'))
       dispatch(resetInitialState())
@@ -272,17 +272,17 @@ const PaymentTypeListPage: NextPage<TProps> = () => {
       {loading && <Spinner />}
       <ConfirmationDialog
         open={openDeleteCity.open}
-        handleClose={handleCloseConfirmDeleteCity}
-        handleCancel={handleCloseConfirmDeleteCity}
-        handleConfirm={handleDeleteCity}
+        handleClose={handleCloseConfirmDeletePaymentType}
+        handleCancel={handleCloseConfirmDeletePaymentType}
+        handleConfirm={handleDeletePaymentType}
         title={t('Title_delete_payment_type')}
         description={t('Confirm_delete_payment_type')}
       />
       <ConfirmationDialog
         open={openDeleteMultiplePayment}
-        handleClose={handleCloseConfirmDeleteMultipleCity}
-        handleCancel={handleCloseConfirmDeleteMultipleCity}
-        handleConfirm={handleDeleteMultipleCity}
+        handleClose={handleCloseConfirmDeleteMultiplePaymentType}
+        handleCancel={handleCloseConfirmDeleteMultiplePaymentType}
+        handleConfirm={handleDeleteMultiplePaymentType}
         title={t('Title_delete_multiple_payment_type')}
         description={t('Confirm_delete_multiple_payment_type')}
       />
