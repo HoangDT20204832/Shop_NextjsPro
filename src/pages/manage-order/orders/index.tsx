@@ -19,7 +19,7 @@ type TProps = {}
   )
 }
 //đặt quyền truy cập vào trang Order => chỉ những tài khoản có permissonUser = ["ADMIN.GRANTED"] hoặc bao gồm quyèn như ở dưới(PERMISSIONS.MANAGE_ORDER.ORDER.VIEW]) mới được vào
-Order.permisson = [PERMISSIONS.MANAGE_ORDER.ORDER.VIEW] 
+Order.permission = [PERMISSIONS.MANAGE_ORDER.ORDER.VIEW] 
 export default Order
 
 
