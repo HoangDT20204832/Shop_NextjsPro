@@ -30,7 +30,7 @@ import CustomSelect from 'src/components/custom-select'
 // ** Others
 import toast from 'react-hot-toast'
 import { OBJECT_TYPE_ERROR_ROLE } from 'src/configs/role'
-import { toFullName } from 'src/utils'
+import { toFullName,formatFilter } from 'src/utils'
 import { hexToRGBA } from 'src/utils/hex-to-rgba'
 
 // ** Hooks
@@ -41,6 +41,7 @@ import { PAGE_SIZE_OPTION } from 'src/configs/gridConfig'
 import { PERMISSIONS } from 'src/configs/permission'
 import { getAllRoles } from 'src/services/role'
 import { OBJECT_STATUS_USER } from 'src/configs/user'
+import { getAllCities } from 'src/services/city'
 
 type TProps = {}
 type TSelectedRow = { id: string; role: { name: string; permissions: string[] } }
@@ -83,15 +84,16 @@ const UserListPage: NextPage<TProps> = () => {
   const [searchBy, setSearchBy] = useState('')
 
   const [optionRoles, setOptionRoles] = useState<{ label: string; value: string }[]>([])
-  const [roleSelected, setRoleSelected] = useState('')
-
-  const [statusSelected, setStatusSelected] = useState('')
+  const [optionCities, setOptionCities] = useState<{ label: string; value: string }[]>([])
+  const [roleSelected, setRoleSelected] = useState<string[]>([])
+  const [citySelected, setCitySelected] = useState<string[]>([])
+  const [statusSelected, setStatusSelected] = useState<string[]>([])
 
   const [loading, setLoading] = useState(false)
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTION[0])
   const [page, setPage] = useState(1)
   const [selectedRow, setSelectedRow] = useState<TSelectedRow[]>([])
-  const [filterBy, setFilterBy] = useState<Record<string, string>>({})
+  const [filterBy, setFilterBy] = useState<Record<string, string | string[]>>({})
   const CONSTANT_STATUS_USER = OBJECT_STATUS_USER()
 
   // ** Hooks
@@ -121,7 +123,7 @@ const UserListPage: NextPage<TProps> = () => {
 
   // fetch api
   const handleGetListUsers = () => {
-    const query = { params: { limit: pageSize, page: page, search: searchBy, order: sortBy, ...filterBy } }
+    const query = { params: { limit: pageSize, page: page, search: searchBy, order: sortBy, ...formatFilter(filterBy) } }
     dispatch(getAllUsersAsync(query))
   }
 
@@ -234,7 +236,7 @@ const UserListPage: NextPage<TProps> = () => {
       renderCell: params => {
         const { row } = params
 
-        return <Typography>{row.city}</Typography>
+        return <Typography>{row?.city?.name}</Typography>
       }
     },
     {
@@ -313,6 +315,21 @@ const UserListPage: NextPage<TProps> = () => {
       })
   }
 
+  const fetchAllCities = async () => {
+    setLoading(true)
+    await getAllCities({ params: { limit: -1, page: -1 } })
+      .then(res => {
+        const data = res?.data.cities
+        if (data) {
+          setOptionCities(data?.map((item: { name: string; _id: string }) => ({ label: item.name, value: item._id })))
+        }
+        setLoading(false)
+      })
+      .catch(e => {
+        setLoading(false)
+      })
+  }
+
   const memoDisabledDeleteUser = useMemo(() => {
     return selectedRow.some((item: TSelectedRow) => item?.role?.permissions?.includes(PERMISSIONS.ADMIN))
   }, [selectedRow])
@@ -324,11 +341,12 @@ const UserListPage: NextPage<TProps> = () => {
 
   //khi filter theo Role, Status  (roleSelected (id của role)) thay đổi) thì set lại filterBy
   useEffect(() => {
-    setFilterBy({ roleId: roleSelected, status: statusSelected })
-  }, [roleSelected, statusSelected])
+    setFilterBy({ roleId: roleSelected, status: statusSelected, cityId: citySelected })
+  }, [roleSelected, statusSelected, citySelected])
 
   useEffect(() => {
     fetchAllRoles()
+    fetchAllCities()
   }, [])
 
  // xử lý thông báo khi tạo hoặc update thành công, thất bại
@@ -423,28 +441,46 @@ const UserListPage: NextPage<TProps> = () => {
             <Box
               sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4, mb: 4, width: '100%' }}
             >
+              
               <Box sx={{ width: '200px' }}>
                 <CustomSelect
                   fullWidth
                   onChange={e => {
-                    setStatusSelected(String(e.target.value))
+                    setRoleSelected(e.target.value as string[])
                   }}
-                  options={Object.values(CONSTANT_STATUS_USER)}
-                  value={statusSelected}
-                  placeholder={t('Status')}
-                />
-              </Box>
-              <Box sx={{ width: '200px' }}>
-                <CustomSelect
-                  fullWidth
-                  onChange={e => {
-                    setRoleSelected(String(e.target.value))
-                  }}
+                  multiple
                   options={optionRoles}
                   value={roleSelected}
                   placeholder={t('Role')}
                 />
               </Box>
+
+              <Box sx={{ width: '200px' }}>
+                <CustomSelect
+                  fullWidth
+                  onChange={e => {
+                    setCitySelected(e.target.value as string[])
+                  }}
+                  multiple
+                  options={optionCities}
+                  value={citySelected}
+                  placeholder={t('City')}
+                />
+              </Box>
+
+              <Box sx={{ width: '200px' }}>
+                <CustomSelect
+                  fullWidth
+                  onChange={e => {
+                    setStatusSelected(e.target.value as string[])
+                  }}
+                  multiple
+                  options={Object.values(CONSTANT_STATUS_USER)}
+                  value={statusSelected}
+                  placeholder={t('Status')}
+                />
+              </Box>
+
               <Box sx={{ width: '200px' }}>
                 <InputSearch value={searchBy} onChangeSearch={(value: string) => setSearchBy(value)} />
               </Box>

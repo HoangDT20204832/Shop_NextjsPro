@@ -43,7 +43,6 @@ import IconifyIcon from 'src/components/Icon'
 import { useTranslation } from 'react-i18next'
 import WrapperFileUpload from 'src/components/wrapper-file-upload'
 import { useAuth } from 'src/hooks/useAuth'
-import { getAuthMe } from 'src/services/auth'
 import { UserDataType } from 'src/contexts/types'
 import { convertBase64, separationFullName, toFullName } from 'src/utils'
 import { useDispatch, useSelector } from 'react-redux'
@@ -56,7 +55,10 @@ import FallbackSpinner from 'src/components/fall-back'
 import Spinner from 'src/components/spinner'
 import CustomSelect from 'src/components/custom-select'
 import CustomModal from 'src/components/custom-modal'
+
+import { getAuthMe } from 'src/services/auth'
 import { getAllRoles } from 'src/services/role'
+import { getAllCities } from 'src/services/city'
 
 type TProps = {}
 
@@ -75,6 +77,7 @@ const MyProfilePage: NextPage<TProps> = () => {
   const [avatar, setAvatar] = useState('')
   // const [roleId, setRoleId] = useState('')
   const [optionRoles, setOptionRoles] = useState<{ label: string; value: string }[]>([])
+  const [optionCities, setOptionCities] = useState<{ label: string; value: string }[]>([])
 
   const [isDisableRole, setIsDisableRole] = useState(false)
 
@@ -130,7 +133,7 @@ const MyProfilePage: NextPage<TProps> = () => {
     setLoading(true)
     await getAuthMe()
       .then(async response => {
-        console.log('response: ', response)
+        console.log('response1: ', response)
         setLoading(false)
         const data = response?.data
         if (data) {
@@ -174,8 +177,24 @@ const MyProfilePage: NextPage<TProps> = () => {
       })
   }
 
+  const fetchAllCities = async () => {
+    setLoading(true)
+    await getAllCities({ params: { limit: -1, page: -1 } })
+      .then(res => {
+        const data = res?.data.cities
+        if (data) {
+          setOptionCities(data?.map((item: { name: string; _id: string }) => ({ label: item.name, value: item._id })))
+        }
+        setLoading(false)
+      })
+      .catch(e => {
+        setLoading(false)
+      })
+  }
+
   useEffect(() => {
     fetchAllRole()
+    fetchAllCities()
   }, [])
 
   useEffect(() => {
@@ -199,7 +218,7 @@ const MyProfilePage: NextPage<TProps> = () => {
 
   // console.log('errors', { errors })
   const onSubmit = (data: any) => {
-    console.log('data', { data, errors })
+    console.log('data1111', { data, errors })
     const { firstName, middleName, lastName } = separationFullName(data?.fullName, i18n.language)
     dispatch(
       updateAuthMeAsync({
@@ -210,9 +229,8 @@ const MyProfilePage: NextPage<TProps> = () => {
         middleName: middleName,
         lastName: lastName,
         address: data.address,
-        avatar: avatar
-
-        // city: data.city,
+        avatar: avatar,
+        city: data.city,
       })
     )
   }
@@ -442,7 +460,7 @@ const MyProfilePage: NextPage<TProps> = () => {
                             fontSize: '13px',
                             marginBottom: '4px',
                             display: 'block',
-                            color: errors?.role
+                            color: errors?.city
                               ? theme.palette.error.main
                               : `rgba(${theme.palette.customColors.main}, 0.42)`
                           }}
@@ -452,8 +470,8 @@ const MyProfilePage: NextPage<TProps> = () => {
                         <CustomSelect
                           fullWidth
                           onChange={onChange}
-                          options={[]}
-                          error={Boolean(errors?.role)}
+                          options={optionCities}
+                          error={Boolean(errors?.city)}
                           onBlur={onBlur}
                           value={value}
                           placeholder={t('enter_your_city')}

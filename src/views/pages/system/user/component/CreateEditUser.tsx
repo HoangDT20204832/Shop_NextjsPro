@@ -26,6 +26,7 @@ import WrapperFileUpload from 'src/components/wrapper-file-upload'
 import { EMAIL_REG, PASSWORD_REG } from 'src/configs/regex'
 import { getAllRoles } from 'src/services/role'
 import { getDetailsUser } from 'src/services/user'
+import { getAllCities } from 'src/services/city'
 import { AppDispatch, RootState } from 'src/stores'
 import { createUserAsync, updateUserAsync } from 'src/stores/user/actions'
 import { convertBase64, separationFullName, toFullName } from 'src/utils'
@@ -57,6 +58,7 @@ const CreateEditUser = (props: TCreateEditUser) => {
   const [avatar, setAvatar] = useState('')
   const [optionRoles, setOptionRoles] = useState<{ label: string; value: string }[]>([])
   const [showPassword, setShowPassword] = useState(false)
+  const [optionCities, setOptionCities] = useState<{ label: string; value: string }[]>([])
 
   const dispatch: AppDispatch = useDispatch()
 
@@ -192,8 +194,24 @@ const CreateEditUser = (props: TCreateEditUser) => {
       })
   }
 
+  const fetchAllCities = async () => {
+    setLoading(true)
+    await getAllCities({ params: { limit: -1, page: -1 } })
+      .then(res => {
+        const data = res?.data.cities
+        if (data) {
+          setOptionCities(data?.map((item: { name: string; _id: string }) => ({ label: item.name, value: item._id })))
+        }
+        setLoading(false)
+      })
+      .catch(e => {
+        setLoading(false)
+      })
+  }
+
   useEffect(() => {
     fetchAllRole()
+    fetchAllCities()
   }, [])
 
   useEffect(() => {
@@ -509,7 +527,7 @@ const CreateEditUser = (props: TCreateEditUser) => {
                               <CustomSelect
                                 fullWidth
                                 onChange={onChange}
-                                options={[]}
+                                options={optionCities}
                                 error={Boolean(errors?.role)}
                                 onBlur={onBlur}
                                 value={value}
