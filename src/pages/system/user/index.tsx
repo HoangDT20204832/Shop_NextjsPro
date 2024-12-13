@@ -16,6 +16,6 @@ const User: NextPage<TProps> = () => {
   return <UserListPage />
 }
 
-//đặt quyền truy cập vào trang User => chỉ những tài khoản có permissonUser = ["ADMIN.GRANTED"] hoặc bao gồm quyèn như ở dưới(PERMISSIONS.SYSTEM.USER.VIEW]) mới được vào
-User.permisson = [PERMISSIONS.SYSTEM.USER.VIEW] 
+//đặt quyền truy cập vào trang User => chỉ những tài khoản có permissionUser = ["ADMIN.GRANTED"] hoặc bao gồm quyèn như ở dưới(PERMISSIONS.SYSTEM.USER.VIEW]) mới được vào
+User.permission = [PERMISSIONS.SYSTEM.USER.VIEW] 
 export default User

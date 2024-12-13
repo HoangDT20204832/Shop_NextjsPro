@@ -28,7 +28,7 @@ import TableHeader from 'src/components/table-header'
 import CreateEditPaymentType from 'src/views/pages/settings/payment-type/component/CreateEditPaymentType'
 // ** Others
 import toast from 'react-hot-toast'
-import { OBJECT_TYPE_ERROR_ROLE } from 'src/configs/role'
+import { OBJECT_TYPE_ERROR_PAYMENT } from 'src/configs/error'
 import { hexToRGBA } from 'src/utils/hex-to-rgba'
 // ** Hooks
 import { usePermission } from 'src/hooks/usePermission'
@@ -229,7 +229,7 @@ const PaymentTypeListPage: NextPage<TProps> = () => {
       handleCloseCreateEdit()
       dispatch(resetInitialState())
     } else if (isErrorCreateEdit && messageErrorCreateEdit && typeError) {
-      const errorConfig = OBJECT_TYPE_ERROR_ROLE[typeError]
+      const errorConfig = OBJECT_TYPE_ERROR_PAYMENT[typeError]
       if (errorConfig) {
         toast.error(t(errorConfig))
       } else {

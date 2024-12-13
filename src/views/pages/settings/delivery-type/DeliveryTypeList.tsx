@@ -28,7 +28,7 @@ import TableHeader from 'src/components/table-header'
 import CreateEditDeliveryType from 'src/views/pages/settings/delivery-type/component/CreateEditDeliveryType'
 // ** Others
 import toast from 'react-hot-toast'
-import { OBJECT_TYPE_ERROR_ROLE } from 'src/configs/role'
+import { OBJECT_TYPE_ERROR_DELIVERY } from 'src/configs/error'
 import { hexToRGBA } from 'src/utils/hex-to-rgba'
 // ** Hooks
 import { usePermission } from 'src/hooks/usePermission'
@@ -227,7 +227,7 @@ const DeliveryTypeListPage: NextPage<TProps> = () => {
       handleCloseCreateEdit()
       dispatch(resetInitialState())
     } else if (isErrorCreateEdit && messageErrorCreateEdit && typeError) {
-      const errorConfig = OBJECT_TYPE_ERROR_ROLE[typeError]
+      const errorConfig = OBJECT_TYPE_ERROR_DELIVERY[typeError]
       if (errorConfig) {
         toast.error(t(errorConfig))
       } else {

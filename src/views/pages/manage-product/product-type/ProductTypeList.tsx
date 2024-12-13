@@ -28,7 +28,7 @@ import TableHeader from 'src/components/table-header'
 import CreateEditProductType from 'src/views/pages/manage-product/product-type/component/CreateEditProductType'
 // ** Others
 import toast from 'react-hot-toast'
-import { OBJECT_TYPE_ERROR_ROLE } from 'src/configs/role'
+import { OBJECT_TYPE_ERROR_PRODUCT_TYPE } from 'src/configs/error'
 import { hexToRGBA } from 'src/utils/hex-to-rgba'
 // ** Hooks
 import { usePermission } from 'src/hooks/usePermission'
@@ -227,7 +227,7 @@ const ProductTypeListPage: NextPage<TProps> = () => {
       handleCloseCreateEdit()
       dispatch(resetInitialState())
     } else if (isErrorCreateEdit && messageErrorCreateEdit && typeError) {
-      const errorConfig = OBJECT_TYPE_ERROR_ROLE[typeError]
+      const errorConfig = OBJECT_TYPE_ERROR_PRODUCT_TYPE[typeError]
       if (errorConfig) {
         toast.error(t(errorConfig))
       } else {

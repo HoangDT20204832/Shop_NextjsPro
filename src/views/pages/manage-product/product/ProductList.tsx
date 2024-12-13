@@ -1,16 +1,20 @@
 // ** Next
 import { NextPage } from 'next'
+
 // ** React
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+
 // ** Mui
-import { Box, Grid, Typography, useTheme } from '@mui/material'
+import { Box, Chip, ChipProps, Grid, Typography, styled, useTheme } from '@mui/material'
 import { GridColDef, GridRowSelectionModel, GridSortModel } from '@mui/x-data-grid'
+
 // ** Redux
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from 'src/stores'
-import { deleteCityAsync, deleteMultipleCityAsync, getAllCitiesAsync } from 'src/stores/city/actions'
-import { resetInitialState } from 'src/stores/city'
+import { resetInitialState } from 'src/stores/product'
+import { deleteMultipleProductAsync, deleteProductAsync, getAllProductsAsync } from 'src/stores/product/actions'
+
 // ** Components
 import GridDelete from 'src/components/grid-delete'
 import GridEdit from 'src/components/grid-edit'
@@ -21,45 +25,86 @@ import Spinner from 'src/components/spinner'
 import ConfirmationDialog from 'src/components/confirmation-dialog'
 import CustomPagination from 'src/components/custom-pagination'
 import TableHeader from 'src/components/table-header'
-import CreateEditCity from 'src/views/pages/settings/city/component/CreateEditCity'
+import CreateEditProduct from 'src/views/pages/manage-product/product/component/CreateEditProduct'
+import CustomSelect from 'src/components/custom-select'
 
 // ** Others
 import toast from 'react-hot-toast'
-import { OBJECT_TYPE_ERROR_CITY } from 'src/configs/error'
+import { OBJECT_TYPE_ERROR_PRODUCT } from 'src/configs/error'
 import { hexToRGBA } from 'src/utils/hex-to-rgba'
-import { formatDate } from 'src/utils'
 
 // ** Hooks
 import { usePermission } from 'src/hooks/usePermission'
+
 // ** Config
 import { PAGE_SIZE_OPTION } from 'src/configs/gridConfig'
+import { OBJECT_STATUS_PRODUCT } from 'src/configs/product'
+
+// ** Services
+import { getAllProductTypes } from 'src/services/product-type'
+
+// ** Utils
+import { formatDate } from 'src/utils'
+import { formatFilter } from 'src/utils'
 
 type TProps = {}
-const CityListPage: NextPage<TProps> = () => {
+
+const ActiveUserStyled = styled(Chip)<ChipProps>(({ theme }) => ({
+  backgroundColor: '#28c76f29',
+  color: '#3a843f',
+  fontSize: '14px',
+  padding: '8px 4px',
+  fontWeight: 400
+}))
+
+const DeactivateUserStyled = styled(Chip)<ChipProps>(({ theme }) => ({
+  backgroundColor: '#da251d29',
+  color: '#da251d',
+  fontSize: '14px',
+  padding: '8px 4px',
+  fontWeight: 400
+}))
+
+const ProductListPage: NextPage<TProps> = () => {
   // ** Translate
   const { t } = useTranslation()
+
   // State
+
   const [openCreateEdit, setOpenCreateEdit] = useState({
     open: false,
     id: ''
   })
-  const [openDeleteCity, setOpenDeleteCity] = useState({
+  const [openDeleteProduct, setOpenDeleteProduct] = useState({
     open: false,
     id: ''
   })
-  const [openDeleteMultipleCity, setOpenDeleteMultipleCity] = useState(false)
+  const [openDeleteMultipleProduct, setOpenDeleteMultipleProduct] = useState(false)
   const [sortBy, setSortBy] = useState('createdAt desc')
   const [searchBy, setSearchBy] = useState('')
-  const [loading, setLoading] = useState(false)
+
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTION[0])
   const [page, setPage] = useState(1)
   const [selectedRow, setSelectedRow] = useState<string[]>([])
+  const [optionTypes, setOptionTypes] = useState<{ label: string; value: string }[]>([])
+  const [typeSelected, setTypeSelected] = useState<string[]>([])
+  const [statusSelected, setStatusSelected] = useState<string[]>([])
+  const [filterBy, setFilterBy] = useState<Record<string, string | string[]>>({})
+  const [loading, setLoading] = useState(false)
+  const CONSTANT_STATUS_PRODUCT = OBJECT_STATUS_PRODUCT()
+
   // ** Hooks
-  const { VIEW, UPDATE, DELETE, CREATE } = usePermission('SETTING.CITY', ['CREATE', 'VIEW', 'UPDATE', 'DELETE'])
+  const { VIEW, UPDATE, DELETE, CREATE } = usePermission('MANAGE_PRODUCT.PRODUCT', [
+    'CREATE',
+    'VIEW',
+    'UPDATE',
+    'DELETE'
+  ])
+
   /// ** redux
   const dispatch: AppDispatch = useDispatch()
   const {
-    cities,
+    products,
     isSuccessCreateEdit,
     isErrorCreateEdit,
     isLoading,
@@ -71,24 +116,31 @@ const CityListPage: NextPage<TProps> = () => {
     isSuccessMultipleDelete,
     isErrorMultipleDelete,
     messageErrorMultipleDelete
-  } = useSelector((state: RootState) => state.city)
+  } = useSelector((state: RootState) => state.product)
+
   // ** theme
   const theme = useTheme()
+
   // fetch api
-  const handleGetListCities = () => {
-    const query = { params: { limit: pageSize, page: page, search: searchBy, order: sortBy } }
-    dispatch(getAllCitiesAsync(query))
+  const handleGetListProducts = () => {
+    const query = {
+      params: { limit: pageSize, page: page, search: searchBy, order: sortBy, ...formatFilter(filterBy) }
+    }
+    dispatch(getAllProductsAsync(query))
   }
+
   // handle
-  const handleCloseConfirmDeleteCity = () => {
-    setOpenDeleteCity({
+  const handleCloseConfirmDeleteProduct = () => {
+    setOpenDeleteProduct({
       open: false,
       id: ''
     })
   }
-  const handleCloseConfirmDeleteMultipleCity = () => {
-    setOpenDeleteMultipleCity(false)
+
+  const handleCloseConfirmDeleteMultipleProductType = () => {
+    setOpenDeleteMultipleProduct(false)
   }
+
   const handleSort = (sort: GridSortModel) => {
     const sortOption = sort[0]
     if (sortOption) {
@@ -97,34 +149,56 @@ const CityListPage: NextPage<TProps> = () => {
       setSortBy('createdAt desc')
     }
   }
+
   const handleCloseCreateEdit = () => {
     setOpenCreateEdit({
       open: false,
       id: ''
     })
   }
-  const handleDeleteCity = () => {
-    dispatch(deleteCityAsync(openDeleteCity.id))
+
+  const handleDeleteProduct = () => {
+    dispatch(deleteProductAsync(openDeleteProduct.id))
   }
-  const handleDeleteMultipleCity = () => {
+
+  const handleDeleteMultipleProduct = () => {
     dispatch(
-      deleteMultipleCityAsync({
-        cityIds: selectedRow
+      deleteMultipleProductAsync({
+        productIds: selectedRow
       })
     )
   }
+
   const handleAction = (action: string) => {
     switch (action) {
       case 'delete': {
-        setOpenDeleteMultipleCity(true)
+        setOpenDeleteMultipleProduct(true)
         break
       }
     }
   }
+
   const handleOnchangePagination = (page: number, pageSize: number) => {
     setPage(page)
     setPageSize(pageSize)
   }
+
+  // ** fetch api
+  const fetchAllTypes = async () => {
+    setLoading(true)
+    await getAllProductTypes({ params: { limit: -1, page: -1 } })
+      .then(res => {
+        const data = res?.data.productTypes
+        if (data) {
+          setOptionTypes(data?.map((item: { name: string; _id: string }) => ({ label: item.name, value: item._id })))
+        }
+        setLoading(false)
+      })
+      .catch(e => {
+        setLoading(false)
+      })
+  }
+
   const columns: GridColDef[] = [
     {
       field: 'name',
@@ -138,6 +212,39 @@ const CityListPage: NextPage<TProps> = () => {
       }
     },
     {
+      field: 'type',
+      headerName: t('type'),
+      minWidth: 200,
+      maxWidth: 200,
+      renderCell: params => {
+        const { row } = params
+
+        return <Typography>{row?.type.name}</Typography>
+      }
+    },
+    {
+      field: 'price',
+      headerName: t('Price'),
+      minWidth: 200,
+      maxWidth: 200,
+      renderCell: params => {
+        const { row } = params
+
+        return <Typography>{row?.price}</Typography>
+      }
+    },
+    {
+      field: 'countInStock',
+      headerName: t('type'),
+      minWidth: 200,
+      maxWidth: 200,
+      renderCell: params => {
+        const { row } = params
+
+        return <Typography>{row?.countInStock}</Typography>
+      }
+    },
+    {
       field: 'createdAt',
       headerName: t('Created_date'),
       minWidth: 180,
@@ -145,7 +252,20 @@ const CityListPage: NextPage<TProps> = () => {
       renderCell: params => {
         const { row } = params
 
-        return <Typography>{formatDate(row?.createdAt, {dateStyle: "short"})}</Typography>
+        return <Typography>{formatDate(row?.createdAt, { dateStyle: 'short' })}</Typography>
+      }
+    },
+    {
+      field: 'status',
+      headerName: t('Status'),
+      minWidth: 180,
+      maxWidth: 180,
+      renderCell: params => {
+        const { row } = params
+
+        return (
+          <>{row.status ? <ActiveUserStyled label={t('Public')} /> : <DeactivateUserStyled label={t('Private')} />}</>
+        )
       }
     },
     {
@@ -171,7 +291,7 @@ const CityListPage: NextPage<TProps> = () => {
             <GridDelete
               disabled={!DELETE}
               onClick={() =>
-                setOpenDeleteCity({
+                setOpenDeleteProduct({
                   open: true,
                   id: String(params.id)
                 })
@@ -189,83 +309,95 @@ const CityListPage: NextPage<TProps> = () => {
         pageSizeOptions={PAGE_SIZE_OPTION}
         pageSize={pageSize}
         page={page}
-        rowLength={cities.total}
+        rowLength={products.total}
       />
     )
   }
+
   useEffect(() => {
-    handleGetListCities()
+    handleGetListProducts()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sortBy, searchBy, page, pageSize])
+  }, [sortBy, searchBy, page, pageSize, filterBy])
+
   useEffect(() => {
     if (isSuccessCreateEdit) {
       if (!openCreateEdit.id) {
-        toast.success(t('Create_city_success'))
+        toast.success(t('Create_product_success'))
       } else {
-        toast.success(t('Update_city_success'))
+        toast.success(t('Update_product_success'))
       }
-      handleGetListCities()
+      handleGetListProducts()
       handleCloseCreateEdit()
       dispatch(resetInitialState())
     } else if (isErrorCreateEdit && messageErrorCreateEdit && typeError) {
-      const errorConfig = OBJECT_TYPE_ERROR_CITY[typeError]
+      const errorConfig = OBJECT_TYPE_ERROR_PRODUCT[typeError]
       if (errorConfig) {
         toast.error(t(errorConfig))
       } else {
         if (openCreateEdit.id) {
-          toast.error(t('Update_city_error'))
+          toast.error(t('Update_product_error'))
         } else {
-          toast.error(t('Create_city_error'))
+          toast.error(t('Create_product_error'))
         }
       }
       dispatch(resetInitialState())
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isSuccessCreateEdit, isErrorCreateEdit, messageErrorCreateEdit, typeError])
+
   useEffect(() => {
     if (isSuccessMultipleDelete) {
-      toast.success(t('Delete_multiple_city_success'))
-      handleGetListCities()
+      toast.success(t('Delete_multiple_product_success'))
+      handleGetListProducts()
       dispatch(resetInitialState())
-      handleCloseConfirmDeleteMultipleCity()
+      handleCloseConfirmDeleteMultipleProductType()
       setSelectedRow([])
     } else if (isErrorMultipleDelete && messageErrorMultipleDelete) {
-      toast.error(t('Delete_multiple_city_error'))
+      toast.error(t('Delete_multiple_product_error'))
       dispatch(resetInitialState())
     }
   }, [isSuccessMultipleDelete, isErrorMultipleDelete, messageErrorMultipleDelete])
+
   useEffect(() => {
     if (isSuccessDelete) {
-      toast.success(t('Delete_city_success'))
-      handleGetListCities()
+      toast.success(t('Delete_product_success'))
+      handleGetListProducts()
       dispatch(resetInitialState())
-      handleCloseConfirmDeleteCity()
+      handleCloseConfirmDeleteProduct()
     } else if (isErrorDelete && messageErrorDelete) {
-      toast.error(t('Delete_city_error'))
+      toast.error(t('Delete_product_error'))
       dispatch(resetInitialState())
     }
   }, [isSuccessDelete, isErrorDelete, messageErrorDelete])
+
+  useEffect(() => {
+    setFilterBy({ productType: typeSelected, status: statusSelected })
+  }, [typeSelected, statusSelected])
+
+  useEffect(() => {
+    fetchAllTypes()
+  }, [])
 
   return (
     <>
       {loading && <Spinner />}
       <ConfirmationDialog
-        open={openDeleteCity.open}
-        handleClose={handleCloseConfirmDeleteCity}
-        handleCancel={handleCloseConfirmDeleteCity}
-        handleConfirm={handleDeleteCity}
-        title={t('Title_delete_city')}
-        description={t('Confirm_delete_city')}
+        open={openDeleteProduct.open}
+        handleClose={handleCloseConfirmDeleteProduct}
+        handleCancel={handleCloseConfirmDeleteProduct}
+        handleConfirm={handleDeleteProduct}
+        title={t('Title_delete_product')}
+        description={t('Confirm_delete_product')}
       />
       <ConfirmationDialog
-        open={openDeleteMultipleCity}
-        handleClose={handleCloseConfirmDeleteMultipleCity}
-        handleCancel={handleCloseConfirmDeleteMultipleCity}
-        handleConfirm={handleDeleteMultipleCity}
-        title={t('Title_delete_multiple_city')}
-        description={t('Confirm_delete_multiple_city')}
+        open={openDeleteMultipleProduct}
+        handleClose={handleCloseConfirmDeleteMultipleProductType}
+        handleCancel={handleCloseConfirmDeleteMultipleProductType}
+        handleConfirm={handleDeleteMultipleProduct}
+        title={t('Title_delete_multiple_product')}
+        description={t('Confirm_delete_multiple_product')}
       />
-      <CreateEditCity open={openCreateEdit.open} onClose={handleCloseCreateEdit} idCity={openCreateEdit.id} />
+      <CreateEditProduct open={openCreateEdit.open} onClose={handleCloseCreateEdit} idProduct={openCreateEdit.id} />
       {isLoading && <Spinner />}
       <Box
         sx={{
@@ -282,6 +414,30 @@ const CityListPage: NextPage<TProps> = () => {
             <Box
               sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4, mb: 4, width: '100%' }}
             >
+              <Box sx={{ width: '200px' }}>
+                <CustomSelect
+                  fullWidth
+                  onChange={e => {
+                    setTypeSelected(e.target.value as string[])
+                  }}
+                  multiple
+                  options={optionTypes}
+                  value={typeSelected}
+                  placeholder={t('Type_product')}
+                />
+              </Box>
+              <Box sx={{ width: '200px' }}>
+                <CustomSelect
+                  fullWidth
+                  onChange={e => {
+                    setStatusSelected(e.target.value as string[])
+                  }}
+                  multiple
+                  options={Object.values(CONSTANT_STATUS_PRODUCT)}
+                  value={statusSelected}
+                  placeholder={t('Status')}
+                />
+              </Box>
               <Box sx={{ width: '200px' }}>
                 <InputSearch value={searchBy} onChangeSearch={(value: string) => setSearchBy(value)} />
               </Box>
@@ -305,7 +461,7 @@ const CityListPage: NextPage<TProps> = () => {
             />
           )}
           <CustomDataGrid
-            rows={cities.data}
+            rows={products.data}
             columns={columns}
             autoHeight
             sx={{
@@ -335,4 +491,5 @@ const CityListPage: NextPage<TProps> = () => {
     </>
   )
 }
-export default CityListPage
+
+export default ProductListPage
