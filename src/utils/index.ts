@@ -1,3 +1,6 @@
+// ** Types
+import { TItemOrderProduct } from 'src/types/order-product'
+
 import { ContentState, EditorState } from 'draft-js'
 import htmlToDraft from 'html-to-draftjs'
 
@@ -127,5 +130,36 @@ export const formatNumberToLocal = (value: string | number) => {
     })
   } catch (error) {
     return value
+  }
+}
+
+// Sao chép sâu (deep clone): Hàm này sao chép toàn bộ dữ liệu (bao gồm cả các object lồng nhau) từ biến gốc sang một biến mới. 
+//Điều này đảm bảo rằng các thay đổi trên bản sao sẽ không ảnh hưởng đến dữ liệu gốc.
+//Đảm bảo tính bất biến: Redux yêu cầu trạng thái (state) phải được thay đổi một cách bất biến, 
+//tức là không được thay đổi trực tiếp giá trị của trạng thái gốc mà phải tạo ra một trạng thái mới. Hàm này hỗ trợ đảm bảo yêu cầu đó.
+export const cloneDeep = (data: any) => {
+  try {
+    return JSON.parse(JSON.stringify(data))
+  } catch (error) {
+    return data
+  }
+}
+
+//Quản lý giỏ hàng trong Redux: Hàm này xử lý logic cập nhật giỏ hàng (cart) khi người dùng thêm sản phẩm:
+//Tìm xem sản phẩm có sẵn trong danh sách giỏ hàng (orderItems) hay không.Nếu sản phẩm đã có, tăng số lượng (amount) của sản phẩm đó.Nếu sản phẩm chưa có, thêm sản phẩm vào giỏ hàng.
+//Tính bất biến: Hàm sử dụng cloneDeep để sao chép trạng thái ban đầu của orderItems. Điều này đảm bảo rằng trạng thái cũ không bị thay đổi trực tiếp, đáp ứng yêu cầu của Redux về tính bất biến.
+export const convertAddProductToCart = (orderItems: TItemOrderProduct[], addItem: TItemOrderProduct) => {
+  try {
+    const cloneOrderItems = cloneDeep(orderItems)
+    const findItems = cloneOrderItems.find((item: TItemOrderProduct) => item.product === addItem.product)
+    if (findItems) {
+      findItems.amount += addItem.amount
+    } else {
+      cloneOrderItems.push(addItem)
+    }
+
+    return cloneOrderItems
+  } catch (error) {
+    return orderItems
   }
 }

@@ -25,6 +25,10 @@ import instanceAxios from 'src/helpers/axios'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 
+import { useDispatch } from 'react-redux'
+import { AppDispatch } from 'src/stores'
+import { addProductToCart } from 'src/stores/order-product'
+
 // ** Defaults
 const defaultProvider: AuthValuesType = {
   user: null,
@@ -51,6 +55,9 @@ const AuthProvider = ({ children }: Props) => {
 
   // ** Language
   const { t } = useTranslation()
+
+  // ** Redux
+  const dispatch:AppDispatch = useDispatch()
 
   useEffect(() => {
     //chaỵ vào initAuth() khi đã đăng nhập, rồi refresh lại trang
@@ -126,7 +133,12 @@ const AuthProvider = ({ children }: Props) => {
     logoutAuth().then(res => {
       setUser(null)
       clearLocalUserData()
-      router.push('/login')
+
+      dispatch(
+        addProductToCart({
+          orderItems: []
+        })
+      )
     })
   }
 

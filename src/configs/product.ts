@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next"
 
+export const LOCAL_PRODUCT_CART = "productCart"
+
 export const OBJECT_STATUS_PRODUCT = () => {
     const {t} = useTranslation()
     
@@ -17,7 +19,7 @@ export const OBJECT_STATUS_PRODUCT = () => {
 
 export const FILTER_REVIEW_PRODUCT = () => {
     const {t} = useTranslation()
-    
+
     return [
         {
             label: t("Từ 4.5 trở lên"),

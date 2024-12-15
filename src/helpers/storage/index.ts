@@ -1,5 +1,7 @@
 // ** Configs
 import { ACCESS_TOKEN, REFRESH_TOKEN, TEMPORARY_TOKEN, USER_DATA } from 'src/configs/auth'
+import { LOCAL_PRODUCT_CART } from 'src/configs/product'
+import { TItemOrderProduct } from 'src/types/order-product'
 
 export const setLocalUserData = (userData: string, accessToken: string, refreshToken: string) => {
   if(typeof window !== 'undefined'){ 
@@ -66,3 +68,17 @@ export const clearTemporaryToken = () => {
   }
 }
 
+// Hàm này có tácd dụng lưu trữ danh sách product thêm vaoof dữ hàng trên localstrorage
+export const setLocalProductToCart = (data: Record<string, TItemOrderProduct[]>) => {
+  console.log("data", {data})
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(LOCAL_PRODUCT_CART, JSON.stringify(data))
+  }
+}
+export const getLocalProductCart = () => {
+  if (typeof window !== 'undefined') {
+    return window.localStorage.getItem(LOCAL_PRODUCT_CART)
+  }
+
+  return ""
+}

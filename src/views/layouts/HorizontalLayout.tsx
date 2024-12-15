@@ -17,6 +17,8 @@ import IconifyIcon from 'src/components/Icon'
 import UserDropdown from 'src/views/layouts/components/user-dropdown'
 import ModeToggle from './components/mode-toggle'
 import LanguageDropdown from './components/language-dropdown'
+import CartProduct from 'src/views/layouts/components/cart-product'
+
 import { useAuth } from 'src/hooks/useAuth'
 import { Button } from '@mui/material'
 import { useRouter } from 'next/router'
@@ -93,6 +95,7 @@ const HorizontalLayout: NextPage<TProps> = ({ open, toggleDrawer, isHideMenu }) 
         </Typography>
         <LanguageDropdown />
         <ModeToggle />
+        <CartProduct />
         {user ? (
           <UserDropdown />
         ) : (
