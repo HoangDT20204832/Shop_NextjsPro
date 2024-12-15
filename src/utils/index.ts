@@ -148,8 +148,9 @@ export const cloneDeep = (data: any) => {
 //Quản lý giỏ hàng trong Redux: Hàm này xử lý logic cập nhật giỏ hàng (cart) khi người dùng thêm sản phẩm:
 //Tìm xem sản phẩm có sẵn trong danh sách giỏ hàng (orderItems) hay không.Nếu sản phẩm đã có, tăng số lượng (amount) của sản phẩm đó.Nếu sản phẩm chưa có, thêm sản phẩm vào giỏ hàng.
 //Tính bất biến: Hàm sử dụng cloneDeep để sao chép trạng thái ban đầu của orderItems. Điều này đảm bảo rằng trạng thái cũ không bị thay đổi trực tiếp, đáp ứng yêu cầu của Redux về tính bất biến.
-export const convertAddProductToCart = (orderItems: TItemOrderProduct[], addItem: TItemOrderProduct) => {
+export const convertUpdateProductToCart = (orderItems: TItemOrderProduct[], addItem: TItemOrderProduct) => {
   try {
+    let result = []
     const cloneOrderItems = cloneDeep(orderItems)
     const findItems = cloneOrderItems.find((item: TItemOrderProduct) => item.product === addItem.product)
     if (findItems) {
@@ -158,7 +159,9 @@ export const convertAddProductToCart = (orderItems: TItemOrderProduct[], addItem
       cloneOrderItems.push(addItem)
     }
 
-    return cloneOrderItems
+    result = cloneOrderItems.filter((item:TItemOrderProduct ) => item.amount)
+
+    return result
   } catch (error) {
     return orderItems
   }

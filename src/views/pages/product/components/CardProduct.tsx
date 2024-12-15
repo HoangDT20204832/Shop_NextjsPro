@@ -20,11 +20,11 @@ import Icon from 'src/components/Icon'
 // ** Redux
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from 'src/stores'
-import { addProductToCart } from 'src/stores/order-product'
+import { updateProductToCart } from 'src/stores/order-product'
 
 // ** Others
 import { ROUTE_CONFIG } from 'src/configs/route'
-import { convertAddProductToCart, formatNumberToLocal } from 'src/utils'
+import { convertUpdateProductToCart, formatNumberToLocal } from 'src/utils'
 
 // ** Storage
 import { getLocalProductCart, setLocalProductToCart } from 'src/helpers/storage'
@@ -61,25 +61,36 @@ const CardProduct = (props: TCardProduct) => {
     router.push(`${ROUTE_CONFIG.PRODUCT}/${slug}`)
   }
 
-  const handleAddProductToCart = (item: TProduct) => {
+  const handleUpdateProductToCart = (item: TProduct) => {
     const productCart = getLocalProductCart()
     const parseData = productCart ? JSON.parse(productCart) : {}
-    const listOrderItems = convertAddProductToCart(orderItems, {
+    const listOrderItems = convertUpdateProductToCart(orderItems, {
       name: item.name,
       amount: 1,
       image: item.image,
       price: item.price,
       discount: item.discount,
-      product: item._id
+      product: item._id,
+      slug: item.slug
     })
-    dispatch(
-      addProductToCart({
-        orderItems: listOrderItems
-      })
-    )
-    if(user?._id) {
+
+    if(user?._id){
+      dispatch(
+        updateProductToCart({
+          orderItems: listOrderItems
+        })
+      )
+
       setLocalProductToCart({ ...parseData, [user?._id]: listOrderItems })
     }
+    else {
+      router.replace({
+        pathname: '/login',
+        query: { returnUrl: router.asPath }
+      })
+    }
+    
+    
   }
 
   return (
@@ -204,7 +215,7 @@ const CardProduct = (props: TCardProduct) => {
             gap: '2px',
             fontWeight: 'bold'
           }}
-          onClick={() => handleAddProductToCart(item)}
+          onClick={() => handleUpdateProductToCart(item)}
         >
           <Icon icon='bx:cart' fontSize={24} style={{ position: 'relative', top: '-2px' }} />
           {t('Add_to_cart')}

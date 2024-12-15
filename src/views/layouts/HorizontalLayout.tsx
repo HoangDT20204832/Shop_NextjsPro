@@ -91,7 +91,9 @@ const HorizontalLayout: NextPage<TProps> = ({ open, toggleDrawer, isHideMenu }) 
           noWrap
           sx={{ flexGrow: 1, fontWeight: '600', cursor: 'pointer' }}
         >
-          <Link href={ROUTE_CONFIG.HOME}>LTTD</Link>
+          <Link style={{ color: 'inherit' }} href={ROUTE_CONFIG.HOME}>
+            LTTD
+          </Link>
         </Typography>
         <LanguageDropdown />
         <ModeToggle />
