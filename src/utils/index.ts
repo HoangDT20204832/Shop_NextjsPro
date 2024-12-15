@@ -119,3 +119,13 @@ export const convertHTMLToDraft = (html: string) => {
 
   return editorState
 }
+// Hàm chuyênmmr đổi hiển thị phân tách fiuawx giá tiền : vd 5000000 =>5.000.000
+export const formatNumberToLocal = (value: string | number) => {
+  try {
+    return Number(value).toLocaleString("vi-VN", {
+      minimumFractionDigits: 0,
+    })
+  } catch (error) {
+    return value
+  }
+}

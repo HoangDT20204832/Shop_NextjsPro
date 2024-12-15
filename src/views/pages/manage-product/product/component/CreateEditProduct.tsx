@@ -195,7 +195,6 @@ const CreateEditProduct = (props: TCreateEditProduct) => {
             price: Number(data.price),
             discountEndDate: data?.discountEndDate || null,
             discountStartDate: data?.discountStartDate || null,
-            city: data.city,
             image: imageProduct,
             type: data.type,
             discount: Number(data.discount) || 0,
@@ -249,8 +248,8 @@ const CreateEditProduct = (props: TCreateEditProduct) => {
             countInStock: data.countInStock,
             price: data.price,
             status: data.status,
-            discountEndDate: data.discountEndDate || null,
-            discountStartDate: data.discountStartDate || null
+            discountEndDate: data.discountEndDate ? new Date(data.discountEndDate) : null, //phải chuyênr thời gian lưu ở phía dâtbase là string lại về dang Date để hiển thị ko bị lỗi
+            discountStartDate: data.discountStartDate ? new Date(data.discountStartDate) : null
           })
           setImageProduct(data?.image)
         }
@@ -352,11 +351,10 @@ const CreateEditProduct = (props: TCreateEditProduct) => {
                             )}
                             {imageProduct ? (
                               <Avatar src={imageProduct} sx={{ width: 100, height: 100 }}>
-                                <Icon icon='ph:user-thin' fontSize={70} />
                               </Avatar>
                             ) : (
                               <Avatar sx={{ width: 100, height: 100 }}>
-                                <Icon icon='ph:user-thin' fontSize={70} />
+                                <Icon icon='fluent-mdl2:product-variant' fontSize={70} />
                               </Avatar>
                             )}
                           </Box>
