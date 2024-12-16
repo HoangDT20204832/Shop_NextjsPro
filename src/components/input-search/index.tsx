@@ -45,7 +45,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }))
 
 interface TInputSearch {
-  value?: string
+  value: string
   onChangeSearch: (value: string) => void,
   placeholder?: string
 }
@@ -56,9 +56,13 @@ const InputSearch = (props: TInputSearch) => {
 
   // const [search, setSearch] = useState<string>("")
   const { value, onChangeSearch, placeholder = t('Search') } = props
-  const [search, setSearch] = useState(value)
+  const [search, setSearch] = useState("")
 
   const debounceSearch = useDebounce(search, 500) //cập nhật giá trị search sau 500ms
+
+  useEffect(() => {
+    setSearch(value)
+  }, [value])
 
   useEffect(() => {
     onChangeSearch(debounceSearch)

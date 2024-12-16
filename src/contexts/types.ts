@@ -19,6 +19,7 @@ export type UserDataType = {
   password: string
   avatar?: string | null
   // phoneNumber: string
+  likedProducts: string[]
 }
 
 export type AuthValuesType = {

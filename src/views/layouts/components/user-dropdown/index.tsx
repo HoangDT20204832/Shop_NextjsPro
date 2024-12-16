@@ -1,6 +1,10 @@
 // ** React
 import React, { useEffect } from 'react'
 
+// ** Next
+import Image from 'next/image'
+import { useRouter } from 'next/router'
+
 // ** Mui Imports
 import Box from '@mui/material/Box'
 import Avatar from '@mui/material/Avatar'
@@ -9,27 +13,29 @@ import MenuItem from '@mui/material/MenuItem'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import Divider from '@mui/material/Divider'
 import IconButton from '@mui/material/IconButton'
-import Typography from '@mui/material/Typography'
 import Tooltip from '@mui/material/Tooltip'
-import Image from 'next/image'
+import { Badge, Typography, styled } from '@mui/material'
+
+// ** Components
+import Icon from 'src/components/Icon'
 
 // ** Hooks
 import { useAuth } from 'src/hooks/useAuth'
-import IconifyIcon from '../../../../components/Icon'
+
+// ** Translate
 import { useTranslation } from 'react-i18next'
-import { useRouter } from 'next/router'
+
+// ** config
 import { ROUTE_CONFIG } from 'src/configs/route'
+
+// ** Utils
 import { toFullName } from 'src/utils'
-import { Badge, styled } from '@mui/material'
+
+// ** Redux
 import { useSelector } from 'react-redux'
 import { RootState } from 'src/stores'
 
-// import PersonAdd from '@mui/icons-material/PersonAdd';
-// import Settings from '@mui/icons-material/Settings';
-// import Logout from '@mui/icons-material/Logout';
-
 type TProps = {}
-
 // custum dấu hoạt động ở avatar
 const StyledBadge = styled(Badge)(({ theme }) => ({
   '& .MuiBadge-badge': {
@@ -61,18 +67,22 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 }))
 
 const UserDropdown = (props: TProps) => {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
-
-  //lây {t} để chuyển đổi ngôn ngư
+  // ** Translation
   const { t, i18n } = useTranslation()
 
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null)
   //lấy thoogn tin user khi đăng nhập và chức năng logout
-  const { user, logout, setUser } = useAuth()
+
+  const { user, logout,setUser } = useAuth()
+
+  // ** Redux
   const {userData} = useSelector((state:RootState) => state.auth)
-  const permissonUser = user?.role?.permissions ?? []
+  const permissionUser = user?.role?.permissions ?? []
 
   const open = Boolean(anchorEl)
+
   const router = useRouter()
+
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget)
   }
@@ -82,8 +92,8 @@ const UserDropdown = (props: TProps) => {
   }
 
   const handleNavigateMyProfile = () => {
-    // dùng với push để điều hướng trang vẫn giống như replace => nhưng khác ở chỗ push dùng khi  muốn cho phép họ quay lại trang trước đó bằng cách sử dụng nút "Back" trong trình duyệt => có thể back về trang home
-    // còn replace thì sử dụng khi bạn không muốn người dùng quay lại trang trước đó bằng cách sử dụng nút "Back" trong trình duyệt // vd trang login thì ko muốn họ back về trang home
+     // dùng với push để điều hướng trang vẫn giống như replace => nhưng khác ở chỗ push dùng khi  muốn cho phép họ quay lại trang trước đó bằng cách sử dụng nút "Back" trong trình duyệt => có thể back về trang home
+    // còn replace thì sử dụng khi bạn không muốn người dùng quay lại trang trước đó bằng cách sử dụng nút "Back" trong trình duyệt // vd trang login thì ko muốn họ back về trang home    router.push(ROUTE_CONFIG.MY_PROFILE)
     router.push(ROUTE_CONFIG.MY_PROFILE)
     handleClose()
   }
@@ -92,15 +102,22 @@ const UserDropdown = (props: TProps) => {
     router.push(ROUTE_CONFIG.CHANGE_PASSWORD)
     handleClose()
   }
+
   const handleNavigateManageSystem = () => {
     router.push(ROUTE_CONFIG.DASHBOARD)
     handleClose()
   }
-  useEffect(() =>{
-      if(userData){
-        setUser({...userData})
-      }
-  },[userData])
+
+  const handleNavigateMyProduct = () => {
+    router.push(ROUTE_CONFIG.MY_PRODUCT)
+    handleClose()
+  }
+
+  useEffect(() => {
+    if(userData) {
+      setUser({...userData})
+    }
+  }, [userData])
 
   return (
     <React.Fragment>
@@ -129,7 +146,7 @@ const UserDropdown = (props: TProps) => {
                     }}
                   />
                 ) : (
-                  <IconifyIcon icon='ph:user-thin' />
+                  <Icon icon='ph:user-thin' />
                 )}
               </Avatar>
             </StyledBadge>
@@ -187,47 +204,47 @@ const UserDropdown = (props: TProps) => {
                   }}
                 />
               ) : (
-                <IconifyIcon icon='ph:user-thin' />
+                <Icon icon='ph:user-thin' />
               )}
             </Avatar>
           </StyledBadge>
-
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography component='span'>
-              {toFullName(user?.lastName || '', user?.middleName || '', user?.firstName || '', i18n?.language)}
+              {toFullName(user?.lastName || '', user?.middleName || '', user?.firstName || '', i18n.language)}
             </Typography>
             <Typography component='span'>{user?.role?.name}</Typography>
           </Box>
         </Box>
         <Divider />
-        {permissonUser.length > 0 && (
+        {permissionUser.length > 0 && (
           <MenuItem onClick={handleNavigateManageSystem}>
             <Avatar>
-              {' '}
-              <IconifyIcon icon='arcticons:phone-manager' />{' '}
+              <Icon icon='arcticons:phone-manager' />
             </Avatar>{' '}
-            {t('manage_system')}
+            {t('Manage_system')}
           </MenuItem>
         )}
-
         <MenuItem onClick={handleNavigateMyProfile}>
           <Avatar>
-            {' '}
-            <IconifyIcon icon='ph:user-thin' />{' '}
+            <Icon icon='ph:user-thin' />
           </Avatar>{' '}
-          {t('my_profile')}
+          {t('My_profile')}
         </MenuItem>
-
-        <MenuItem onClick={handleNavigateChangePassword}>
+        <MenuItem onClick={handleNavigateMyProduct}>
           <Avatar>
-            <IconifyIcon icon='arcticons:passwordgenerator' />
+            <Icon icon="tabler:brand-producthunt" />
+          </Avatar>{' '}
+          {t('My_product')}
+        </MenuItem>
+        <MenuItem onClick={handleNavigateChangePassword}>
+          <Avatar sx={{ backgroundColor: 'transparent' }}>
+            <Icon icon='arcticons:password' />
           </Avatar>
           {t('Change_password')}
         </MenuItem>
-
         <MenuItem onClick={logout}>
           <Avatar sx={{ backgroundColor: 'transparent' }}>
-            <IconifyIcon icon='ic:baseline-log-in' />
+            <Icon icon='material-symbols-light:logout' />
           </Avatar>
           {t('Logout')}
         </MenuItem>

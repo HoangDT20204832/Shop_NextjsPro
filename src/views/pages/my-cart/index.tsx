@@ -11,8 +11,6 @@ import { Avatar, Box, Button, Checkbox, Divider, IconButton, Tooltip, Typography
 import CustomTextField from 'src/components/text-field'
 import Icon from 'src/components/Icon'
 import CustomSelect from 'src/components/custom-select'
-import NoData from 'src/components/no-data'
-
 
 // ** Translate
 import { t } from 'i18next'
@@ -24,6 +22,7 @@ import { hexToRGBA } from 'src/utils/hex-to-rgba'
 
 // ** Redux
 import { updateProductToCart } from 'src/stores/order-product'
+
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from 'src/stores'
 
@@ -33,6 +32,7 @@ import { useAuth } from 'src/hooks/useAuth'
 // ** Other
 import { TItemOrderProduct } from 'src/types/order-product'
 import { getLocalProductCart, setLocalProductToCart } from 'src/helpers/storage'
+import NoData from 'src/components/no-data'
 
 type TProps = {}
 
@@ -189,7 +189,7 @@ const MyCartPage: NextPage<TProps> = () => {
                       <Avatar sx={{ width: '100px', height: '100px' }} src={item.image} />
                       <Typography
                         sx={{
-                          fontSize: '24px',
+                          fontSize: '20px',
                           flexBasis: '35%',
                           maxWidth: '100%',
                           textOverflow: 'ellipsis',
@@ -201,38 +201,33 @@ const MyCartPage: NextPage<TProps> = () => {
                         {item.name}
                       </Typography>
                       <Box sx={{ flexBasis: '20%' }}>
-                        {item.discount > 0 && (
-                          <Typography
-                            variant='h6'
-                            mt={2}
-                            sx={{
-                              color: theme.palette.error.main,
-                              fontWeight: 'bold',
-                              textDecoration: 'line-through',
-                              fontSize: '20px'
-                            }}
-                          >
-                            {formatNumberToLocal(item.price)} VND
-                          </Typography>
-                        )}
-                      </Box>
-                      <Box sx={{ flexBasis: '20%', display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Typography
-                          variant='h4'
+                          variant='h6'
                           mt={2}
                           sx={{
-                            color: theme.palette.primary.main,
+                            color: item.discount > 0 ? theme.palette.error.main : theme.palette.primary.main,
                             fontWeight: 'bold',
-                            fontSize: '20px'
+                            textDecoration: item.discount > 0 ? 'line-through' : 'normal',
+                            fontSize: '18px'
                           }}
                         >
-                          {item.discount > 0 ? (
-                            <>{formatNumberToLocal((item.price * (100 - item.discount)) / 100)}</>
-                          ) : (
-                            <>{formatNumberToLocal(item.price)}</>
-                          )}{' '}
-                          VND
+                          {formatNumberToLocal(item.price)} VND
                         </Typography>
+                      </Box>
+                      <Box sx={{ flexBasis: '20%', display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {item.discount > 0 && (
+                          <Typography
+                            variant='h4'
+                            mt={2}
+                            sx={{
+                              color: theme.palette.primary.main,
+                              fontWeight: 'bold',
+                              fontSize: '18px'
+                            }}
+                          >
+                            {formatNumberToLocal((item.price * (100 - item.discount)) / 100)}
+                          </Typography>
+                        )}
                         {item.discount > 0 && (
                           <Box
                             sx={{
@@ -258,6 +253,7 @@ const MyCartPage: NextPage<TProps> = () => {
                           </Box>
                         )}
                       </Box>
+
                       <Box sx={{ flexBasis: '10%', mt: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
                         <IconButton
                           onClick={() => handleChangeAmountCart(item, -1)}
@@ -324,8 +320,8 @@ const MyCartPage: NextPage<TProps> = () => {
           </Fragment>
         ) : (
           <Box sx={{ padding: '20px', width: '200px' }}>
-          <NoData widthImage='80px' heightImage='80px' textNodata={t('No_product')} />
-        </Box>
+            <NoData widthImage='80px' heightImage='80px' textNodata={t('No_product')} />
+          </Box>
         )}
       </Box>
       <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
