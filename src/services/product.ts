@@ -2,7 +2,8 @@ import {
     TParamsGetProducts,
     TParamsCreateProduct,
     TParamsEditProduct,
-    TParamsDeleteMultipleProduct
+    TParamsDeleteMultipleProduct,
+    TParamsGetRelatedProduct
   } from 'src/types/product'
   // api endPoint
   import { API_ENDPOINT } from 'src/configs/api'
@@ -82,6 +83,17 @@ import {
     try {
       const res = await axios.get(`${API_ENDPOINT.MANAGE_PRODUCT.PRODUCT.INDEX}/public/slug/${slug}`)
 
+      return res.data
+    } catch (error: any) {
+      return error?.response?.data
+    }
+  }
+
+  //Lấy ra các sản phẩm cùng loại
+  export const getListRelatedProductBySlug = async (data: { params: TParamsGetRelatedProduct }) => {
+    try {
+      const res = await axios.get(`${API_ENDPOINT.MANAGE_PRODUCT.PRODUCT.INDEX}/related`, data)
+     
       return res.data
     } catch (error: any) {
       return error?.response?.data

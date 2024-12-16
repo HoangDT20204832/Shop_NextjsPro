@@ -11,6 +11,8 @@ import { Avatar, Box, Button, Checkbox, Divider, IconButton, Tooltip, Typography
 import CustomTextField from 'src/components/text-field'
 import Icon from 'src/components/Icon'
 import CustomSelect from 'src/components/custom-select'
+import NoData from 'src/components/no-data'
+
 
 // ** Translate
 import { t } from 'i18next'
@@ -321,7 +323,9 @@ const MyCartPage: NextPage<TProps> = () => {
             </Box>
           </Fragment>
         ) : (
-          <Box>{t('Không có dữ liệu')}</Box>
+          <Box sx={{ padding: '20px', width: '200px' }}>
+          <NoData widthImage='80px' heightImage='80px' textNodata={t('No_product')} />
+        </Box>
         )}
       </Box>
       <Box sx={{ width: '100%', display: 'flex', justifyContent: 'flex-end', mt: 4 }}>

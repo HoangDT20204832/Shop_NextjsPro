@@ -46,15 +46,16 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 interface TInputSearch {
   value?: string
-  onChangeSearch: (value: string) => void
+  onChangeSearch: (value: string) => void,
+  placeholder?: string
 }
 
 const InputSearch = (props: TInputSearch) => {
   const { t } = useTranslation()
   const theme = useTheme()
-  const { value, onChangeSearch } = props
 
   // const [search, setSearch] = useState<string>("")
+  const { value, onChangeSearch, placeholder = t('Search') } = props
   const [search, setSearch] = useState(value)
 
   const debounceSearch = useDebounce(search, 500) //cập nhật giá trị search sau 500ms
@@ -69,7 +70,7 @@ const InputSearch = (props: TInputSearch) => {
         <IconifyIcon icon='material-symbols-light:search' />
       </SearchIconWrapper>
       <StyledInputBase
-        placeholder='Search…'
+        placeholder={placeholder}
         value={search}
         inputProps={{ 'aria-label': 'search' }}
         onChange={e => {
