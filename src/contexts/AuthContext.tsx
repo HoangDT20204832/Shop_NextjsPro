@@ -8,7 +8,7 @@ import { useRouter } from 'next/router'
 // import axios from 'axios'
 
 // ** Config
-import authConfig from 'src/configs/auth'
+import authConfig , { LIST_PAGE_PUBLIC }from 'src/configs/auth'
 
 // ** Types
 import { AuthValuesType, LoginParams, ErrCallbackType, UserDataType } from './types'
@@ -133,6 +133,19 @@ const AuthProvider = ({ children }: Props) => {
     logoutAuth().then(res => {
       setUser(null)
       clearLocalUserData()
+
+      // nếu khi ấn logout mà trang có đường dẫn bắt đầu là đường dẫn public thì ko đưa về trang login
+      // ngược lại là những trang yêu cầu quyền truy cập khi đăng xuất thì đá về login
+      if (!LIST_PAGE_PUBLIC?.some(item => router.asPath?.startsWith(item))) {
+        if (router.asPath !== '/') {
+          router.replace({
+            pathname: '/login',
+            query: { returnUrl: router.asPath }
+          })
+        } else {
+          router.replace('/login')
+        }
+      }
 
       dispatch(
         updateProductToCart({

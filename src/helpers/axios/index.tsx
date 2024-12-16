@@ -61,6 +61,8 @@ const AxiosInterceptor: FC<TAxiosInterceptor> = ({ children }) => {
     const { accessToken, refreshToken } = getLocalUserData() // chuyển xuống đây để mỗi khi thay mật khẩu,... sẽ lấy acctoken mới nhất
 
     const { temporaryToken } = getTemporaryToken()
+    // phải thêm optionalTraning vào vì ko phải thg cònig.param cunngx có gtri, có thể là undefine
+    const isPublicApi = config?.params?.isPublic
     if (accessToken || temporaryToken) {
       let decodeAccessToken: any = {}
       if (accessToken) {
@@ -111,7 +113,7 @@ const AxiosInterceptor: FC<TAxiosInterceptor> = ({ children }) => {
           handleRedirectLogin(router, setUser)
         }
       }
-    } else {
+    } else if(!isPublicApi) {
       handleRedirectLogin(router, setUser)
     }
 

@@ -1,6 +1,6 @@
 {
     "Account": "Tài khoản",
-    "my_profile": "Hồ sơ của tôi",
+    "My_profile": "Hồ sơ của tôi",
     "enter_your_email": "Nhập email của bạn",
     "Role": "Nhóm vai trò",
     "enter_your_role": "Chọn vai trò của bạn",
@@ -19,7 +19,7 @@
     "Logout": "Đăng xuất",
     "the_email_or_password_is_wrong": "Email hoặc mật khẩu không đúng",
     "login_success": "Đăng nhập thành công",
-    "manage_system": "Quản trị hệ thống",
+    "Manage_system": "Quản trị hệ thống",
     "Name": "Tên",
     "Edit": "Sửa",
     "Actions": "Thao tác",
