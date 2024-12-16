@@ -333,7 +333,7 @@ const MyProfilePage: NextPage<TProps> = () => {
                       <CustomTextField
                         required
                         disabled
-                        autoFocus
+                        
                         fullWidth
                         label={t('Email')}
                         onChange={onChange}
@@ -417,7 +417,7 @@ const MyProfilePage: NextPage<TProps> = () => {
                     control={control}
                     render={({ field: { onChange, onBlur, value } }) => (
                       <CustomTextField
-                        autoFocus
+                        
                         fullWidth
                         label={t('Full_name')}
                         onChange={onChange}
@@ -436,7 +436,7 @@ const MyProfilePage: NextPage<TProps> = () => {
                     control={control}
                     render={({ field: { onChange, onBlur, value } }) => (
                       <CustomTextField
-                        autoFocus
+                        
                         fullWidth
                         label={t('Address')}
                         onChange={onChange}
@@ -498,7 +498,7 @@ const MyProfilePage: NextPage<TProps> = () => {
                     render={({ field: { onChange, onBlur, value } }) => (
                       <CustomTextField
                         required
-                        autoFocus
+                        
                         fullWidth
                         label={t('Phone_number')}
                         onChange={e => {

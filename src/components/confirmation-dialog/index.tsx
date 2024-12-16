@@ -63,7 +63,7 @@ const ConfirmationDialog = (props: TConfirmationDialog) => {
         <Button variant='contained' onClick={handleConfirm}>
           {t('Confirm')}
         </Button>
-        <Button variant='outlined' color='error' onClick={handleCancel} autoFocus>
+        <Button variant='outlined' color='error' onClick={handleCancel} >
           {t('Cancel')}
         </Button>
       </DialogActions>

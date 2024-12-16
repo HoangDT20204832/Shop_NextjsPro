@@ -193,7 +193,7 @@ const ChangePasswordPage: NextPage<TProps> = () => {
                     <CustomTextField
                       required
                       fullWidth
-                      autoFocus
+                      
                       label={t('Current_password')}
                       onChange={onChange}
                       onBlur={onBlur}
@@ -231,7 +231,7 @@ const ChangePasswordPage: NextPage<TProps> = () => {
                     <CustomTextField
                       required
                       fullWidth
-                      autoFocus
+                      
                       label={t('New_password')}
                       onChange={onChange}
                       onBlur={onBlur}
@@ -269,7 +269,7 @@ const ChangePasswordPage: NextPage<TProps> = () => {
                     <CustomTextField
                       required
                       fullWidth
-                      autoFocus
+                      
                       label={t('Confirm_new_password')}
                       onChange={onChange}
                       onBlur={onBlur}

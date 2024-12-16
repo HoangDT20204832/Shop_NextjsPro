@@ -10,7 +10,7 @@ export type TItemOrderProduct = {
 
 export type TParamsCreateOrderProduct = {
   orderItems: TItemOrderProduct[]
-  fullName: string
+  fullName: string | undefined
   address?: string
   city: string
   phone: string
