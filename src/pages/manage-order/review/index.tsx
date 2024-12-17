@@ -2,22 +2,19 @@
 // Next
 import {NextPage} from 'next'
 
-// ** React
-import { ReactNode } from 'react'
-
-// ** Views
-import BlackLayout from 'src/views/layouts/BlackLayout'
-import RegisterPage from 'src/views/pages/register'
+// ** Config
+import { PERMISSIONS } from 'src/configs/permission'
+// ** views
+import ReviewListPage from 'src/views/pages/manage-order/reviews/ReviewList'
 
 type TProps = {}
 
  const Reviews:NextPage<TProps>=()=> {
 
-  return (
-    <> Day la trang Reviews</>
-  )
+  return <ReviewListPage />
 }
 
+Reviews.permission = [PERMISSIONS.MANAGE_ORDER.REVIEW.VIEW]
 export default Reviews
 
 
