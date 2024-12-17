@@ -15,8 +15,8 @@ export type TItemProductMe = {
   price: number
   discount: number
   product: {
-    _id: string,
-    countInStock: number,
+    _id: string
+    countInStock: number
     slug: string
   }
 }
@@ -35,6 +35,18 @@ export type TParamsCreateOrderProduct = {
   deliveryMethod: string
 }
 
+export type TParamsEditOrderProduct = {
+  shippingAddress: {
+    address: string
+    fullName: string
+    phone: string
+    city: string
+  }
+  id: string
+  isPaid: boolean
+  isDelivery: boolean
+}
+
 export type TParamsGetOrderProducts = {
   limit?: number
   page?: number
@@ -48,7 +60,7 @@ export type TItemOrderProductMe = {
     fullName: string
     address: string
     city: {
-      _id: string,
+      _id: string
       name: string
     }
     phone: string
@@ -77,3 +89,5 @@ export type TItemOrderProductMe = {
   isDelivered: number
   status: number
 }
+
+export interface TItemOrderProducts extends TItemOrderProductMe {}
