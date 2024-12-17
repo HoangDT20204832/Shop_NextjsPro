@@ -16,7 +16,18 @@ export const getTimePast = (date: Date, t: any): string => {
       return `${month} ${t("month")}`
     } else {
       const year: number = Math.floor(pastTimeDate / 365)
-      
+
       return `${year} ${t("year")}`
     }
+  }
+
+
+  export const formatDate = (//chuyển đổi thành giá trị thời gian theo khu vực ta chọn (vi-VN)
+
+    value: Date | string,
+    formatting: Intl.DateTimeFormatOptions = { month: 'numeric', day: 'numeric', year: 'numeric' }
+  ) => {
+    if (!value) return value
+
+    return Intl.DateTimeFormat('vi-VN', formatting).format(new Date(value))
   }

@@ -168,8 +168,11 @@ const CheckoutProductPage: NextPage<TProps> = () => {
         shippingPrice: memoPriceShipping,
         totalPrice: totalPrice
       })
-    )
+    ).then((res) => {
+      console.log("resss", {res})
+    })
   }
+  
 
   // ** Fetch API
   const handleGetListPaymentMethod = async () => {

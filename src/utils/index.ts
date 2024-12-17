@@ -76,14 +76,7 @@ export const getAllValueOfObject = (obj:any, exclude?:string[]) =>{  // lấy t�
     }
 }
 
-export const formatDate = (        //chuyển đổi thành giá trị thời gian theo khu vực ta chọn (vi-VN)
-  value: Date | string,
-  formatting: Intl.DateTimeFormatOptions = { month: 'numeric', day: 'numeric', year: 'numeric' }
-) => {
-  if (!value) return value
-
-  return Intl.DateTimeFormat('vi-VN', formatting).format(new Date(value))
-}
+        
 export const formatFilter = (filter: any) => { // chuyển đổi giá trị filter từ mảng [a,b,c] thành string "a|b|c" để filter nhiều 
   const result: Record<string, string> = {}
   Object.keys(filter)?.forEach((key: string) => {

@@ -27,7 +27,7 @@ import CreateEditCity from 'src/views/pages/settings/city/component/CreateEditCi
 import toast from 'react-hot-toast'
 import { OBJECT_TYPE_ERROR_CITY } from 'src/configs/error'
 import { hexToRGBA } from 'src/utils/hex-to-rgba'
-import { formatDate } from 'src/utils'
+import { formatDate } from 'src/utils/date'
 
 // ** Hooks
 import { usePermission } from 'src/hooks/usePermission'

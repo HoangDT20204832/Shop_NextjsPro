@@ -35,7 +35,7 @@ import { usePermission } from 'src/hooks/usePermission'
 // ** Config
 import { PAGE_SIZE_OPTION } from 'src/configs/gridConfig'
 // ** Utils
-import { formatDate } from 'src/utils'
+import { formatDate } from 'src/utils/date'
 
 type TProps = {}
 const DeliveryTypeListPage: NextPage<TProps> = () => {
