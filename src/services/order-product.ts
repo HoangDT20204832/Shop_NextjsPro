@@ -38,3 +38,12 @@ export const getDetailsOrderProductByMe = async (id: string) => {
   }
 }
 
+export const cancelOrderProductOfMe = async (id: string) => {
+  try {
+    const res = await instanceAxios.post(`${API_ENDPOINT.MANAGE_ORDER.ORDER.INDEX}/me/cancel/${id}`)
+
+    return res.data
+  } catch (error: any) {
+    return error?.response?.data
+  }
+}
