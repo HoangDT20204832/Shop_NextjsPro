@@ -20,7 +20,7 @@ type TProps = {}
   
 }
 
-ProductType.permission = [PERMISSIONS.MANAGE_PRODUCT.PRODUCT_TYPE.VIEW]
+// ProductType.permission = [PERMISSIONS.MANAGE_PRODUCT.PRODUCT_TYPE.VIEW]
 
 export default ProductType
 

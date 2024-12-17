@@ -21,7 +21,7 @@ type TProps = {}
   )
 }
   
-PaymentType.permission = [PERMISSIONS.SETTING.PAYMENT_TYPE.VIEW]
+// PaymentType.permission = [PERMISSIONS.SETTING.PAYMENT_TYPE.VIEW]
 
 export default PaymentType
 

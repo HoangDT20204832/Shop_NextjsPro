@@ -41,10 +41,10 @@ const TablePermisson = (props: TTablePermisson) => {
     try {
       //trường hợp có parentValue
       if (parentValue) {
-        return PERMISSIONS[parentValue][value][mode]
+        return (PERMISSIONS as any)[parentValue][value][mode]
       } else {
         //trường hợp ko có parentValue (vd : DASHBOARD)
-        return PERMISSIONS[value]
+        return (PERMISSIONS as any)[value]
       }
     } catch (error) {
       return ''
@@ -64,12 +64,12 @@ const TablePermisson = (props: TTablePermisson) => {
   const handleIsChecked = (value: string,  isParent?:boolean,parentValue?: string,) => {
     let allValue : string[]  = [];
     if(parentValue){
-      allValue = getAllValueOfObject(PERMISSIONS[parentValue][value]);
+      allValue = getAllValueOfObject((PERMISSIONS as any)[parentValue][value]);
     }else{
       if(isParent){
-        allValue = getAllValueOfObject(PERMISSIONS[value])
+        allValue = getAllValueOfObject((PERMISSIONS as any)[value])
       }else{
-        allValue = [PERMISSIONS[value]]
+        allValue = [(PERMISSIONS as any)[value]]
       }
     }
     console.log('allValue', allValue)

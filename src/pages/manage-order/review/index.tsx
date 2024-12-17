@@ -14,7 +14,6 @@ type TProps = {}
   return <ReviewListPage />
 }
 
-Reviews.permission = [PERMISSIONS.MANAGE_ORDER.REVIEW.VIEW]
 export default Reviews
 
 
