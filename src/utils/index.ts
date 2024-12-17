@@ -166,6 +166,27 @@ export const convertUpdateProductToCart = (orderItems: TItemOrderProduct[], addI
     return orderItems
   }
 }
+//Hàm cập nhật nhiều sản phẩn vào giỏ hàng
+export const convertUpdateMultipleProductsCart = (orderItems: TItemOrderProduct[], addItems: TItemOrderProduct[]) => {
+  try {
+    let result = []
+    const cloneOrderItems = cloneDeep(orderItems)
+    addItems.forEach(addItem => {
+      const findItems = cloneOrderItems.find((item: TItemOrderProduct) => item.product === addItem.product)
+      if (findItems) {
+        findItems.amount += addItem.amount
+      } else {
+        cloneOrderItems.push(addItem)
+      }
+    })
+    result = cloneOrderItems.filter((item: TItemOrderProduct) => item.amount)
+
+    return result
+  } catch (error) {
+    return orderItems
+  }
+}
+
 //Hàm đưa ra thời gian hết hạn hay chưa(true, false)
 export const isExpiry = (startDate:Date | null, endDate:Date | null) => {
   if(startDate && endDate) {
@@ -178,3 +199,4 @@ export const isExpiry = (startDate:Date | null, endDate:Date | null) => {
 
   return false
 }
+

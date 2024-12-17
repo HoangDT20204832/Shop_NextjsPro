@@ -68,11 +68,11 @@ export const clearTemporaryToken = () => {
   }
 }
 
-// Hàm này có tácd dụng lưu trữ danh sách product thêm vaoof dữ hàng trên localstrorage
+// Hàm này có tácd dụng lưu trữ danh sách product thêm vaoof giở hàng trên localstrorage
 export const setLocalProductToCart = (data: Record<string, TItemOrderProduct[]>) => {
   console.log("data", {data})
   if (typeof window !== 'undefined') {
-    window.localStorage.setItem(LOCAL_PRODUCT_CART, JSON.stringify(data))
+    window.localStorage?.setItem(LOCAL_PRODUCT_CART, JSON.stringify(data))
   }
 }
 export const getLocalProductCart = () => {

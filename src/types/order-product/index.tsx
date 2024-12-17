@@ -8,9 +8,22 @@ export type TItemOrderProduct = {
   slug: string
 }
 
+export type TItemProductMe = {
+  name: string
+  amount: number
+  image: string
+  price: number
+  discount: number
+  product: {
+    _id: string,
+    countInStock: number,
+    slug: string
+  }
+}
+
 export type TParamsCreateOrderProduct = {
   orderItems: TItemOrderProduct[]
-  fullName: string | undefined
+  fullName: string
   address?: string
   city: string
   phone: string
@@ -28,6 +41,7 @@ export type TParamsGetOrderProducts = {
   search?: string
   order?: string
 }
+
 export type TItemOrderProductMe = {
   _id: string
   shippingAddress: {
@@ -36,7 +50,7 @@ export type TItemOrderProductMe = {
     city: string
     phone: string
   }
-  orderItems: TItemOrderProduct[]
+  orderItems: TItemProductMe[]
   paymentMethod: {
     _id: string
     name: string
