@@ -24,9 +24,10 @@ import {
   
   export const updateMyReview = async (data: TParamsUpdateReview) => {
     try {
-      const res = await instanceAxios.put(`${API_ENDPOINT.MANAGE_ORDER.ORDER.INDEX}/me`, data)
-  
-      return res.data
+        const { id, ...rests } = data
+        const res = await instanceAxios.put(`${API_ENDPOINT.MANAGE_ORDER.REVIEW.INDEX}/me/${id}`, rests)  
+     
+       return res.data
     } catch (error: any) {
       return error?.response?.data
     }
