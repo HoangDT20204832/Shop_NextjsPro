@@ -1,3 +1,4 @@
+
 // ** Next
 import { NextPage } from 'next'
 
@@ -107,6 +108,10 @@ const CardOrder: NextPage<TProps> = props => {
     )
   }
 
+  const handleNavigateDetailsOrder = () => {
+    router.push(`${ROUTE_CONFIG.MY_ORDER}/${dataOrder._id}`)
+  }
+
   const memeDisabledBuyAgain = useMemo(() => {
     return dataOrder?.orderItems?.some((item) => !item.product.countInStock)
   }, [dataOrder.orderItems])
@@ -145,7 +150,7 @@ const CardOrder: NextPage<TProps> = props => {
           </Typography>
         </Box>
         <Divider />
-        <Box mt={2} mb={2} sx={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <Box mt={2} mb={2} sx={{ display: 'flex', flexDirection: 'column', gap: 4, cursor: "pointer" }} onClick={handleNavigateDetailsOrder}>
           {dataOrder?.orderItems?.map((item: TItemProductMe) => {
             return (
               <Box key={item?.product?._id} sx={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
@@ -275,6 +280,7 @@ const CardOrder: NextPage<TProps> = props => {
           </Button>
           <Button
             variant='outlined'
+            onClick={handleNavigateDetailsOrder}
             sx={{
               height: 40,
               display: 'flex',
