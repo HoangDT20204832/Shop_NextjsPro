@@ -14,6 +14,7 @@ import Container from '@mui/material/Container'
 import HorizontalLayout from 'src/views/layouts/HorizontalLayout'
 import VerticalLayout from 'src/views/layouts/VerticalLayout'
 import { useTheme } from '@mui/material'
+import FooterComp from 'src/components/footer-component'
 
 type TProps = {
   children: React.ReactNode //children ở đây chính là các component thể hiện các trang giao diện
@@ -58,6 +59,8 @@ const LayoutNotApp: NextPage<TProps> = ({ children }) => {
         >
           {children}
         </Container>
+
+        <FooterComp />
       </Box>
     </Box>
   )

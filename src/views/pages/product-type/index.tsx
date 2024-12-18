@@ -19,7 +19,7 @@ import InputSearch from 'src/components/input-search'
 import NoData from 'src/components/no-data'
 
 // ** Config
-import {PAGE_SIZE_OPTION2 } from 'src/configs/gridConfig'
+import {PAGE_SIZE_OPTION3 } from 'src/configs/gridConfig'
 
 // ** Services
 import { getAllProductTypes } from 'src/services/product-type'
@@ -35,8 +35,9 @@ import { AppDispatch, RootState } from 'src/stores'
 import toast from 'react-hot-toast'
 import { resetInitialState } from 'src/stores/product'
 import { OBJECT_TYPE_ERROR_PRODUCT } from 'src/configs/error'
-import ImageSlider from 'src/components/image-slider'
 import { useRouter } from 'next/router'
+import { ROUTE_CONFIG } from 'src/configs/route'
+import IconifyIcon from 'src/components/Icon'
 
 type TProps = {}
 
@@ -46,30 +47,34 @@ const StyledTabs = styled(Tabs)<TabsProps>(({ theme }) => ({
   }
 }))
 
-const HomePage: NextPage<TProps> = () => {
+const ProductTypePage: NextPage<TProps> = () => {
   // ** Translate
   const { t } = useTranslation()
 
   // State
   const [sortBy, setSortBy] = useState('createdAt desc')
   const [searchBy, setSearchBy] = useState('')
-  const [productTypeSelected, setProductTypeSelected] = useState('')
+  // const [productTypeSelected, setProductTypeSelected] = useState('')
   const [reviewSelected, setReviewSelected] = useState('')
   const [locationSelected, setLocationSelected] = useState('')
 
-  const router = useRouter()
+  const [optionCities, setOptionCities] = useState<{ label: string; value: string }[]>([])
+  const [nameProductType, setNameProductType] = useState('')
 
-  // const [optionCities, setOptionCities] = useState<{ label: string; value: string }[]>([])
 
-  const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTION2[0])
+  // const handleChange = (event: React.SyntheticEvent, newValue: string) => {
+  //   setProductTypeSelected(newValue)
+  // }
+
+  const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTION3[0])
   const [page, setPage] = useState(1)
-  const [optionTypes, setOptionTypes] = useState<{ label: string; value: string, id:string }[]>([])
+  const [optionTypes, setOptionTypes] = useState<{ label: string; value: string }[]>([])
   const [filterBy, setFilterBy] = useState<Record<string, string | string[]>>({})
   const [loading, setLoading] = useState(false)
   const [productsPublic, setProductsPublic] = useState({
     data: [],
     total: 0
-  })
+  })  
 
   const firstRender = useRef<boolean>(false)
 
@@ -89,11 +94,17 @@ const HomePage: NextPage<TProps> = () => {
   // ** theme
   const theme = useTheme()
 
+  const router = useRouter()
+  console.log("router", router)
+  const productTypeId = router.query?.id as string
+
+  console.log("productTypeId", productTypeId)
   // fetch api
   const handleGetListProducts = async () => {
     setLoading(true)
     const query = {
-      params: { limit: pageSize, page: page, search: searchBy, order: sortBy }
+      params: { limit: pageSize, page: page, search: searchBy, order: sortBy, productType: productTypeId
+        , ...formatFilter(filterBy) }
     }
     await getAllProductsPublic(query).then(res => {
       if (res?.data) {
@@ -111,37 +122,18 @@ const HomePage: NextPage<TProps> = () => {
     setPageSize(pageSize)
   }
 
-
-  const handleChange = (event: React.SyntheticEvent, newValue: string) => {
-    // setProductTypeSelected(newValue)
-    router.push(`/product-type/${newValue}`)
-
-      // Tìm ID của loại sản phẩm dựa trên `newValue`
-  const selectedType = optionTypes.find((type) => type.value === newValue);
-
-  if (selectedType) {
-    // Điều hướng tới đường dẫn `/product-type/[label]` và kèm ID dưới dạng query
-    router.push({
-      pathname: `/product-type/${newValue}`, // Đường dẫn chính
-      query: { id: selectedType.id },    // Gửi kèm ID qua query
-    });
+  const handleFilterProduct = (value: string, type: string) => {
+    switch (type) {
+      case 'review': {
+        setReviewSelected(value)
+        break
+      }
+      case 'location': {
+        setLocationSelected(value)
+        break
+      }
+    }
   }
-    
-  }
-
-
-  // const handleFilterProduct = (value: string, type: string) => {
-  //   switch (type) {
-  //     case 'review': {
-  //       setReviewSelected(value)
-  //       break
-  //     }
-  //     case 'location': {
-  //       setLocationSelected(value)
-  //       break
-  //     }
-  //   }
-  // }
 
   const handleResetFilter = () => {
     setLocationSelected('')
@@ -154,11 +146,15 @@ const HomePage: NextPage<TProps> = () => {
     await getAllProductTypes({ params: { limit: -1, page: -1 } })
       .then(res => {
         const data = res?.data.productTypes
-        console.log("hmmm", data)
         if (data) {
-          setOptionTypes(data?.map((item: { name: string; slug: string, _id:string }) => ({ label: item.name, value: item.slug, id:item._id })))
+          const typeProduct = data?.find((item:{ name: string; slug: string, _id:string }) => item._id === productTypeId)
+          console.log("nameProductType",typeProduct)
+          setNameProductType(typeProduct?.name)
+          // setOptionTypes(data?.map((item: { name: string; _id: string }) => ({ label: item.name, value: item._id })))
           // setProductTypeSelected(data?.[0]?._id)
-          firstRender.current = true
+          // firstRender.current = true
+
+          return nameProductType
         }
         setLoading(false)
       })
@@ -167,40 +163,38 @@ const HomePage: NextPage<TProps> = () => {
       })
   }
 
-  // const fetchAllCities = async () => {
-  //   setLoading(true)
-  //   await getAllCities({ params: { limit: -1, page: -1 } })
-  //     .then(res => {
-  //       const data = res?.data.cities
-  //       if (data) {
-  //         setOptionCities(data?.map((item: { name: string; _id: string }) => ({ label: item.name, value: item._id })))
-  //       }
-  //       setLoading(false)
-  //     })
-  //     .catch(e => {
-  //       setLoading(false)
-  //     })
-  // }
+  const fetchAllCities = async () => {
+    setLoading(true)
+    await getAllCities({ params: { limit: -1, page: -1 } })
+      .then(res => {
+        const data = res?.data.cities
+        if (data) {
+          setOptionCities(data?.map((item: { name: string; _id: string }) => ({ label: item.name, value: item._id })))
+        }
+        setLoading(false)
+      })
+      .catch(e => {
+        setLoading(false)
+      })
+  }
 
   useEffect(() => {
     fetchAllTypes()
-    // fetchAllCities()
     handleGetListProducts()
-
+    fetchAllCities()
   }, [])
 
+
   useEffect(() => {
-    if (firstRender.current) {
       handleGetListProducts()
-    }
+    
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortBy, searchBy, page, pageSize, filterBy])
 
-  // useEffect(() => {
-  //   if (firstRender.current) {
-  //     setFilterBy({ productType: productTypeSelected, minStar: reviewSelected, productLocation: locationSelected })
-  //   }
-  // }, [productTypeSelected, reviewSelected, locationSelected])
+  useEffect(() => {
+  
+      setFilterBy({  minStar: reviewSelected, productLocation: locationSelected })
+  }, [ reviewSelected, locationSelected])
 
   useEffect(() => {
     if (isSuccessLike) {
@@ -245,13 +239,25 @@ const HomePage: NextPage<TProps> = () => {
           width: '100%'
         }}
       >
-          <ImageSlider /> {/* Slider hình ảnh */}
-        <StyledTabs value={productTypeSelected} onChange={handleChange} aria-label='wrapped label tabs example'>
+
+        <Box sx={{display: 'flex'}}>
+          <Typography color={theme.palette.primary.main}
+            sx={{cursor: 'pointer',fontWeight: 'bold'}}
+            onClick={()=> router.push(ROUTE_CONFIG.HOME)}
+           >Trang chủ         
+           </Typography>
+           <IconifyIcon icon="tabler:chevron-right"/>
+           <Typography color={theme.palette.primary.main}>
+               {nameProductType}
+           </Typography>
+        </Box>
+  
+        {/* <StyledTabs value={productTypeSelected} onChange={handleChange} aria-label='wrapped label tabs example'>
           {optionTypes.map(opt => {
             return <Tab key={opt.value} value={opt.value} label={opt.label} />
           })}
-        </StyledTabs>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4 }}>
+        </StyledTabs> */}
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
           <Box sx={{ width: '300px' }}>
             <InputSearch
               placeholder={t('Search_name_product')}
@@ -276,7 +282,7 @@ const HomePage: NextPage<TProps> = () => {
               xs: 4
             }}
           >
-            {/* <Grid item md={3} display={{ md: 'flex', xs: 'none' }}>
+            <Grid item md={3} display={{ md: 'flex', xs: 'none' }}>
               <Box sx={{ width: '100%' }}>
                 <FilterProduct
                   locationSelected={locationSelected}
@@ -286,8 +292,8 @@ const HomePage: NextPage<TProps> = () => {
                   handleFilterProduct={handleFilterProduct}
                 />
               </Box>
-            </Grid> */}
-            <Grid item md={12} xs={12}>
+            </Grid>
+            <Grid item md={9} xs={12}>
               <Grid
                 container
                 spacing={{
@@ -299,7 +305,7 @@ const HomePage: NextPage<TProps> = () => {
                   <>
                     {productsPublic?.data?.map((item: TProduct) => {
                       return (
-                        <Grid item key={item._id} md={3} sm={6} xs={12}>
+                        <Grid item key={item._id} md={4} sm={6} xs={12}>
                           <CardProduct item={item} />
                         </Grid>
                       )
@@ -316,7 +322,7 @@ const HomePage: NextPage<TProps> = () => {
         </Box>
         <CustomPagination
           onChangePagination={handleOnchangePagination}
-          pageSizeOptions={PAGE_SIZE_OPTION2}
+          pageSizeOptions={PAGE_SIZE_OPTION3}
           pageSize={pageSize}
           page={page}
           rowLength={productsPublic.total}
@@ -327,6 +333,4 @@ const HomePage: NextPage<TProps> = () => {
   )
 }
 
-export default HomePage
-
-
+export default ProductTypePage

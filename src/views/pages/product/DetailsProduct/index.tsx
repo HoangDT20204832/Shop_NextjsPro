@@ -65,6 +65,7 @@ const DetailsProductPage: NextPage<TProps> = () => {
   // ** Hooks
   const { i18n } = useTranslation()
   const router = useRouter()
+  // console.log("router", router)
   const productId = router.query?.productId as string
   const { user } = useAuth()
 
