@@ -302,6 +302,11 @@
     "Back_home": "Quay về trang chủ",
     "Order_has_been_paid": "Đơn hàng đã thanh toán",
     "Order_has_not_been_paid": "Đơn hàng chưa thanh toán",
-    "Order_has_not_been_delivery": "Đơn hàng chưa được giao hàng"
+    "Order_has_not_been_delivery": "Đơn hàng chưa được giao hàng",
+    
+    "No_sell_product": "Chưa bán sản phẩm",
+    "Sort_new_create": "Sắp xếp mới nhất",
+    "Sort_best_sold": "Bán chạy nhất",
+    "Sort_by": "Sắp xếp theo"
 
 }
