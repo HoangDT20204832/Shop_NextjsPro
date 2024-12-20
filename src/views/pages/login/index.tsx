@@ -24,7 +24,7 @@ import * as yup from 'yup'
 //** Components
 import CustomTextField from 'src/components/text-field'
 import { EMAIL_REG, PASSWORD_REG } from 'src/configs/regex'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Icon from 'src/components/Icon'
 import Image from 'next/image'
 
@@ -37,6 +37,10 @@ import { useAuth } from 'src/hooks/useAuth'
 import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 
+import { signIn, useSession } from 'next-auth/react'
+import { loginAuth } from 'src/services/auth'
+import { clearLocalPreTokenGoogle, getLocalPreTokenGoogle, setLocalPreTokenGoogle } from 'src/helpers/storage'
+
 // import { useTheme } from '@emotion/react'
 
 type TProps = {}
@@ -47,7 +51,7 @@ const LoginPage: NextPage<TProps> = () => {
   //State
   const [showPassword, setShowPassword] = useState<boolean>(false)
   const [isRemember, setIsRemember] = useState<boolean>(true)
-
+  const prevTokenLocal = getLocalPreTokenGoogle() // prevTokenLocal là accessToken do google cung cấp(trả về) khi client ấn signIn
   // ** Language
   const { t } = useTranslation()
 
@@ -56,7 +60,10 @@ const LoginPage: NextPage<TProps> = () => {
 
   // console.log('thembfskje', theme)
 
-  const { login } = useAuth() //lấy login: handleLogin từ AuthContext thoogn qua hàm useAuth ở folder hooks
+  const { login ,loginGoogle} = useAuth() //lấy login: handleLogin từ AuthContext thoogn qua hàm useAuth ở folder hooks
+
+  const { data: session } = useSession()
+  console.log("session", {session})
 
   const schema = yup.object().shape({
     email: yup.string().required(t("required_field")).matches(EMAIL_REG, t("Rules_email")),
@@ -88,6 +95,26 @@ const LoginPage: NextPage<TProps> = () => {
       })
     }
   }
+
+  const handleLoginGoogle = () => {
+    signIn("google")    // khi gọi hàm này thì client sẽ signIn lên google và google sẽ trả về thông tin user như
+                         // name, avatar,....., accesstoken 
+    clearLocalPreTokenGoogle()  // xoá accessTokenGoogle của google cấp cho ở trên localTrogate
+    // để khi ấn đăng nhập bằng  google thì (session as any)?.accessToken thay đổi =>  re-render lại componet
+     //=> gán lại  cho  prevTokenLocal =0 
+     // rồi chạy đến hàm usffect (session as any)?.accessToken !== prevTokenLocal(đúng do prevTokenLocal=0)
+     //=> nó sẽ thực hiên luôn chức năng login
+     //()
+  }
+
+  useEffect(() => {
+    if ((session as any)?.accessToken && (session as any)?.accessToken !== prevTokenLocal) {
+      loginGoogle({ idToken: (session as any)?.accessToken, rememberMe: isRemember }, err => {
+        if (err?.response?.data?.typeError === 'INVALID') toast.error(t('The_email_or_password_wrong'))
+      })
+      setLocalPreTokenGoogle((session as any)?.accessToken)
+    }
+  }, [(session as any)?.accessToken])
 
   return (
     <Box
@@ -247,7 +274,8 @@ const LoginPage: NextPage<TProps> = () => {
                   ></path>
                 </svg>
               </IconButton>
-              <IconButton sx={{ color: theme.palette.error.main }}>
+              <IconButton sx={{ color: theme.palette.error.main }}
+              onClick={handleLoginGoogle}>
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
                   role='img'

@@ -7,6 +7,10 @@ import { Router } from 'next/router'
 import type { NextPage } from 'next'
 import type { AppProps } from 'next/app'
 
+//  **  Next-auth
+import { SessionProvider } from "next-auth/react"
+
+
 // ** Store Imports
 import { Provider } from 'react-redux'
 
@@ -89,7 +93,7 @@ const Guard = ({ children, authGuard, guestGuard }: GuardProps) => {
 }
 
 export default function App(props: ExtendedAppProps) {
-  const { Component, pageProps } = props
+  const { Component, pageProps : { session, ...pageProps }} = props
 
   console.log("Component", {Component})
 
@@ -141,24 +145,26 @@ export default function App(props: ExtendedAppProps) {
 
       <AuthProvider>
         <AxiosInterceptor>
-        <SettingsProvider {...(setConfig ? { pageSettings: setConfig() } : {})}>
-          <SettingsConsumer>
-            {({ settings }) => {
-              return (
-                <ThemeComponent settings={settings}>
-                  <Guard authGuard={authGuard} guestGuard={guestGuard}>
-                    <AclGuard permisson={permission} aclAbilities={aclAbilities} guestGuard={guestGuard} authGuard={authGuard}>
-                      {getLayout(<Component {...pageProps} />)}
-                    </AclGuard>
-                  </Guard>
-                  <ReactHotToast>
-                    <Toaster position={settings.toastPosition} toastOptions={toastOptions} />
-                  </ReactHotToast>
-                </ThemeComponent>
-              )
-            }}
-          </SettingsConsumer>
-        </SettingsProvider>
+        <SessionProvider session={session}>
+          <SettingsProvider {...(setConfig ? { pageSettings: setConfig() } : {})}>
+            <SettingsConsumer>
+              {({ settings }) => {
+                return (
+                  <ThemeComponent settings={settings}>
+                    <Guard authGuard={authGuard} guestGuard={guestGuard}>
+                      <AclGuard permisson={permission} aclAbilities={aclAbilities} guestGuard={guestGuard} authGuard={authGuard}>
+                        {getLayout(<Component {...pageProps} />)}
+                      </AclGuard>
+                    </Guard>
+                    <ReactHotToast>
+                      <Toaster position={settings.toastPosition} toastOptions={toastOptions} />
+                    </ReactHotToast>
+                  </ThemeComponent>
+                )
+              }}
+            </SettingsConsumer>
+          </SettingsProvider>
+          </SessionProvider>
         </AxiosInterceptor>
       </AuthProvider>
     </Provider>

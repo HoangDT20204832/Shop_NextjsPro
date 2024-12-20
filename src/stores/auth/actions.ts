@@ -1,4 +1,4 @@
-import { changePasswordMe, registerAuth, updateAuthMe } from '../../services/auth'
+import { changePasswordMe, registerAuth, registerAuthGoogle, updateAuthMe } from '../../services/auth'
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import axios from 'axios'
 import { TChangePassword } from 'src/types/auth'
@@ -24,6 +24,20 @@ export const registerAuthAsync = createAsyncThunk(
     }
   }
 )
+
+export const registerAuthGoogleAsync = createAsyncThunk(`${serviceName}/register-google`, async (idToken: string) => {
+  const response = await registerAuthGoogle(idToken)
+
+  if (response?.data) {
+    return response
+  }
+
+  return {
+    data: null,
+    message: response?.response?.data?.message,
+    typeError: response?.response?.data?.typeError
+  }
+})
 
 export const updateAuthMeAsync = createAsyncThunk(
   // dùng redux think để xử lý bất đồng bộ

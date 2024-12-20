@@ -35,14 +35,16 @@ import { EMAIL_REG, PASSWORD_REG } from 'src/configs/regex'
 import RegisterDark from '/public/images/register-dark.png'
 import RegisterLight from '/public/images/register-light.png'
 import { useDispatch, useSelector } from 'react-redux'
-import { registerAuthAsync } from 'src/stores/auth/actions'
+import { registerAuthAsync, registerAuthGoogleAsync } from 'src/stores/auth/actions'
 import { AppDispatch, RootState } from 'src/stores'
 import toast from 'react-hot-toast'
 import FallbackSpinner from 'src/components/fall-back'
 import { resetInitialState } from 'src/stores/auth'
 import { useRouter } from 'next/router'
+import { useSession, signIn, signOut } from "next-auth/react"
 import { ROUTE_CONFIG } from 'src/configs/route'
 import { useTranslation } from 'react-i18next'
+import { clearLocalPreTokenGoogle, getLocalPreTokenGoogle, setLocalPreTokenGoogle } from 'src/helpers/storage'
 
 type TProps = {}
 
@@ -56,6 +58,7 @@ const RegisterPage: NextPage<TProps> = () => {
   // State
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const prevTokenLocal = getLocalPreTokenGoogle()
 
   // ** Router
   const router = useRouter()
@@ -69,6 +72,9 @@ const RegisterPage: NextPage<TProps> = () => {
 
   //useTranlate
   const { t } = useTranslation()
+
+  const { data: session,...restsss } = useSession()
+  console.log("restsss", {restsss, session})
 
   const schema = yup.object().shape({
     email: yup.string().required(t('required_field')).matches(EMAIL_REG, t("Rules_email")),
@@ -106,6 +112,20 @@ const RegisterPage: NextPage<TProps> = () => {
       dispatch(registerAuthAsync({ email: data.email, password: data.password }))
     }
   }
+
+
+  const handleRegisterGoogle = async () => {
+    signIn("google")            // hàm này sẽ client sẽ gửi signIn lên cho Google để nó tar về thông tin user
+                                // như: name, avatar, accesstoke,...
+    clearLocalPreTokenGoogle()  
+   }
+   useEffect(() => {
+     if ((session as any)?.accessToken && (session as any)?.accessToken !== prevTokenLocal) {
+       dispatch(registerAuthGoogleAsync((session as any)?.accessToken))
+       setLocalPreTokenGoogle((session as any)?.accessToken)
+     }
+   }, [(session as any)?.accessToken])
+
 
   useEffect(() => {
     if (message) {
@@ -304,7 +324,8 @@ const RegisterPage: NextPage<TProps> = () => {
                     ></path>
                   </svg>
                 </IconButton>
-                <IconButton sx={{ color: theme.palette.error.main }}>
+                <IconButton sx={{ color: theme.palette.error.main }}
+                onClick={handleRegisterGoogle}>
                   <svg
                     xmlns='http://www.w3.org/2000/svg'
                     role='img'
