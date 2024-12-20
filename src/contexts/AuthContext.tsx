@@ -11,10 +11,12 @@ import { useRouter } from 'next/router'
 import authConfig , { LIST_PAGE_PUBLIC }from 'src/configs/auth'
 
 // ** Types
-import { AuthValuesType, LoginParams, ErrCallbackType, UserDataType,LoginGoogleParams } from './types'
+import { AuthValuesType, LoginParams, ErrCallbackType, UserDataType,LoginGoogleParams,
+  LoginFacebookParams
+ } from './types'
 
 // ** Services
-import { loginAuth, loginAuthGoogle, logoutAuth } from 'src/services/auth'
+import { loginAuth, loginAuthGoogle,loginAuthFacebook, logoutAuth } from 'src/services/auth'
 
 // ** Configs
 import { API_ENDPOINT } from 'src/configs/api'
@@ -39,6 +41,7 @@ const defaultProvider: AuthValuesType = {
   login: () => Promise.resolve(),
   logout: () => Promise.resolve(),
   loginGoogle: () => Promise.resolve(),
+  loginFacebook: () => Promise.resolve()
 }
 
 const AuthContext = createContext(defaultProvider)
@@ -150,6 +153,27 @@ const AuthProvider = ({ children }: Props) => {
       })
   }
 
+  const handleLoginFacebook = (params: LoginFacebookParams, errorCallback?: ErrCallbackType) => {
+    loginAuthFacebook(params?.idToken)
+      .then(async response => {
+        if (params.rememberMe) {
+          setLocalUserData(JSON.stringify(response.data.user), response.data.access_token, response.data.refresh_token)
+        } else {
+          setTemporaryToken(response.data.access_token)
+        }
+        toast.success(t('Login_success'))
+        const returnUrl = router.query.returnUrl
+        setUser({ ...response.data.user })
+        const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
+        console.log("redirectURL",{redirectURL})
+        router.replace(redirectURL as string)
+      })
+      .catch(err => {
+        if (errorCallback) errorCallback(err)
+      })
+  }
+
+
   const handleLogout = () => {
     logoutAuth().then(res => {
       setUser(null)
@@ -183,7 +207,8 @@ const AuthProvider = ({ children }: Props) => {
     setLoading,
     login: handleLogin,
     logout: handleLogout,
-    loginGoogle: handleLoginGoogle
+    loginGoogle: handleLoginGoogle,
+    loginFacebook: handleLoginFacebook
   }
 
   return <AuthContext.Provider value={values}>{children}</AuthContext.Provider>

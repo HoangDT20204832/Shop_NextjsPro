@@ -4,6 +4,8 @@ import { ReactNode, ReactElement, useEffect } from 'react'
 import { ACCESS_TOKEN, USER_DATA } from 'src/configs/auth'
 import { useAuth } from 'src/hooks/useAuth'
 
+import { useSession } from 'next-auth/react'
+
 interface GuestGuardProps {
   children: ReactNode
   fallback: ReactElement | null
@@ -15,6 +17,10 @@ const GuestGuard = (props: GuestGuardProps) => {
   const { children, fallback } = props
 
   const router = useRouter()
+
+  const { data: session, status } = useSession()
+  console.log("session", {session})
+  
   const authContext = useAuth()
   useEffect(() => {
     if(!router.isReady){   //nếu Page chưa first=render xong thì sẽ chạy return => ko chạy hàm if() phái dưới

@@ -38,9 +38,8 @@ import toast from 'react-hot-toast'
 import { useTranslation } from 'react-i18next'
 
 import { signIn, useSession } from 'next-auth/react'
-import { loginAuth } from 'src/services/auth'
-import { clearLocalPreTokenGoogle, getLocalPreTokenGoogle, setLocalPreTokenGoogle } from 'src/helpers/storage'
-
+import { clearLocalPreTokenAuthSocial, getLocalPreTokenAuthSocial, setLocalPreTokenAuthSocial } from 'src/helpers/storage'
+import FallbackSpinner from 'src/components/fall-back'
 // import { useTheme } from '@emotion/react'
 
 type TProps = {}
@@ -51,7 +50,7 @@ const LoginPage: NextPage<TProps> = () => {
   //State
   const [showPassword, setShowPassword] = useState<boolean>(false)
   const [isRemember, setIsRemember] = useState<boolean>(true)
-  const prevTokenLocal = getLocalPreTokenGoogle() // prevTokenLocal là accessToken do google cung cấp(trả về) khi client ấn signIn
+  const prevTokenLocal = getLocalPreTokenAuthSocial() // prevTokenLocal là accessToken do google cung cấp(trả về) khi client ấn signIn
   // ** Language
   const { t } = useTranslation()
 
@@ -60,10 +59,10 @@ const LoginPage: NextPage<TProps> = () => {
 
   // console.log('thembfskje', theme)
 
-  const { login ,loginGoogle} = useAuth() //lấy login: handleLogin từ AuthContext thoogn qua hàm useAuth ở folder hooks
+  const { login ,loginGoogle, loginFacebook} = useAuth() //lấy login: handleLogin từ AuthContext thoogn qua hàm useAuth ở folder hooks
 
   const { data: session } = useSession()
-  console.log("session", {session})
+  console.log("session", {session, status})
 
   const schema = yup.object().shape({
     email: yup.string().required(t("required_field")).matches(EMAIL_REG, t("Rules_email")),
@@ -99,25 +98,37 @@ const LoginPage: NextPage<TProps> = () => {
   const handleLoginGoogle = () => {
     signIn("google")    // khi gọi hàm này thì client sẽ signIn lên google và google sẽ trả về thông tin user như
                          // name, avatar,....., accesstoken 
-    clearLocalPreTokenGoogle()  // xoá accessTokenGoogle của google cấp cho ở trên localTrogate
+    clearLocalPreTokenAuthSocial()  // xoá accessTokenGoogle của google or facebook cấp cho ở trên localTrogate
     // để khi ấn đăng nhập bằng  google thì (session as any)?.accessToken thay đổi =>  re-render lại componet
      //=> gán lại  cho  prevTokenLocal =0 
      // rồi chạy đến hàm usffect (session as any)?.accessToken !== prevTokenLocal(đúng do prevTokenLocal=0)
      //=> nó sẽ thực hiên luôn chức năng login
      //()
   }
+  const handleLoginFacebook = () => {
+    signIn("facebook")
+    clearLocalPreTokenAuthSocial()
+  }
 
   useEffect(() => {
     if ((session as any)?.accessToken && (session as any)?.accessToken !== prevTokenLocal) {
-      loginGoogle({ idToken: (session as any)?.accessToken, rememberMe: isRemember }, err => {
-        if (err?.response?.data?.typeError === 'INVALID') toast.error(t('The_email_or_password_wrong'))
-      })
-      setLocalPreTokenGoogle((session as any)?.accessToken)
+      if((session as any)?.provider  === "facebook") {
+        loginFacebook({ idToken: (session as any)?.accessToken, rememberMe: isRemember }, err => {
+          if (err?.response?.data?.typeError === 'INVALID') toast.error(t('The_email_or_password_wrong'))
+        })
+      }else {
+        loginGoogle({ idToken: (session as any)?.accessToken, rememberMe: isRemember }, err => {
+          if (err?.response?.data?.typeError === 'INVALID') toast.error(t('The_email_or_password_wrong'))
+        })
+      }
+      setLocalPreTokenAuthSocial((session as any)?.accessToken)
     }
   }, [(session as any)?.accessToken])
 
   return (
-    <Box
+    <>
+        {status === "loading" && <FallbackSpinner />}
+        <Box
       sx={{
         height: '100vh',
         width: '100vw',
@@ -258,7 +269,8 @@ const LoginPage: NextPage<TProps> = () => {
             </Grid>
             <Typography sx={{ textAlign: 'center', mt: 2, mb: 2 }}>Or</Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
-              <IconButton sx={{ color: '#497ce2' }}>
+              <IconButton sx={{ color: '#497ce2' }}
+                onClick={handleLoginFacebook}>
                 <svg
                   xmlns='http://www.w3.org/2000/svg'
                   role='img'
@@ -296,6 +308,8 @@ const LoginPage: NextPage<TProps> = () => {
         </Box>
       </Box>
     </Box>
+    </>
+
   )
 }
 
