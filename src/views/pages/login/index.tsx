@@ -41,6 +41,7 @@ import { signIn, useSession } from 'next-auth/react'
 import { clearLocalPreTokenAuthSocial, getLocalPreTokenAuthSocial, getLocalRememberLoginAuthSocial, setLocalPreTokenAuthSocial, setLocalRememberLoginAuthSocial } from 'src/helpers/storage'
 import FallbackSpinner from 'src/components/fall-back'
 // import { useTheme } from '@emotion/react'
+import { ROUTE_CONFIG } from 'src/configs/route'
 
 type TProps = {}
 
@@ -250,7 +251,8 @@ const LoginPage: NextPage<TProps> = () => {
                 }
                 label= {t('Remember_me')}
               />
-              <Typography variant='body2'>{t("Forgot_password")}?</Typography>
+              <Typography variant='body2' component={Link} href={`${ROUTE_CONFIG.FORGOT_PASSWORD}`}
+              >{t("Forgot_password")}?</Typography>
             </Box>
             <Button type='submit' fullWidth variant='contained' sx={{ mt: 3, mb: 2 }}>
                {t("Login")}
@@ -262,7 +264,7 @@ const LoginPage: NextPage<TProps> = () => {
               </Grid>
               <Grid item>
                 <Link
-                  href='/register'
+                  href={`${ROUTE_CONFIG.REGISTER}`}
                   style={{
                     color: theme.palette.mode === 'light' ? theme.palette.primary.main : theme.palette.common.white
                   }}

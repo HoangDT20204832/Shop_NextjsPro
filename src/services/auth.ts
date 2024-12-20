@@ -7,7 +7,7 @@ import { API_ENDPOINT } from 'src/configs/api'
 import instanceAxios from 'src/helpers/axios'
 
 //** Type
-import { TChangePassword, TLoginAuth, TRegisterAuth } from 'src/types/auth'
+import { TChangePassword, TLoginAuth, TRegisterAuth ,TForgotPasswordAuth, TResetPasswordAuth } from 'src/types/auth'
 
 //vì đăng nhập ko cần phải gửi accesstoken vào headers nên axois là đủ
 export const loginAuth = async (data: TLoginAuth) => {
@@ -92,6 +92,25 @@ export const getAuthMe = async () => {
 export const changePasswordMe = async (data: TChangePassword) => {
   try {
     const res = await instanceAxios.patch(`${API_ENDPOINT.AUTH.INDEX}/change-password`, data)
+
+    return res.data
+  } catch (error) {
+    return error
+  }
+}
+
+export const forgotPasswordAuth = async (data: TForgotPasswordAuth) => {
+  try {
+    const res = await axios.post(`${API_ENDPOINT.AUTH.INDEX}/forgot-password`, data)
+    
+    return res.data
+  } catch (error) {
+    return error
+  }
+}
+export const resetPasswordAuth = async (data: TResetPasswordAuth) => {
+  try {
+    const res = await axios.post(`${API_ENDPOINT.AUTH.INDEX}/reset-password`, data)
 
     return res.data
   } catch (error) {
