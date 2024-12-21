@@ -315,6 +315,13 @@
     "Reset_password_success": "Khôi phục mật khẩu thành công",
     "Reset_password_error": "Khôi phục mật khẩu thất bại",
     "Forgot_password_success": "Gửi yêu cầu thành công",
-    "Forgot_password_error": "Gửi yêu cầu thất bại"
+    "Forgot_password_error": "Gửi yêu cầu thất bại",
+    "Comment": "Bình luận",
+    "Title_delete_comment": "Xác nhận xóa bình luận",
+    "Confirm_delete_comment":"Xác nhận xóa bình luận",
+    "Update_comment_success": "Cập nhật bình luận thành công",
+    "Update_comment_error": "Cập nhật bình luận thất bại",
+    "Delete_comment_success": "Xóa bình luận thành công",
+    "Delete_comment_error": "Xóa bình luận thất bại"
 
 }

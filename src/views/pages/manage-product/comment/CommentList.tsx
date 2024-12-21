@@ -1,3 +1,4 @@
+
 // ** Next
 import { NextPage } from 'next'
 
@@ -8,13 +9,11 @@ import { useTranslation } from 'react-i18next'
 // ** Mui
 import { Box, Grid, Typography, useTheme } from '@mui/material'
 import { GridColDef, GridRowSelectionModel, GridSortModel } from '@mui/x-data-grid'
-import { Tooltip } from '@mui/material'
 
 // ** Redux
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from 'src/stores'
-import { deleteMultipleReviewAsync, deleteReviewAsync, getAllReviewAsync } from 'src/stores/reviews/actions'
-import { resetInitialState } from 'src/stores/reviews'
+import { resetInitialState } from 'src/stores/comments'
 
 // ** Components
 import GridDelete from 'src/components/grid-delete'
@@ -24,9 +23,7 @@ import CustomDataGrid from 'src/components/custom-data-grid'
 import Spinner from 'src/components/spinner'
 import ConfirmationDialog from 'src/components/confirmation-dialog'
 import CustomPagination from 'src/components/custom-pagination'
-import CustomSelect from 'src/components/custom-select'
-import EditReview from 'src/views/pages/manage-order/reviews/components/EditReview'
-import TableHeader from 'src/components/table-header'
+import EditComment from 'src/views/pages/manage-product/comment/components/EditComment'
 
 // ** Others
 import toast from 'react-hot-toast'
@@ -39,12 +36,16 @@ import { usePermission } from 'src/hooks/usePermission'
 
 // ** Config
 import { PAGE_SIZE_OPTION } from 'src/configs/gridConfig'
-import { FILTER_REVIEW_CMS } from 'src/configs/reviews'
+import { Tooltip } from '@mui/material'
+
+// ** Services
+import { deleteCommentAsync, deleteMultipleCommentAsync, getAllCommentCMSAsync } from 'src/stores/comments/actions'
+import TableHeader from 'src/components/table-header'
 
 type TProps = {}
 
 
-const ReviewListPage: NextPage<TProps> = () => {
+const CommentListPage: NextPage<TProps> = () => {
   // ** Translate
   const { t } = useTranslation()
 
@@ -54,13 +55,12 @@ const ReviewListPage: NextPage<TProps> = () => {
     open: false,
     id: ''
   })
-  const [openDeleteReview, setOpenDeleteReview] = useState({
+  const [openDeleteComment, setOpenDeleteComment] = useState({
     open: false,
     id: ''
   })
   const [sortBy, setSortBy] = useState('createdAt desc')
   const [searchBy, setSearchBy] = useState('')
-  const [starSelected, setStarSelected] = useState<string[]>([])
 
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTION[0])
   const [page, setPage] = useState(1)
@@ -69,14 +69,13 @@ const ReviewListPage: NextPage<TProps> = () => {
   const [selectedRow, setSelectedRow] = useState<string[]>([])
 
   // ** Hooks
-  const { VIEW, UPDATE, DELETE } = usePermission('SYSTEM.MANAGE_ORDER.REVIEW', ['CREATE', 'VIEW', 'UPDATE', 'DELETE'])
+  const { UPDATE, DELETE } = usePermission('SYSTEM.MANAGE_PRODUCT.COMMENT', ['UPDATE', 'DELETE'])
   const { i18n } = useTranslation()
-  const optionReviews = FILTER_REVIEW_CMS()
 
   /// ** redux
   const dispatch: AppDispatch = useDispatch()
   const {
-    reviews,
+    comments,
     isSuccessEdit,
     isErrorEdit,
     isLoading,
@@ -88,22 +87,22 @@ const ReviewListPage: NextPage<TProps> = () => {
     isSuccessMultipleDelete,
     isErrorMultipleDelete,
     messageErrorMultipleDelete
-  } = useSelector((state: RootState) => state.reviews)
+  } = useSelector((state: RootState) => state.comments)
 
   // ** theme
   const theme = useTheme()
 
   // fetch api
-  const handleGetListReviews = () => {
+  const handleGetListComments = () => {
     const query = {
       params: { limit: pageSize, page: page, search: searchBy, order: sortBy, ...formatFilter(filterBy) }
     }
-    dispatch(getAllReviewAsync(query))
+    dispatch(getAllCommentCMSAsync(query))
   }
 
   // handle
-  const handleCloseConfirmDeleteReview = () => {
-    setOpenDeleteReview({
+  const handleCloseConfirmDeleteComment = () => {
+    setOpenDeleteComment({
       open: false,
       id: ''
     })
@@ -125,25 +124,8 @@ const ReviewListPage: NextPage<TProps> = () => {
     })
   }
 
-  const handleDeleteReview = () => {
-    dispatch(deleteReviewAsync(openDeleteReview.id))
-  }
-
-  const handleOnchangePagination = (page: number, pageSize: number) => {
-    setPage(page)
-    setPageSize(pageSize)
-  }
-
-  const handleCloseConfirmDeleteMultiple = () => {
-    setOpenDeleteMultipleMultiple(false)
-  }
-
-  const handleDeleteMultipleReview = () => {
-    dispatch(
-      deleteMultipleReviewAsync({
-        reviewIds: selectedRow
-      })
-    )
+  const handleDeleteComment = () => {
+    dispatch(deleteCommentAsync(openDeleteComment.id))
   }
 
   const handleAction = (action: string) => {
@@ -155,12 +137,30 @@ const ReviewListPage: NextPage<TProps> = () => {
     }
   }
 
+  const handleOnchangePagination = (page: number, pageSize: number) => {
+    setPage(page)
+    setPageSize(pageSize)
+  }
+
+  const handleCloseConfirmDeleteMultiple = () => {
+    setOpenDeleteMultipleMultiple(false)
+  }
+
+  const handleDeleteMultipleComment = () => {
+    dispatch(
+      deleteMultipleCommentAsync({
+        commentIds: selectedRow
+      })
+    )
+  }
+
   const columns: GridColDef[] = [
     {
-      field: "firstName",
+      field: i18n.language === "vi" ? "lastName" : "firstName",
       headerName: t('User'),
       hideSortIcons: true,
-      flex: 1,
+      minWidth: 200,
+      maxWidth: 200,
       renderCell: params => {
         const { row } = params
         const fullName =
@@ -181,8 +181,8 @@ const ReviewListPage: NextPage<TProps> = () => {
     {
       field: 'name',
       headerName: t('Product_name'),
-      minWidth: 200,
-      maxWidth: 200,
+      minWidth: 350,
+      maxWidth: 350,
       renderCell: params => {
         const { row } = params
 
@@ -202,18 +202,6 @@ const ReviewListPage: NextPage<TProps> = () => {
         const { row } = params
 
         return <Typography>{row?.content}</Typography>
-      }
-    },
-    {
-      field: 'star',
-      headerName: t('Star'),
-      hideSortIcons: true,
-      minWidth: 200,
-      maxWidth: 200,
-      renderCell: params => {
-        const { row } = params
-
-        return <Typography>{row?.star}</Typography>
       }
     },
     {
@@ -238,7 +226,7 @@ const ReviewListPage: NextPage<TProps> = () => {
             <GridDelete
               disabled={!DELETE}
               onClick={() =>
-                setOpenDeleteReview({
+                setOpenDeleteComment({
                   open: true,
                   id: String(params.id)
                 })
@@ -256,25 +244,20 @@ const ReviewListPage: NextPage<TProps> = () => {
         pageSizeOptions={PAGE_SIZE_OPTION}
         pageSize={pageSize}
         page={page}
-        rowLength={reviews.total}
+        rowLength={comments.total}
       />
     )
   }
 
   useEffect(() => {
-    handleGetListReviews()
+    handleGetListComments()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortBy, searchBy, page, pageSize, filterBy])
 
   useEffect(() => {
-    setFilterBy({ minStar: starSelected })
-  }, [starSelected])
-
-
-  useEffect(() => {
     if (isSuccessEdit) {
-      toast.success(t('Update_review_success'))
-      handleGetListReviews()
+      toast.success(t('Update_comment_success'))
+      handleGetListComments()
       handleCloseEdit()
       dispatch(resetInitialState())
     } else if (isErrorEdit && messageErrorEdit && typeError) {
@@ -282,7 +265,7 @@ const ReviewListPage: NextPage<TProps> = () => {
       if (errorConfig) {
         toast.error(t(errorConfig))
       } else {
-        toast.error(t('Update_review_error'))
+        toast.error(t('Update_comment_error'))
 
       }
       dispatch(resetInitialState())
@@ -292,25 +275,25 @@ const ReviewListPage: NextPage<TProps> = () => {
 
   useEffect(() => {
     if (isSuccessDelete) {
-      toast.success(t('Delete_review_success'))
-      handleGetListReviews()
+      toast.success(t('Delete_comment_success'))
+      handleGetListComments()
       dispatch(resetInitialState())
-      handleCloseConfirmDeleteReview()
+      handleCloseConfirmDeleteComment()
     } else if (isErrorDelete && messageErrorDelete) {
-      toast.error(t('Delete_review_error'))
+      toast.error(t('Delete_comment_error'))
       dispatch(resetInitialState())
     }
   }, [isSuccessDelete, isErrorDelete, messageErrorDelete])
 
   useEffect(() => {
     if (isSuccessMultipleDelete) {
-      toast.success(t('Delete_multiple_review_success'))
-      handleGetListReviews()
+      toast.success(t('Delete_multiple_comment_success'))
+      handleGetListComments()
       dispatch(resetInitialState())
       handleCloseConfirmDeleteMultiple()
       setSelectedRow([])
     } else if (isErrorMultipleDelete && messageErrorMultipleDelete) {
-      toast.error(t('Delete_multiple_review_error'))
+      toast.error(t('Delete_multiple_comment_error'))
       dispatch(resetInitialState())
     }
   }, [isSuccessMultipleDelete, isErrorMultipleDelete, messageErrorMultipleDelete])
@@ -318,22 +301,22 @@ const ReviewListPage: NextPage<TProps> = () => {
   return (
     <>
       <ConfirmationDialog
-        open={openDeleteReview.open}
-        handleClose={handleCloseConfirmDeleteReview}
-        handleCancel={handleCloseConfirmDeleteReview}
-        handleConfirm={handleDeleteReview}
-        title={t('Title_delete_review')}
-        description={t('Confirm_delete_review')}
+        open={openDeleteComment.open}
+        handleClose={handleCloseConfirmDeleteComment}
+        handleCancel={handleCloseConfirmDeleteComment}
+        handleConfirm={handleDeleteComment}
+        title={t('Title_delete_comment')}
+        description={t('Confirm_delete_comment')}
       />
       <ConfirmationDialog
         open={openDeleteMultipleMultiple}
         handleClose={handleCloseConfirmDeleteMultiple}
         handleCancel={handleCloseConfirmDeleteMultiple}
-        handleConfirm={handleDeleteMultipleReview}
-        title={t('Title_delete_multiple_review')}
-        description={t('Confirm_delete_multiple_review')}
+        handleConfirm={handleDeleteMultipleComment}
+        title={t('Title_delete_multiple_comment')}
+        description={t('Confirm_delete_multiple_comment')}
       />
-      <EditReview open={openEdit.open} onClose={handleCloseEdit} idReview={openEdit.id} />
+      <EditComment open={openEdit.open} onClose={handleCloseEdit} idComment={openEdit.id} />
       {isLoading && <Spinner />}
       <Box
         sx={{
@@ -346,27 +329,16 @@ const ReviewListPage: NextPage<TProps> = () => {
         }}
       >
         <Grid container sx={{ height: '100%', width: '100%' }}>
-          {!selectedRow.length && (
-            <Box
-              sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4, mb: 4, width: '100%' }}
-            >
-              <Box sx={{ width: '200px' }}>
-                <CustomSelect
-                  fullWidth
-                  onChange={e => {
-                    setStarSelected(e.target.value as string[])
-                  }}
-                  multiple
-                  options={optionReviews}
-                  value={starSelected}
-                  placeholder={t('Star')}
-                />
-              </Box>
+          <Box
+            sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4, mb: 4, width: '100%' }}
+          >
+            {!selectedRow?.length && (
               <Box sx={{ width: '200px' }}>
                 <InputSearch value={searchBy} onChangeSearch={(value: string) => setSearchBy(value)} />
               </Box>
-            </Box>
-          )}
+            )}
+
+          </Box>
           {selectedRow?.length > 0 && (
             <TableHeader
               numRow={selectedRow?.length}
@@ -376,7 +348,7 @@ const ReviewListPage: NextPage<TProps> = () => {
             />
           )}
           <CustomDataGrid
-            rows={reviews.data}
+            rows={comments.data}
             columns={columns}
             autoHeight
             sx={{
@@ -406,4 +378,4 @@ const ReviewListPage: NextPage<TProps> = () => {
   )
 }
 
-export default ReviewListPage
+export default CommentListPage

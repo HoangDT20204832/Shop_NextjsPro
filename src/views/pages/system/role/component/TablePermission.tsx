@@ -186,7 +186,7 @@ const TablePermisson = (props: TTablePermisson) => {
           <>
             {!row.isHideView && !row.isParent && (
               <Checkbox
-                disabled={isDisablePermisson}
+                disabled={isDisablePermisson || row.value === PERMISSIONS.DASHBOARD}
                 value={value}
                 onChange={e => handleOnchangeCheckbox(e.target.value)}
                 checked={permissonSelected.includes(value)}

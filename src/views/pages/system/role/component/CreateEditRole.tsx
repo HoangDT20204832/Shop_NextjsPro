@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useTranslation } from 'react-i18next'
 import { useDispatch, useSelector } from 'react-redux'
+import { PERMISSIONS } from 'src/configs/permission'
 import CustomModal from 'src/components/custom-modal'
 import IconifyIcon from 'src/components/Icon'
 import Spinner from 'src/components/spinner'
@@ -58,7 +59,7 @@ const CreateEditRole = (props: TCreateEditRole) => {
         //update ROle
         dispatch(updateRoleAsync({ name: data?.name, id: idRole }))
       } else {
-        dispatch(createRoleAsync({ name: data?.name }))
+        dispatch(createRoleAsync({ name: data?.name, permissions: [PERMISSIONS.DASHBOARD] }))
       }
     }
   }
