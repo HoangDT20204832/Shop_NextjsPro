@@ -3,20 +3,32 @@ export type TParamsAddComment = {
     user: string
     content: string
   }
+  
+  export type TParamsReplyComment = {
+    product: string
+    user: string
+    content: string
+    parent: string
+  }
+  
   export interface TParamsUpdateComment {
     id: string
     content: string
   }
+  
   export type TParamsDeleteMultipleComment = {
     commentIds: string[]
   }
+  
   export type TParamsGetComments = {
     limit?: number
     page?: number
     search?: string
     order?: string
     isPublic?: boolean
+    productId?:string
   }
+  
   export type TCommentItem = {
     _id: string
     user: {
@@ -24,12 +36,17 @@ export type TParamsAddComment = {
       lastName: string
       middleName: string
       avatar: string
-      _id: string
+      id: string
     }
+    parent?:string
     product: {
       id: string
       name: string
     }
     content: string
-    updatedAt: Date
+    createdAt: Date
+  }
+  
+  export interface TCommentItemProduct extends TCommentItem {
+    replies?: TCommentItem[]
   }
