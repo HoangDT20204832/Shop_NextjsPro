@@ -16,6 +16,7 @@ export const authOptions = {
       name: "facebook"
     }),
   ],
+  secret: process.env.NEXT_AUTH_SECRET,
   callbacks: {
     async jwt({ token, account }: any) {
       // Persist the OAuth access_token to the token right after signin
@@ -26,7 +27,6 @@ export const authOptions = {
       if (account) {
         token.accessToken = account.access_token
       }
-      console.log('account', { account, token })
 
       return token
     },
@@ -34,8 +34,6 @@ export const authOptions = {
       // Send properties to the client, like an access_token from a provider.
       session.accessToken = token.accessToken
       session.provider = token.provider
-
-      console.log('session', { session, user, token })
 
       return session
     }
