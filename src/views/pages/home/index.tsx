@@ -19,7 +19,7 @@ import InputSearch from 'src/components/input-search'
 import NoData from 'src/components/no-data'
 
 // ** Config
-import {PAGE_SIZE_OPTION2 } from 'src/configs/gridConfig'
+import { PAGE_SIZE_OPTION2 } from 'src/configs/gridConfig'
 
 // ** Services
 import { getAllProductTypes } from 'src/services/product-type'
@@ -37,6 +37,7 @@ import { resetInitialState } from 'src/stores/product'
 import { OBJECT_TYPE_ERROR_PRODUCT } from 'src/configs/error'
 import ImageSlider from 'src/components/image-slider'
 import { useRouter } from 'next/router'
+import CardSkeleton from '../product/components/CardSkeleton'
 
 type TProps = {}
 
@@ -63,7 +64,7 @@ const HomePage: NextPage<TProps> = () => {
 
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTION2[0])
   const [page, setPage] = useState(1)
-  const [optionTypes, setOptionTypes] = useState<{ label: string; value: string, id:string }[]>([])
+  const [optionTypes, setOptionTypes] = useState<{ label: string; value: string, id: string }[]>([])
   const [filterBy, setFilterBy] = useState<Record<string, string | string[]>>({})
   const [loading, setLoading] = useState(false)
   const [productsPublic, setProductsPublic] = useState({
@@ -114,19 +115,17 @@ const HomePage: NextPage<TProps> = () => {
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     // setProductTypeSelected(newValue)
-    router.push(`/product-type/${newValue}`)
+    // Tìm ID của loại sản phẩm dựa trên `newValue`()(slug)
+    const selectedType = optionTypes.find((type) => type.value === newValue);
 
-      // Tìm ID của loại sản phẩm dựa trên `newValue`
-  const selectedType = optionTypes.find((type) => type.value === newValue);
+    if (selectedType) {
+      // Điều hướng tới đường dẫn `/product-type/[label]` và kèm ID dưới dạng query
+      router.push({
+        pathname: `/product-type/${newValue}`, // Đường dẫn chính
+        // query: { id: selectedType.id },    // Gửi kèm ID qua query
+      });
+    }
 
-  if (selectedType) {
-    // Điều hướng tới đường dẫn `/product-type/[label]` và kèm ID dưới dạng query
-    router.push({
-      pathname: `/product-type/${newValue}`, // Đường dẫn chính
-      query: { id: selectedType.id },    // Gửi kèm ID qua query
-    });
-  }
-    
   }
 
 
@@ -156,7 +155,7 @@ const HomePage: NextPage<TProps> = () => {
         const data = res?.data.productTypes
         console.log("hmmm", data)
         if (data) {
-          setOptionTypes(data?.map((item: { name: string; slug: string, _id:string }) => ({ label: item.name, value: item.slug, id:item._id })))
+          setOptionTypes(data?.map((item: { name: string; slug: string, _id: string }) => ({ label: item.name, value: item.slug, id: item._id })))
           // setProductTypeSelected(data?.[0]?._id)
           firstRender.current = true
         }
@@ -245,7 +244,7 @@ const HomePage: NextPage<TProps> = () => {
           width: '100%'
         }}
       >
-          <ImageSlider /> {/* Slider hình ảnh */}
+        <ImageSlider /> {/* Slider hình ảnh */}
         <StyledTabs value={productTypeSelected} onChange={handleChange} aria-label='wrapped label tabs example'>
           {optionTypes.map(opt => {
             return <Tab key={opt.value} value={opt.value} label={opt.label} />
@@ -288,29 +287,50 @@ const HomePage: NextPage<TProps> = () => {
               </Box>
             </Grid> */}
             <Grid item md={12} xs={12}>
-              <Grid
-                container
-                spacing={{
-                  md: 6,
-                  xs: 4
-                }}
-              >
-                {productsPublic?.data?.length > 0 ? (
-                  <>
-                    {productsPublic?.data?.map((item: TProduct) => {
-                      return (
-                        <Grid item key={item._id} md={3} sm={6} xs={12}>
-                          <CardProduct item={item} />
-                        </Grid>
-                      )
-                    })}
-                  </>
-                ) : (
-                  <Box sx={{ width: '100%', mt: 10 }}>
-                    <NoData widthImage='60px' heightImage='60px' textNodata={t('No_product')} />
-                  </Box>
-                )}
-              </Grid>
+              {loading ? (
+                //Hiển thị Khung card khi đang loading
+                <Grid
+                  container
+                  spacing={{
+                    md: 6,
+                    xs: 4
+                  }}
+                >
+                  {Array.from({ length: 4 }).map((_, index) => {
+                    return (
+                      <Grid item key={index} md={3} sm={6} xs={12}>
+                        <CardSkeleton />
+                      </Grid>
+                    )
+                  })}
+                </Grid>
+              ) : (
+                <Grid
+                  container
+                  spacing={{
+                    md: 6,
+                    xs: 4
+                  }}
+                >
+                  {productsPublic?.data?.length > 0 ? (
+                    <>
+                      {productsPublic?.data?.map((item: TProduct) => {
+                        return (
+                          <Grid item key={item._id} md={3} sm={6} xs={12}>
+                            <CardProduct item={item} />
+                          </Grid>
+                        )
+                      })}
+                    </>
+                  ) : (
+                    <Box sx={{ width: '100%', mt: 10 }}>
+                      <NoData widthImage='60px' heightImage='60px' textNodata={t('No_product')} />
+                    </Box>
+                  )}
+                </Grid>
+              )}
+
+
             </Grid>
           </Grid>
         </Box>

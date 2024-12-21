@@ -38,6 +38,7 @@ import { OBJECT_TYPE_ERROR_PRODUCT } from 'src/configs/error'
 import { useRouter } from 'next/router'
 import { ROUTE_CONFIG } from 'src/configs/route'
 import IconifyIcon from 'src/components/Icon'
+import CardSkeleton from '../product/components/CardSkeleton'
 
 type TProps = {}
 
@@ -60,11 +61,7 @@ const ProductTypePage: NextPage<TProps> = () => {
 
   const [optionCities, setOptionCities] = useState<{ label: string; value: string }[]>([])
   const [nameProductType, setNameProductType] = useState('')
-
-
-  // const handleChange = (event: React.SyntheticEvent, newValue: string) => {
-  //   setProductTypeSelected(newValue)
-  // }
+  const [productTypeId, setproductTypeId] = useState('')
 
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTION3[0])
   const [page, setPage] = useState(1)
@@ -96,9 +93,9 @@ const ProductTypePage: NextPage<TProps> = () => {
 
   const router = useRouter()
   console.log("router", router)
-  const productTypeId = router.query?.id as string
+  const productTypeSlug = router.query?.productTypeId as string
 
-  console.log("productTypeId", productTypeId)
+  console.log("productTypeId", productTypeSlug)
   // fetch api
   const handleGetListProducts = async () => {
     setLoading(true)
@@ -147,14 +144,15 @@ const ProductTypePage: NextPage<TProps> = () => {
       .then(res => {
         const data = res?.data.productTypes
         if (data) {
-          const typeProduct = data?.find((item:{ name: string; slug: string, _id:string }) => item._id === productTypeId)
+          const typeProduct = data?.find((item:{ name: string; slug: string, _id:string }) => item.slug === productTypeSlug)
           console.log("nameProductType",typeProduct)
           setNameProductType(typeProduct?.name)
+          setproductTypeId(typeProduct?._id)
           // setOptionTypes(data?.map((item: { name: string; _id: string }) => ({ label: item.name, value: item._id })))
           // setProductTypeSelected(data?.[0]?._id)
           // firstRender.current = true
 
-          return nameProductType
+          // return nameProductType
         }
         setLoading(false)
       })
@@ -179,9 +177,10 @@ const ProductTypePage: NextPage<TProps> = () => {
   }
 
   useEffect(() => {
-    fetchAllTypes()
     handleGetListProducts()
     fetchAllCities()
+    fetchAllTypes()
+
   }, [])
 
 
@@ -294,7 +293,25 @@ const ProductTypePage: NextPage<TProps> = () => {
               </Box>
             </Grid>
             <Grid item md={9} xs={12}>
-              <Grid
+            {loading ? (
+                //Hiển thị Khung card khi đang loading
+                <Grid
+                  container
+                  spacing={{
+                    md: 6,
+                    xs: 4
+                  }}
+                >
+                  {Array.from({ length: 4 }).map((_, index) => {
+                    return (
+                      <Grid item key={index} md={4} sm={6} xs={12}>
+                        <CardSkeleton/>
+                      </Grid>
+                    )
+                  })}
+                </Grid>
+              ) : (
+                <Grid
                 container
                 spacing={{
                   md: 6,
@@ -317,6 +334,8 @@ const ProductTypePage: NextPage<TProps> = () => {
                   </Box>
                 )}
               </Grid>
+              )}
+            
             </Grid>
           </Grid>
         </Box>
