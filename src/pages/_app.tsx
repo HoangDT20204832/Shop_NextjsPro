@@ -30,6 +30,7 @@ import { AuthProvider } from 'src/contexts/AuthContext'
 
 // ** Global css styles
 import 'src/styles/globals.scss'
+import "react-multi-carousel/lib/styles.css";
 
 // ** Redux
 import { store } from 'src/stores'
